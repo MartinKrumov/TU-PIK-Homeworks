@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <conio.h>
+#include <math.h>
+
+int main()
+{
+	printf("Calculator for Quadratic Equations.Please enter values for a, b and c \n");
+
+	float a, b, c;
+	float x1, x2, d;
+	
+	printf("Enter a = ");
+	scanf("%g", &a);
+
+	printf("Enter b = ");
+	scanf("%g", &b);
+
+	printf("Enter c = ");
+	scanf("%g", &c);
+
+	if (a == 0)
+	{
+		x1 = - c / b;
+		printf("x1 = %g\n", x1);
+	}
+	else if (b == 0)
+	{
+		printf("Nqma reshenie\n");
+	}
+	else if (c == 0)
+	{
+		printf("Vsqko x e reshenie\n");
+	}
+	else 
+	{
+		d = b*b - 4 * a*c;
+		if (d < 0)
+		{
+			printf("Nqma realni koreni\n");
+		}
+		else if (d == 0)
+		{
+			x1 = (-b) / (2 * a);
+			printf("x1 = x2 = %g\n", x1);
+		}
+		else 
+		{
+			x1 = (-b + sqrt(d)) / (2 * a);
+			x2 = (-b - sqrt(d)) / (2 * a);
+
+			printf("x1 = %g\n", x1);
+			printf("x2 = %g\n", x2);
+		}	
+	}
+
+	system("PAUSE");
+	return 0;
+}
