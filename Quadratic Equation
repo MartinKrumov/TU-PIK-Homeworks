@@ -4,7 +4,7 @@
 
 int main()
 {
-	printf("Calculator for Quadratic Equations.Please enter values for a, b and c \n");
+	printf("Calculator for Quadratic Equations.Please enter values for a, b and c. \n");
 
 	float a, b, c;
 	float x1, x2, d;
@@ -25,11 +25,28 @@ int main()
 	}
 	else if (b == 0)
 	{
-		printf("Nqma reshenie\n");
+		if (-c / a < 0)
+		{
+			printf("Nqma reshenie\n");
+		}
+		else
+		{
+			x1 = sqrt(-c / a);
+			x2 = -1 * sqrt(-c / a);
+
+			printf("x1 = %g\n", x1);
+			printf("x2 = %g\n", x2);
+		}
+		
 	}
 	else if (c == 0)
 	{
-		printf("Vsqko x e reshenie\n");
+		x1 = 0;
+		x2 = -b / a;
+
+		printf("x1 = %g\n", x1);
+		printf("x2 = %g\n", x2);
+
 	}
 	else 
 	{
