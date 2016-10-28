@@ -8,66 +8,95 @@ int main()
 
 	float a, b, c;
 	float x1, x2, d;
-	
-	printf("Enter a = ");
+
+	printf("Enter a = "); 
 	scanf("%g", &a);
 
-	printf("Enter b = ");
+	printf("Enter b = "); 
 	scanf("%g", &b);
 
-	printf("Enter c = ");
+	printf("Enter c = "); 
 	scanf("%g", &c);
 
 	if (a == 0)
 	{
-		x1 = - c / b;
-		printf("x1 = %g\n", x1);
-	}
-	else if (b == 0)
-	{
-		if (-c / a < 0)
+		if (b == 0)
 		{
-			printf("Nqma reshenie\n");
-		}
-		else
-		{
-			x1 = sqrt(-c / a);
-			x2 = -1 * sqrt(-c / a);
+			if (c == 0)
+				printf("Vsqko x e reshenie\n");
 
-			printf("x1 = %g\n", x1);
-			printf("x2 = %g\n", x2);
-		}
-		
-	}
-	else if (c == 0)
-	{
-		x1 = 0;
-		x2 = -b / a;
-
-		printf("x1 = %g\n", x1);
-		printf("x2 = %g\n", x2);
-
-	}
-	else 
-	{
-		d = b*b - 4 * a*c;
-		if (d < 0)
-		{
-			printf("Nqma realni koreni\n");
-		}
-		else if (d == 0)
-		{
-			x1 = (-b) / (2 * a);
-			printf("x1 = x2 = %g\n", x1);
+			else
+				printf("Nqma reshene\n");
 		}
 		else 
 		{
-			x1 = (-b + sqrt(d)) / (2 * a);
-			x2 = (-b - sqrt(d)) / (2 * a);
+			if (c == 0)
+			{
+				x1 = 0;
+				printf("x1 = %d\n", x1);
+			}
+			else
+			{
+				x1 = -c / b;
+				printf("x1 = %g\n", x1);
+			}
+		}
+	}
+	else
+	{
+		if (b == 0)
+		{
+			if (c == 0)
+			{
+				x1 = 0;
+				printf("x1 = %d\n", x1);
+			}
+			else
+			{
+				if (-c / a < 0)
+					printf("Nqma reshenie\n");
 
-			printf("x1 = %g\n", x1);
-			printf("x2 = %g\n", x2);
-		}	
+				else
+				{
+					x1 = sqrt(-c / a);
+					x2 = -1 * sqrt(-c / a);
+
+					printf("x1 = %g\n", x1);
+					printf("x2 = %g\n", x2);
+				}
+			}
+		}
+		else
+		{
+			if (c == 0)
+			{
+				x1 = 0;
+				x2 = -b / a;
+
+				printf("x1 = %g\n", x1);
+				printf("x2 = %g\n", x2);
+			}
+			else
+			{
+				d = b*b - 4 * a*c;
+				if (d < 0)
+					printf("Nqma realni koreni\n");
+
+				else if (d == 0)
+				{
+					x1 = (-b) / (2 * a);
+					printf("x1 = x2 = %g\n", x1);
+				}
+				else
+				{
+					x1 = (-b + sqrt(d)) / (2 * a);
+					x2 = (-b - sqrt(d)) / (2 * a);
+
+					printf("x1 = %g\n", x1);
+					printf("x2 = %g\n", x2);
+				}
+			}
+		}
 	}
 
 	system("PAUSE");
