@@ -2,6 +2,11 @@
 #include <conio.h>
 #include <math.h>
 
+float GetDiscriminant(float a, float b, float c)
+{
+	float discriminant = b*b - 4 * a*c;
+	return discriminant;
+}
 int main()
 {
 	printf("Calculator for Quadratic Equations.Please enter values for a, b and c. \n");
@@ -78,7 +83,7 @@ int main()
 			}
 			else
 			{
-				d = b*b - 4 * a*c;
+				d = GetDiscriminant(a, b, c);
 				if (d < 0)
 					printf("Nqma realni koreni\n");
 
