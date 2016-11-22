@@ -1,0 +1,91 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <conio.h>
+
+void SelectionSort(int* pArr, size_t Size)
+{
+	if (!pArr || Size == 0)
+		return;
+
+	for (size_t i = 0; i < Size - 1; i++)
+	{
+		size_t min = i;
+
+		for (size_t j = i + 1; j < Size; j++)
+		{
+			if (pArr[j] < pArr[min])
+				min = j;
+		}
+
+		if (pArr[min] < pArr[i])
+		{
+			int temp = pArr[i];
+			pArr[i] = pArr[min];
+			pArr[min] = temp;
+		}
+	}
+}
+
+int main()
+{
+	int n;
+	
+	scanf("%d", &n);
+	int a[256][256];
+
+	for (size_t i = 0; i < n; i++)
+	{
+		for (size_t j = 0; j < n; j++)
+		{
+			scanf("%d",&a[i][j]);
+		}
+	}
+
+	for (size_t i = 0; i < n; i++)
+	{
+		for (size_t j = 0; j < n; j++)
+		{
+			printf("%d ", a[i][j]);
+		}
+		printf("\n");
+	}
+
+	int p;
+	scanf("%d",&p);
+
+
+	int res[64]; // (n*n - n) / 2
+	int index = 0;
+
+	int cols = 0;
+	for (size_t rows = 0; rows < n; rows++)
+	{
+		cols = 0;
+		while (cols != rows)
+		{
+			if (a[rows][cols] > p)
+			{
+				res[index++] =a[rows][cols];
+			}
+			cols++;
+		}
+	}
+
+	for (size_t i = 0; i < index; i++)
+	{
+		printf("%d ", res[i]);
+	}
+	printf("\n");
+
+	SelectionSort(res, index);
+
+	for (size_t i = 0; i < index; i++)
+	{
+		printf("%d ", res[i]);
+	}
+	printf("\n");
+
+
+	_getch();
+	return 0;
+}
