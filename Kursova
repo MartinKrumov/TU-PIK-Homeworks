@@ -1,0 +1,102 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <conio.h>
+
+void Zadanie()
+{
+	printf("Da se sustavi programa za obrabotka na masiva A[N][N], kadeto dannite sa celi chisla v intervala A[-1000;1000].");
+	printf("Programata da izvurshi slednite deistviq:\n");
+	printf("polucheniqt masiv da se sortira po golemina."); 
+	printf("Imeto na avtora e : Aleksandur Anatoliev Bogdanov");
+	printf("Fakulteten nomer:051216017 fakultet:EMF grupa:14\n");
+}
+
+void SelectionSort(int* pArr, size_t Size)
+{
+	if (!pArr || Size == 0)
+		return;
+
+	for (size_t i = 0; i < Size - 1; i++)
+	{
+		size_t min = i;
+
+		for (size_t j = i + 1; j < Size; j++)
+		{
+			if (pArr[j] < pArr[min])
+				min = j;
+		}
+
+		if (pArr[min] < pArr[i])
+		{
+			int temp = pArr[i];
+			pArr[i] = pArr[min];
+			pArr[min] = temp;
+		}
+	}
+}
+
+int main()
+{
+	int n;
+	Zadanie();
+	//printf("Enter n: ");
+	scanf("%d", &n);
+	int a[256][256];
+
+	printf("Vuvedete elementite v masiva");
+	for (size_t i = 0; i < n; i++)  //Vkarvame chisla v masiva
+	{
+		for (size_t j = 0; j < n; j++)
+		{
+			scanf("%d", &a[i][j]);
+		}
+	}
+
+	for (size_t i = 0; i < n; i++) //Izvejdame na ekrana chislata ot masiva
+	{
+		for (size_t j = 0; j < n; j++)
+		{
+			printf("%d ", a[i][j]);
+		}
+		printf("\n");
+	}
+
+	int p;
+	scanf("%d", &p); //Davame stoinost na P
+
+	// (n*n - n) / 2
+	int res[64]; // Suzdavame masiv, v koito shte vkarvame chislata koito sa po-golemi ot P
+	int index = 0;
+
+	int cols = 0;
+	for (size_t rows = 0; rows < n; rows++) // //Ako dadeniqt element e po-golqm ot P go vkarvame v noviqt masiv(res)
+	{
+		cols = 0;
+		while (cols != rows) //Cikula vurti do kato kolonite ne stanat ravni na redovete (rows)
+		{
+			if (a[rows][cols] > p) //Ako dadeniqt element e po-golqm ot P go postavqme v noviqt masiv
+			{
+				res[index++] = a[rows][cols];
+			}
+			cols++;
+		}
+	}
+
+	for (size_t i = 0; i < index; i++) //Izvejdame na ekrana masivut res ne sortiran
+	{
+		printf("%d ", res[i]);
+	}
+	printf("\n");
+
+	SelectionSort(res, index); // Sortirame masivut po golemina (ot nai-malkoto kum nai-golqmota)
+
+	for (size_t i = 0; i < index; i++) //Tuk izvejdame masivut sortiran 
+	{
+		printf("%d ", res[i]);
+	}
+	printf("\n");
+
+
+	_getch();
+	return 0;
+}
