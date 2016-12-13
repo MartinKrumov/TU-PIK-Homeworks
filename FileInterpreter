@@ -45,9 +45,9 @@ int GetCommentsNumber(FILE* inputFile)
 			}
 		}
 	}
-
+	rewind(inputFile);
 	return numberOfComments;
-}
+} 
 
 int FindKeyword(char* word, char* text)
 {
@@ -62,7 +62,7 @@ int FindKeyword(char* word, char* text)
 		{
 			for (size_t j = 1; j < wordLen; j++)
 			{
-				if (text[i+j] != word[j])
+				if (text[i + j] != word[j])
 				{
 					flag = 1;
 					break;
@@ -74,7 +74,7 @@ int FindKeyword(char* word, char* text)
 			}
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -109,22 +109,122 @@ int GetLoopsNumber(FILE* inputFile)
 			numberOfLoops += FindKeyword(" while (", line);
 		}
 	}
-
+	rewind(inputFile);
 	return numberOfLoops;
+}
+
+void FileToFile(FILE* inputFile, FILE* outputFile)
+{
+	char inputFileName[128];
+	printf("Enter input file name: ");
+	scanf("%s", &inputFileName);
+
+	char outputFileName[128];
+	printf("Enter output file name:");
+	scanf("%s", &outputFileName);
+
+	inputFile = fopen(inputFileName, "r");
+	outputFile = fopen(outputFileName, "w");
+
+	int comments = GetCommentsNumber(inputFile);
+	int loops = GetLoopsNumber(inputFile);
+
+	fprintf(outputFile, "Comment = %d\n", comments);
+	fprintf(outputFile, "Loops = %d\n", loops);
+
+}
+
+void FileToScreen(FILE* inputFile)
+{
+	char fileName[128];
+	printf("Enter file name: ");
+	scanf("%s", &fileName);
+
+	inputFile = fopen(fileName, "r");
+
+	int comments = GetCommentsNumber(inputFile);
+	printf("Commentss: %d\n", comments);
+
+	int loops = GetLoopsNumber(inputFile);
+	printf("Cikli: %d\n", loops);
+
+}
+
+void KeyboardToFile(FILE* inputFile)
+{
+	char lines[256];
+	char fileName[128];
+	scanf("%s", &fileName);
+	
+	inputFile = fopen(fileName, "w");
+
+	while (1)
+	{
+		scanf("%s", &lines);
+		if (strcmp(lines, "exit") == 0)
+		{
+			break;
+		}
+		fprintf(inputFile, "%s\n", &lines);
+		fflush(inputFile);
+	}
+
+	int comments = GetCommentsNumber(inputFile);
+	int loops = GetLoopsNumber(inputFile);
+
+	fprintf(inputFile, "Comments = %d\n", comments);
+	fprintf(inputFile, "Loops = %d\n", loops);
+
+}
+
+void KeyboardToScreen(FILE* inputfile)
+{
+
+}
+
+void Menu()
+{
+	printf("1.Reading program from file and saving the result in new file.\n");
+	printf("2.Reading program from file and output the result on the screen\n");
+	printf("3.Reading program from console and saving the result in file\n");
+	//printf("4.Reading program from console and output the result on the screen\n");
 }
 
 int main()
 {
-	FILE* inputFile;
-	inputFile = fopen("Example.txt", "rt");
+	FILE* inputFile = NULL;
+	FILE* outputFile = NULL;
+	//inputFile = fopen("Example.txt", "rt");
 
-	int n = GetCommentsNumber(inputFile);
-	printf("Komentari: %d\n", n);
-	rewind(inputFile);
-	int m = GetLoopsNumber(inputFile);
-	printf("Cikli: %d\n", m);
+	int choice;
+	Menu();
+	scanf("%d", &choice);
 
-	fclose(inputFile);
+	switch (choice)
+	{
+	case 1:FileToFile(inputFile, outputFile);
+		break;
+	case 2:FileToScreen(inputFile);
+		break;
+	case 3:KeyboardToFile(inputFile);
+		break;
+	case 4:
+		break;
+	default:printf("Invalid input");
+		break;
+	}
+
+	printf("----------------");
+	/*int comments = GetCommentsNumber(inputFile);
+	printf("Komentari: %d\n", comments);*/
+
+	//rewind(inputFile);
+
+	/*int loops = GetLoopsNumber(inputFile);
+	printf("Cikli: %d\n", loops);*/
+
+	/*fclose(inputFile);
+	fclose(outputFile);*/
 
 	_getch();
 	return 0;
