@@ -1,0 +1,332 @@
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+#include <Windows.h>
+
+
+#define SIZE 256
+#define NAMES 128
+#define TRUE 1
+
+// Прототипи на функциите използвани по долу
+int menu();
+void getFileName(char* fileName, int mode);
+void countFDW(FILE *inputFile, FILE *outputFile);
+void numberOfComments(FILE* inputFile, FILE* outputFile);
+int FileToFile(void);
+int FileToScreen(void);
+int ScreenToFile(void);
+int ScreenToScreen(void);
+
+
+int main()
+{
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+	while (1)
+	{
+		switch (menu())
+		{
+		case 1:
+			FileToFile();
+			break;
+		case 2:
+			FileToScreen();
+			break;
+		case 3:
+			ScreenToFile();
+			break;
+		case 4:
+			ScreenToScreen();
+			break;
+		case 0:
+			exit(0);
+		default:
+			break;
+		}
+
+		system("pause");
+		system("cls");
+	}
+	return 0;
+}
+
+
+int menu()
+{
+	int i;
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+	printf(" ________________M A I N   M E N U_________________\n");
+	printf("|                                                  |\n");
+	printf("| 1. Open a .txt/.c file and write to a file       |\n");
+	printf("| 2. Open a .txt/.c file and write to the screen   |\n");
+	printf("| 3. Enter text and write to a file                |\n");
+	printf("| 4. Enter text and write to the screen            |\n");
+	printf("| 0. Exit                                          |\n");
+	printf("|__________________________________________________|\n");
+
+	do //while (i<0 || i>4);
+	{
+		fflush(stdin);// Чисти буфера
+		printf("Select Option: ");
+		scanf("%d", &i);
+	} while (i<0 || i>4);// Позволява въвеждане на числа само между 0 и 4
+	return i;// Връщаме избраната стойност
+}
+
+void getFileName(char* fileName, int mode) /// 1 TO OPEN A FILE TO READ /// 2 TO OPEN A FILE TO WRITE ///
+{
+	while (1)// Безкраен цикъл
+	{
+		fflush(stdin);
+		if (mode == 1) // Ако е подадено 1 ще се изисква потребителя да въведе име на файл за четене
+		{
+			printf("Enter File Name To Read (.c/.txt): ");
+			scanf("%s", fileName);      ///gets(fileName);
+
+			if (fileName[strlen(fileName) - 4] == '.' && toupper(fileName[strlen(fileName) - 3]) == 'T' && toupper(fileName[strlen(fileName) - 2]) == 'X' && toupper(fileName[strlen(fileName) - 1]) == 'T')
+			{
+				return;
+			}
+
+
+			if (fileName[strlen(fileName) - 2] == '.' && toupper(fileName[strlen(fileName) - 1]) == 'C')// Проверка дали файла завършва на .С
+			{
+				return;// Ако завършва се излиза от функцията
+			}
+		}
+		if (mode == 2)// При мод 2 се въвежда име на файла за запис
+		{
+			printf("Enter File Name To Write (.c/.txt): ");
+			scanf("%s", fileName);      ///gets(fileName);
+
+			if (fileName[strlen(fileName) - 4] == '.' && toupper(fileName[strlen(fileName) - 3]) == 'T' && toupper(fileName[strlen(fileName) - 2]) == 'X' && toupper(fileName[strlen(fileName) - 1]) == 'T')
+			{
+				return;
+			}
+
+
+			if (fileName[strlen(fileName) - 2] == '.' && toupper(fileName[strlen(fileName) - 1]) == 'C')
+			{
+				return;
+			}
+		}
+	}
+}
+
+void countFDW(FILE *inputFile, FILE *outputFile)
+{
+	int countOP = 0, i = 0, flag = 0, flag1 = 0, flag2 = 0, flag3 = 0;
+	char line[SIZE];
+	while (fgets(line, sizeof(line), inputFile) != NULL) //Четене ред по ред
+	{
+		for (i = 0; i < strlen(line); i++)
+		{
+
+			if (line[i] == '\"' && !flag) flag = 1; // ne tyrsim v kavi4kite;
+			else if (line[i] == '\"' && line[i - 1] != '\\' && flag == 1) flag = 0;
+
+			if (!flag && line[i] == '/' && line[i + 1] == '/') break; // pri nalicieto na C++ comment krai na tyrseneto v tozi red;
+
+			if (!flag && line[i] == '/' && line[i + 1] == '*') flag = 2;// ne tyrsim v C komentarite;
+			else if (flag == 2 && line[i] == '*' && line[i + 1] == '/') flag = 0;
+
+			if (line[i] == '\'' && !flag) flag = 3; // ne tyrsim v kavi4kite;
+			else if (line[i] == '\'' && flag == 3) flag = 0;
+
+			if (!flag){
+				if (line[i] == 'f' && line[i + 1] == 'o' && line[i + 2] == 'r')    countOP++;// Проверка за for
+				else if (line[i] == 'd' && line[i + 1] == 'o')// проверка за думичката do
+				{
+					flag3++;
+				}
+				else if ((line[i] == 'w' && line[i + 1] == 'h' && line[i + 2] == 'i' && line[i + 3] == 'l' && line[i + 4] == 'e') && flag3)// Проверка за думата while
+				{
+					flag3--;
+					countOP++;
+				}
+				else if ((line[i] == 'w' && line[i + 1] == 'h' && line[i + 2] == 'i' && line[i + 3] == 'l' && line[i + 4] == 'e') && flag3 == 0) countOP++;
+			}
+		}
+	}
+	fprintf(outputFile, "The number of operators 'For', 'While','Do/While' is: %d\n", countOP);// Запис на информацията
+}
+
+void numberOfComments(FILE* inputFile, FILE* outputFile) //Функция за броене на броя коментарите
+{
+	char c;
+	int state = 1, comments = 0;
+
+	while ((c = fgetc(inputFile)) != EOF) //Четене на файла
+	{
+		switch (state){//В тази конструкция на switch - state - switch се търсят коментарите и се броят цифрите вътре
+		case 1: switch (c){
+		case '/': state = 2; break; //при намиране на наклонена черта се отбелязва началото на търсенето на коментар
+		}
+				break;
+		case 2: switch (c){
+		case '/': state = 5; break; //Намиране на едноредов коментар и отиване в режим на търсене на нов ред
+		case '*': state = 3; break; // Намиране на многоредов коментар и отиваме в режим на претърсване на коментара и преброяване на коментарите
+		default: state = 1; //връщане обратно за намиране на първата наклонена черта от началото на коментар
+		}
+				break;
+		case 3: switch (c){
+		case '*': state = 4; break; //Звездичката е потенциален символ за терминиране и се прехвърляме в режим на търсене  на край на такъв коментар
+		}
+				break;
+		case 4: switch (c){
+		case '/': state = 1; comments++; break; //Търсене на терминиращата наклонена черта на многоредовия коментар и преброяването му
+		default: state = 4; //Връщане обратно на търсене на звездичка
+		}
+		case 5: switch (c){
+		case '\n': comments++; state = 1; //преброяване на едноредов коментар
+		}
+		}
+	}
+
+	fprintf(outputFile, "Total comments: %d\n", comments); //Записване на информацията в изходният файл
+}
+
+int FileToFile(void)
+{
+	char readFile[NAMES] = { 0 }, writeFile[NAMES] = { 0 };// Имената на файловете
+	FILE* inputFile, *outputFile; // Деклариране на файлов поинтър
+	getFileName(readFile, 1);// Въвеждане на името на файла за четене
+
+	inputFile = fopen(readFile, "r"); // Отваряме файла за четене. "r" за четене
+	if (inputFile == NULL)// Проверка дали съществува файла
+	{
+		fprintf(stderr, "ERROR! CANNOT OPEN FILE!!!");
+		return; // Връщаме се към main-а
+	}
+
+	getFileName(writeFile, 2);// Въвеждане на файла за писане
+	outputFile = fopen(writeFile, "w");// Проверка дали е отворен/създанен файл
+
+	if (outputFile == NULL)
+	{
+		fprintf(stderr, "ERROR! CANNOT OPEN FILE!!!");
+		return;// Връщаме се към main-а
+	}
+
+
+	numberOfComments(inputFile, outputFile);//Викане на функцията за броене на коментари
+	rewind(inputFile);// Връща файловия поинтър към началото на файла(за да може пак да се прочете)
+	countFDW(inputFile, outputFile);//Викане на функцията брояща циклите
+	printf("Information saved to \"%s\"\n", writeFile);
+
+	fclose(inputFile);//затваряне на файла
+	fclose(outputFile);
+
+	return 0;
+}
+
+
+int FileToScreen(void)
+{
+	char readFile[NAMES] = { 0 };
+	FILE* inputFile;
+	getFileName(readFile, 1);
+
+	inputFile = fopen(readFile, "r");// Отваряне на файла за четене
+	if (inputFile == NULL)
+	{
+		fprintf(stderr, "CANNOT OPEN FILE!");
+		return;
+	}
+
+	numberOfComments(inputFile, stdout);// stdout e изходен поток за данни. Той превръща fprintf-a в обикновен printf
+	rewind(inputFile);// Връща файловия поинтър към началото на файла(за да може пак да се прочете)
+	countFDW(inputFile, stdout);
+
+	fclose(inputFile);
+
+	return 0;
+}
+
+
+int ScreenToFile(void)
+{
+	char writeFile[NAMES] = { 0 }, manage[SIZE], c = 0;
+	FILE *outputFile, *tempBuffer;
+
+	getFileName(writeFile, 2);// Въвеждане на името на файла за запис
+
+	outputFile = fopen(writeFile, "w");//Отваря файла за писане
+	if (outputFile == NULL)// Проверка за дали файла е отворен(създаден)
+	{
+		fprintf(stderr, "CANNOT OPEN FILE!");// stderr поток за грешки
+		return;
+	}
+
+	tempBuffer = fopen("TempChanges.tmp", "w");// Отваряне на временен файл за писане
+
+	printf("\nWrite text under the line and type \"exit\" on a new line to save the information\n");
+	printf("________________________________________________________________________________\n");
+	fflush(stdin);
+
+	while (1)
+	{
+		gets(manage);// Взима низ от клавиетурата
+		if (!strcmp(manage, "exit"))// Проверка дали се среща 'exit' във въведения от потребителя низ
+		{
+			fclose(tempBuffer);//ако се среща файла се затваря
+			tempBuffer = fopen("TempChanges.tmp", "r");// след това се отваря за четене
+			break;//излизане от безкрайният цикъл
+		}
+		fprintf(tempBuffer, "%s\n", manage);// Записване на низа въведен от потребителя
+	}
+
+
+	numberOfComments(tempBuffer, outputFile);
+	rewind(tempBuffer);
+	countFDW(tempBuffer, outputFile);
+
+	printf("Information saved to \"%s\"\n", writeFile);
+
+	fclose(outputFile);
+	fclose(tempBuffer);
+
+	return 0;
+}
+
+int ScreenToScreen(void)// Тук нещата са като по-горе
+{
+	char  manage[SIZE], c = 0;
+	int counter = 0;
+	FILE *tempBuffer;
+
+	tempBuffer = fopen("TempChanges.tmp", "w");
+
+	printf("\nWrite text under the line and type \"exit\" on a new line to save the information\n");
+	printf("________________________________________________________________________________\n");
+	fflush(stdin);
+
+	while (1)
+	{
+		gets(manage);
+		if (!strcmp(manage, "exit"))
+		{
+			fclose(tempBuffer);
+			tempBuffer = fopen("TempChanges.tmp", "r");
+			break;
+		}
+		fprintf(tempBuffer, "%s\n", manage);
+	}
+
+	system("CLS");
+	printf("Information:\n");
+	numberOfComments(tempBuffer, stdout);
+	rewind(tempBuffer);
+	countFDW(tempBuffer, stdout);
+
+	fclose(tempBuffer);
+
+	return 0;
+}
