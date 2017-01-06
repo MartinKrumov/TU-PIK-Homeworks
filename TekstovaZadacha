@@ -8,7 +8,7 @@ int br(char c, FILE* f); //Тук другата например: int st(char c
 
 int main()
 {
-	FILE* f; //указател от тип файл
+	FILE* f; //указател към тип файл
 	char c;
 	char fileName[128];// стринг, в него ще записваме името(пътя) на файла
 	int countOfMathces;
