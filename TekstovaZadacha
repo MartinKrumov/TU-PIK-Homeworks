@@ -1,6 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS //не е задължително да го пишете
 #include <stdio.h>
-#include <string.h>
+#include <string.h> //не е задължително да го пишете
 #include <conio.h> //не е задължително да го пишете
 
 int mn(FILE* f); //Тук пишем името на едната фукинция от теста, например: int ln(FILE* f)		(Прототип на 1вата функция)
