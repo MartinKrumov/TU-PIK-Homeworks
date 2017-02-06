@@ -1,0 +1,95 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <conio.h>
+#include <stdlib.h>
+
+#define N 2
+
+void Uslovie();
+void SelectionSort(int* pArr, size_t Size);
+
+void Uslovie()
+{
+	//bla bla bla
+}
+
+int main()
+{
+	float arr[N][N];
+	float num = 0;
+	
+	Uslovie();
+
+	for (size_t i = 0; i < N; i++)
+	{
+		for (size_t j = 0; j < N; j++)
+		{
+			scanf("%f", &num);
+			while (num < -999.9 || num > 999.999)
+			{
+				printf("Enter new number !!!\n");
+				//printf("Enter elements arr[%d][%d] = ", i, j);
+				scanf("%f", &num);
+			}
+			arr[i][j] = num;
+		}
+	}
+
+	for (size_t i = 0; i < N; i++)
+	{
+		for (size_t j = 0; j < N; j++)
+		{
+			printf("%f \n", arr[i][j]);
+		}
+	}
+
+	float res[256];
+	int index = 0;
+
+	for (size_t i = 0; i < N; i++)
+	{
+		for (size_t j = 0; j < N; j++)
+		{
+			if (arr[i][j] > 0)
+			{
+				res[index++] = arr[i][j];
+			}
+		}
+	}
+
+	SelectionSort(res, index);
+
+	for (size_t i = 0; i < index; i++)
+	{
+		printf("%f ", res[i]);
+	}
+	printf("\n");
+
+
+	system("pause");
+	return 0;
+}
+
+void SelectionSort(int* pArr, size_t Size)
+{
+	if (!pArr || Size == 0)
+		return;
+
+	for (size_t i = 0; i < Size - 1; i++)
+	{
+		size_t min = i;
+
+		for (size_t j = i + 1; j < Size; j++)
+		{
+			if (pArr[j] < pArr[min])
+				min = j;
+		}
+
+		if (pArr[min] < pArr[i])
+		{
+			int temp = pArr[i];
+			pArr[i] = pArr[min];
+			pArr[min] = temp;
+		}
+	}
+}
