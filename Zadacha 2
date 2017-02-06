@@ -1,0 +1,54 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <conio.h>
+#define n 3
+
+int main()
+{
+	int arr[n][n];
+	int sum = 0;
+
+	for (size_t i = 0; i < n; i++)
+	{
+		for (size_t j = 0; j < n; j++)
+		{
+			//printf("Enter elements arr[%d][%d] = ", i, j);
+			scanf("%d", &arr[i][j]);
+		}
+	}
+
+	for (size_t i = 0; i < n; i++)
+	{
+		for (size_t j = 0; j < n; j++)
+		{
+			printf("%d ", arr[i][j]);
+		}
+		printf("\n");
+	}
+
+	int res[256];
+	int index = 0;
+
+	int a, b;
+	int r;
+	printf("Enter A, B , R : \n");
+	scanf("%d %d %d", &a, &b, &r);
+
+	for (size_t i = 0; i < n; i++)
+	{
+		for (size_t j = i + 1; j < n; j++)
+		{
+			if (arr[i][j] >= a && arr[i][j] && arr[i][j] % r == 0)
+			{
+				res[index++] == arr[i][j];
+				sum += arr[i][j];
+			}
+		}
+	}
+
+	float average = (float)sum / index;
+	printf("Average = %f", average);
+
+	_getch();
+	return 0;
+}
