@@ -1,0 +1,98 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define SIZE 32
+
+int BinarySearch(int*, int, int);
+void BubbleSort(int*, int);
+
+int main()
+{
+	int numbers[SIZE];
+	int n;
+	scanf("%d", &n);
+
+	for (size_t i = 0; i < n; i++)
+	{
+		scanf("%d", &numbers[i]);
+	}
+
+	int search;
+	scanf("%d", &search);
+
+	BubbleSort(numbers, n);
+
+	//for (size_t i = 0; i < n; i++)
+	//{
+	//	printf("%d ", numbers[i]);
+	//}
+	//printf("\n");
+
+	int index = BinarySearch(numbers, n, search);
+
+	if (index == -1)
+	{
+		printf("The is no such number in the array. \n");
+	}
+	else
+	{
+		printf("Found it at position %d. \n", index);
+	}
+
+	system("pause");
+	return 0;
+}
+
+void BubbleSort(int *arr, int size)
+{
+	if (!arr || size == 0)
+		return;
+
+	bool swapped = true;
+	while (swapped)
+	{
+		swapped = false;
+		for (size_t i = 0; i < size - 1; i++)
+		{
+			if (arr[i] > arr[i + 1])
+			{
+				int oldValue = arr[i];
+				arr[i] = arr[i + 1];
+				arr[i + 1] = oldValue;
+				swapped = true;
+			}
+		}
+	}
+}
+
+int BinarySearch(int* arr, int size, int search)
+{
+	int index = -1;
+	int first = 0;
+	int last = size;
+
+	int mid = (first + last) / 2;
+
+	while (first < last)
+	{
+		if (arr[mid] == search)
+		{
+			index = mid;
+			return index;
+		}
+		else if (arr[mid] < search)
+		{
+			first = mid + 1;
+		}
+		else
+		{
+			last = mid - 1;
+		}
+
+		mid = (first + last) / 2;
+	}
+
+	return index;
+}
