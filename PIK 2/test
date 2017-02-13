@@ -1,0 +1,428 @@
+#include <windows.h>
+#include <conio.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <limits.h>
+
+
+
+int menu(int i)
+{
+	printf("Ïðîãðàìà \n");
+	printf("1. Èçáîð íà âõîäåí ôàéë çà îáðàáîòêà\n");
+	printf("2. Ïîêàçâàíå ñúäúðæàíèåòî íà ôàéëà\n");
+	printf("3. Ïðåáðîÿâàíå íà ñèìâîëèòå îò ôàéëà è çàïèñà èì â òàáëèöà\n");
+	printf("4. Áðîé íà ñðåùàíå íà èçáðàí ñèìâîë ñïðÿìî îáù áðîé ñèìâîëè\n");
+	printf("5. Çàìÿíà íà èçáðàí ñèìâîë ñ äðóã è çàïèñà ìó â íîâ ôàéë\n");
+	printf("6. Îáðàáîòêà íà ÷èñëîâà èíôîðìàöèÿ\n");
+	printf("7. Èçõîä\n");
+	do
+	{
+		printf("\nÂàøèÿò èçáîð:");
+		scanf("%d", &i);
+	} while (i<1 || i>7);
+
+	return i;
+}
+
+int cmenu(int j)
+{
+	printf("\n\n*×èñëîâà îáðàáîòêà*\n");
+	printf("1. Íàìèðàíå íà ìèíèìàëíà è ìàêñèìàëíà ñòîèíîñò îò âñè÷êè çàïèñàíè ÷èñëà\n");
+	printf("2. Çàïèñ íà âñè÷êè ÷èñëà ëåæàùè â äàäåí èíòåðâàë\n");
+	printf("3. Ñðåäíî-àðèòìåòè÷íà ñòîéíîñò íà âñè÷êè ÷èñëà\n");
+	printf("4. Çàìÿíà íà âñè÷êè îòðèöàòåëíè ÷èñëà ñ 0 è çàïèñà èì â íîâ ôàéë\n");
+	printf("5. <---Íàçàä\n");
+
+	do
+	{
+		printf("Èçáåðåòå ìîëÿ:\n");
+		scanf("%d", &j);
+	} while (j<1 || j>5);
+
+	return j;
+}
+
+
+#include <windows.h>
+#include <conio.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <limits.h>
+
+void count(FILE *f, char d)
+{
+	char c;
+	float b = 0, i = 0, v = 0;
+	rewind(f);
+	do
+	{
+		c = fgetc(f);
+		if (ferror(f))
+		{
+			perror("Ãðåøêà:");
+		}
+		i++;
+	} while (c != EOF);
+	rewind(f);
+	do
+	{
+		c = fgetc(f);
+		if (ferror(f))
+		{
+			perror("Ãðåøêà:");
+		}
+		if (c == d)
+		{
+			b++;
+		}
+	} while (c != EOF);
+	v = (b / i);
+	printf("\nÎáù áðîé ñèìâîëè:%0.0f\nÑèìâîëúò *%c* ñå ñðåùà %0.0f ïúòè\n%0.2f%% ñïðÿìî îáùèÿ áðîé\n\n", i, d, b, v);
+
+}
+
+void replace(FILE *fi, FILE *fo)
+{
+
+	char c, ch1, ch2;
+	rewind(fi);
+	fo = fopen("C:\\t.txt", "w");
+	if (fo == NULL)
+	{
+		printf("Ãðåøêà");
+	}
+
+	printf("\nÂúâåäåòå ñèìâîë çà çàìÿíà:");
+	scanf("%c", &ch1);
+	ch1 = getche();
+	printf("\nÇàìåíè ñ:");
+	ch2 = getchar();
+	while (1)
+	{
+		c = fgetc(fi);
+		if (ferror(fi))
+		{
+			perror("Ãðåøêà:");
+		}
+		if (c == EOF){ break; }
+		if (c == ch1)
+		{
+			fputc(ch2, fo);
+		}
+		else
+		{
+			fputc(c, fo);
+		}
+	}
+	if (fo != NULL){ printf("\nÃîòîâî\n\n"); }
+}
+
+void maxi(FILE *f)
+{
+	int n;
+	int min = INT_MAX, max = INT_MIN;
+	int flag = 0;
+	rewind(f);
+
+	while (fscanf(f, "%d", &n) != EOF)
+	{
+		if (ferror(f))
+		{
+			perror("Ãðåøêà:");
+		}
+		if (flag == 0)
+		{
+			min = n;
+			max = n;
+			flag = 1;
+		}
+		if (min>n)
+			min = n;
+		if (max<n)
+			max = n;
+	}
+	printf("\nÌàêñèìàëíà ñòîéíîñò: %d\nÌèíèìàëíà ñòîéíîñò: %d\n", max, min);
+}
+
+void interval(FILE *f)
+{
+	int x, y;
+	int n = 0;
+	int k = 0;
+	int m = 0;
+	FILE *fo;
+	rewind(f);
+	fo = fopen("C:\\Users\\HP\\Desktop\\1\\1\\t.txt", "w");
+	if (fo == NULL)
+	{
+		printf("Ãðåøêà");
+	}
+
+	printf("\nÂúâåäåòå íà÷àëî íà èíòåðâàëà:");
+	scanf("%d", &x);
+	printf("\nÂúâåäåòå êðàé íà èíòåðâàëà:");
+	scanf("%d", &y);
+	printf("\nÆåëàí áðîé êîëîíè:");
+	scanf("%d", &k);
+
+	while (fscanf(f, "%d", &n) != EOF)
+	{
+		if (ferror(f))
+		{
+			perror("Ãðåøêà:");
+		}
+		if (n>x && n<y)
+		{
+			if (m<k)
+			{
+				fprintf(fo, "%d\t", n);
+				m++;
+			}
+			else
+			{
+				fprintf(fo, "\n%d\t", n);
+				m = 1;
+			}
+		}
+	}
+}
+
+void tablica(FILE *f, FILE *fo)
+{
+	short count[256] = { 0 };
+	int c, k = 0;
+
+	rewind(f);
+	fo = fopen("C:\\Users\\HP\\Desktop\\1\\1\\t.txt", "w");
+	if (fo == NULL) { printf("Ãðåøêà"); }
+	while (1)
+	{
+		c = fgetc(f);
+		if (ferror(f))
+		{
+			perror("Ãðåøêà:");
+		}
+		if (c == EOF)break;
+		count[c]++;
+	}
+	printf("ÑÈÌÂÎË|ASCII-DEC|ASCII-HEX|BROI");
+	fprintf(fo, "ÑÈÌÂÎË|ASCII-DEC|ASCII-HEX|BROI");
+	for (k = 0; k<256; k++)
+	{
+		if (count[k] > 0)
+		{
+			printf("     %c     %u        %x     %d\n", k, k, k, count[k]);
+			fprintf(fo, "     %c     %u        %x     %d\n", k, k, k, count[k]);
+		}
+	}
+}
+
+void sred(FILE *f)
+{
+	long int n, sum = 0, b = 0;
+	char m[256], *m1;
+	rewind(f);
+	while (fscanf(f, "%s", m) != EOF)
+	{
+		if (ferror(f))
+		{
+			printf("Oh dear, something went wrong with read()! %s\n", strerror(errno));
+			perror("Ãðåøêà:");
+		}
+
+		n = strtol(m, &m1, 10);
+		if (errno == 34)
+		{
+			printf("Ïðåïúëâàíå íà âõîäà");
+		}
+		else
+		{
+			if (n >= 0 && sum >= 0 && (INT_MAX - n <= sum) || n <= 0 && sum <= 0 && (INT_MIN - n>sum))
+			{
+				printf("\n!!Ïðåïúëâàíå ïðè ñúáèðàíå!!\n");
+				_getch();
+				exit(0);
+
+			}
+
+			else
+			{
+				sum = sum + n;
+				b++;
+				/*	if (errno == 34)
+				{
+				printf("Oh dear, something went wrong with read()! %s\n", strerror(errno));
+				printf("\n!!Ïðåïúëøàíå!!\n");
+				}*/
+			}
+
+
+		}
+	}
+
+}
+
+void otr(FILE *f, FILE *fo)
+{
+	int n, c, b = 0;
+	//Ðàçäåëèòåëÿò å èíòåðâàë (32)
+	rewind(f);
+
+	fo = fopen("C:\\Users\\HP\\Desktop\\1\\1\\t.txt", "w");
+	if (fo == NULL)
+	{
+		printf("Ãðåøêà!");
+	}
+	while (fscanf(f, "%d", &n) != EOF)
+	{
+		if (ferror(f))
+		{
+			perror("Ãðåøêà:");
+		}
+		if (n<0)
+		{
+			n = 0;
+			fprintf(fo, "%d%c", n, ' ');
+		}
+		else
+		{
+			fprintf(fo, "%d%c", n, ' ');
+		}
+	}
+	if (fo != NULL)
+	{
+		printf("\nÃîòîâî\n\n");
+	}
+}
+
+FILE *file(char name[30])
+{
+	FILE *fp;
+
+	printf("Âúâåäåòå èìå íà ôàéëà:");
+	scanf("%s", name);
+
+	fp = fopen(name, "r");
+	if (fp == 0)
+	{
+		printf("\nÍåñúùåñòâóâàù ôàéë!!");
+	}
+}
+
+void tekst(FILE *fp)
+{
+	char line[512];
+	rewind(fp);
+	while (fgets(line, 255, fp) != NULL)
+	{
+		if (ferror(fp))
+		{
+			perror("Ãðåøêà:");
+		}
+		printf("%s", line);
+	}
+	printf("\n\n");
+}
+
+void pok(FILE *fp)
+{
+	char c;
+	rewind(fp);
+	printf("Âúâåäåòå ñèìâîë:\n");
+	c = getchar();
+	scanf("%c", &c);
+	count(fp, c);
+
+}
+int main()
+{
+	FILE *f = 0;
+	FILE *fo = 0;
+	int mode = 0, cmode = 0;
+	char name[256];
+	char line[256];
+	char a, b, c = 0, d = 0;
+
+	SetConsoleOutputCP(1251);
+	SetConsoleCP(1251);
+
+	do
+	{
+		mode = menu(mode);
+		switch (mode)
+		{
+		case 1:
+			f = file(name);
+			break;
+		case 2:
+			if (f == NULL)
+			{
+				printf("\nÌîëÿ ïúðâî îòâîðåòå ôàéë\n\n");
+				break;
+			}
+			tekst(f);
+			break;
+		case 3:
+			if (f == NULL)
+			{
+				printf("\nÌîëÿ ïúðâî îòâîðåòå ôàéë\n\n");
+				break;
+			}
+			tablica(f, fo);
+			break;
+		case 4:
+			if (f == NULL)
+			{
+				printf("\nÌîëÿ ïúðâî îòâîðåòå ôàéë\n\n");
+				break;
+			}
+			pok(f);
+			break;
+		case 5:
+			if (f == NULL)
+			{
+				printf("\nÌîëÿ ïúðâî îòâîðåòå ôàéë\n\n");
+				break;
+			}
+			replace(f, fo);
+			break;
+		case 6:
+			if (f == NULL)
+			{
+				printf("\nÌîëÿ ïúðâî îòâîðåòå ôàéë\n\n");
+				break;
+			}
+
+			cmode = cmenu(cmode);
+			switch (cmode)
+			{
+			case 1:
+				maxi(f);
+				break;
+			case 2:
+				interval(f);
+				break;
+			case 3:
+				sred(f);
+				break;
+			case 4:
+				otr(f, fo);
+				break;
+			case 5:break;
+			}
+
+			break;
+		case 7:printf("Ciao\n");
+		}
+	} while (mode != 7);
+
+	_getche();
+	return 0;
+}
