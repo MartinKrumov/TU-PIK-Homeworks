@@ -11,17 +11,17 @@
 
 int menu(int i)
 {
-	printf("Ïðîãðàìà \n");
-	printf("1. Èçáîð íà âõîäåí ôàéë çà îáðàáîòêà\n");
-	printf("2. Ïîêàçâàíå ñúäúðæàíèåòî íà ôàéëà\n");
-	printf("3. Ïðåáðîÿâàíå íà ñèìâîëèòå îò ôàéëà è çàïèñà èì â òàáëèöà\n");
-	printf("4. Áðîé íà ñðåùàíå íà èçáðàí ñèìâîë ñïðÿìî îáù áðîé ñèìâîëè\n");
-	printf("5. Çàìÿíà íà èçáðàí ñèìâîë ñ äðóã è çàïèñà ìó â íîâ ôàéë\n");
-	printf("6. Îáðàáîòêà íà ÷èñëîâà èíôîðìàöèÿ\n");
-	printf("7. Èçõîä\n");
+	printf("Програма \n");
+	printf("1. Избор на входен файл за обработка\n");
+	printf("2. Показване съдържанието на файла\n");
+	printf("3. Преброяване на символите от файла и записа им в таблица\n");
+	printf("4. Брой на срещане на избран символ спрямо общ брой символи\n");
+	printf("5. Замяна на избран символ с друг и записа му в нов файл\n");
+	printf("6. Обработка на числова информация\n");
+	printf("7. Изход\n");
 	do
 	{
-		printf("\nÂàøèÿò èçáîð:");
+		printf("\nВашият избор:");
 		scanf("%d", &i);
 	} while (i<1 || i>7);
 
@@ -30,16 +30,16 @@ int menu(int i)
 
 int cmenu(int j)
 {
-	printf("\n\n*×èñëîâà îáðàáîòêà*\n");
-	printf("1. Íàìèðàíå íà ìèíèìàëíà è ìàêñèìàëíà ñòîèíîñò îò âñè÷êè çàïèñàíè ÷èñëà\n");
-	printf("2. Çàïèñ íà âñè÷êè ÷èñëà ëåæàùè â äàäåí èíòåðâàë\n");
-	printf("3. Ñðåäíî-àðèòìåòè÷íà ñòîéíîñò íà âñè÷êè ÷èñëà\n");
-	printf("4. Çàìÿíà íà âñè÷êè îòðèöàòåëíè ÷èñëà ñ 0 è çàïèñà èì â íîâ ôàéë\n");
-	printf("5. <---Íàçàä\n");
+	printf("\n\n*Числова обработка*\n");
+	printf("1. Намиране на минимална и максимална стоиност от всички записани числа\n");
+	printf("2. Запис на всички числа лежащи в даден интервал\n");
+	printf("3. Средно-аритметична стойност на всички числа\n");
+	printf("4. Замяна на всички отрицателни числа с 0 и записа им в нов файл\n");
+	printf("5. <---Назад\n");
 
 	do
 	{
-		printf("Èçáåðåòå ìîëÿ:\n");
+		printf("Изберете моля:\n");
 		scanf("%d", &j);
 	} while (j<1 || j>5);
 
@@ -66,7 +66,7 @@ void count(FILE *f, char d)
 		c = fgetc(f);
 		if (ferror(f))
 		{
-			perror("Ãðåøêà:");
+			perror("Грешка:");
 		}
 		i++;
 	} while (c != EOF);
@@ -76,7 +76,7 @@ void count(FILE *f, char d)
 		c = fgetc(f);
 		if (ferror(f))
 		{
-			perror("Ãðåøêà:");
+			perror("Грешка:");
 		}
 		if (c == d)
 		{
@@ -84,7 +84,7 @@ void count(FILE *f, char d)
 		}
 	} while (c != EOF);
 	v = (b / i);
-	printf("\nÎáù áðîé ñèìâîëè:%0.0f\nÑèìâîëúò *%c* ñå ñðåùà %0.0f ïúòè\n%0.2f%% ñïðÿìî îáùèÿ áðîé\n\n", i, d, b, v);
+	printf("\nОбщ брой символи:%0.0f\nСимволът *%c* се среща %0.0f пъти\n%0.2f%% спрямо общия брой\n\n", i, d, b, v);
 
 }
 
@@ -96,20 +96,20 @@ void replace(FILE *fi, FILE *fo)
 	fo = fopen("C:\\t.txt", "w");
 	if (fo == NULL)
 	{
-		printf("Ãðåøêà");
+		printf("Грешка");
 	}
 
-	printf("\nÂúâåäåòå ñèìâîë çà çàìÿíà:");
+	printf("\nВъведете символ за замяна:");
 	scanf("%c", &ch1);
 	ch1 = getche();
-	printf("\nÇàìåíè ñ:");
+	printf("\nЗамени с:");
 	ch2 = getchar();
 	while (1)
 	{
 		c = fgetc(fi);
 		if (ferror(fi))
 		{
-			perror("Ãðåøêà:");
+			perror("Грешка:");
 		}
 		if (c == EOF){ break; }
 		if (c == ch1)
@@ -121,7 +121,7 @@ void replace(FILE *fi, FILE *fo)
 			fputc(c, fo);
 		}
 	}
-	if (fo != NULL){ printf("\nÃîòîâî\n\n"); }
+	if (fo != NULL){ printf("\nГотово\n\n"); }
 }
 
 void maxi(FILE *f)
@@ -135,7 +135,7 @@ void maxi(FILE *f)
 	{
 		if (ferror(f))
 		{
-			perror("Ãðåøêà:");
+			perror("Грешка:");
 		}
 		if (flag == 0)
 		{
@@ -148,7 +148,7 @@ void maxi(FILE *f)
 		if (max<n)
 			max = n;
 	}
-	printf("\nÌàêñèìàëíà ñòîéíîñò: %d\nÌèíèìàëíà ñòîéíîñò: %d\n", max, min);
+	printf("\nМаксимална стойност: %d\nМинимална стойност: %d\n", max, min);
 }
 
 void interval(FILE *f)
@@ -162,21 +162,21 @@ void interval(FILE *f)
 	fo = fopen("C:\\Users\\HP\\Desktop\\1\\1\\t.txt", "w");
 	if (fo == NULL)
 	{
-		printf("Ãðåøêà");
+		printf("Грешка");
 	}
 
-	printf("\nÂúâåäåòå íà÷àëî íà èíòåðâàëà:");
+	printf("\nВъведете начало на интервала:");
 	scanf("%d", &x);
-	printf("\nÂúâåäåòå êðàé íà èíòåðâàëà:");
+	printf("\nВъведете край на интервала:");
 	scanf("%d", &y);
-	printf("\nÆåëàí áðîé êîëîíè:");
+	printf("\nЖелан брой колони:");
 	scanf("%d", &k);
 
 	while (fscanf(f, "%d", &n) != EOF)
 	{
 		if (ferror(f))
 		{
-			perror("Ãðåøêà:");
+			perror("Грешка:");
 		}
 		if (n>x && n<y)
 		{
@@ -201,19 +201,19 @@ void tablica(FILE *f, FILE *fo)
 
 	rewind(f);
 	fo = fopen("C:\\Users\\HP\\Desktop\\1\\1\\t.txt", "w");
-	if (fo == NULL) { printf("Ãðåøêà"); }
+	if (fo == NULL) { printf("Грешка"); }
 	while (1)
 	{
 		c = fgetc(f);
 		if (ferror(f))
 		{
-			perror("Ãðåøêà:");
+			perror("Грешка:");
 		}
 		if (c == EOF)break;
 		count[c]++;
 	}
-	printf("ÑÈÌÂÎË|ASCII-DEC|ASCII-HEX|BROI");
-	fprintf(fo, "ÑÈÌÂÎË|ASCII-DEC|ASCII-HEX|BROI");
+	printf("СИМВОЛ|ASCII-DEC|ASCII-HEX|BROI");
+	fprintf(fo, "СИМВОЛ|ASCII-DEC|ASCII-HEX|BROI");
 	for (k = 0; k<256; k++)
 	{
 		if (count[k] > 0)
@@ -234,19 +234,19 @@ void sred(FILE *f)
 		if (ferror(f))
 		{
 			printf("Oh dear, something went wrong with read()! %s\n", strerror(errno));
-			perror("Ãðåøêà:");
+			perror("Грешка:");
 		}
 
 		n = strtol(m, &m1, 10);
 		if (errno == 34)
 		{
-			printf("Ïðåïúëâàíå íà âõîäà");
+			printf("Препълване на входа");
 		}
 		else
 		{
 			if (n >= 0 && sum >= 0 && (INT_MAX - n <= sum) || n <= 0 && sum <= 0 && (INT_MIN - n>sum))
 			{
-				printf("\n!!Ïðåïúëâàíå ïðè ñúáèðàíå!!\n");
+				printf("\n!!Препълване при събиране!!\n");
 				_getch();
 				exit(0);
 
@@ -259,7 +259,7 @@ void sred(FILE *f)
 				/*	if (errno == 34)
 				{
 				printf("Oh dear, something went wrong with read()! %s\n", strerror(errno));
-				printf("\n!!Ïðåïúëøàíå!!\n");
+				printf("\n!!Препълшане!!\n");
 				}*/
 			}
 
@@ -272,19 +272,19 @@ void sred(FILE *f)
 void otr(FILE *f, FILE *fo)
 {
 	int n, c, b = 0;
-	//Ðàçäåëèòåëÿò å èíòåðâàë (32)
+	//Разделителят е интервал (32)
 	rewind(f);
 
 	fo = fopen("C:\\Users\\HP\\Desktop\\1\\1\\t.txt", "w");
 	if (fo == NULL)
 	{
-		printf("Ãðåøêà!");
+		printf("Грешка!");
 	}
 	while (fscanf(f, "%d", &n) != EOF)
 	{
 		if (ferror(f))
 		{
-			perror("Ãðåøêà:");
+			perror("Грешка:");
 		}
 		if (n<0)
 		{
@@ -298,7 +298,7 @@ void otr(FILE *f, FILE *fo)
 	}
 	if (fo != NULL)
 	{
-		printf("\nÃîòîâî\n\n");
+		printf("\nГотово\n\n");
 	}
 }
 
@@ -306,13 +306,13 @@ FILE *file(char name[30])
 {
 	FILE *fp;
 
-	printf("Âúâåäåòå èìå íà ôàéëà:");
+	printf("Въведете име на файла:");
 	scanf("%s", name);
 
 	fp = fopen(name, "r");
 	if (fp == 0)
 	{
-		printf("\nÍåñúùåñòâóâàù ôàéë!!");
+		printf("\nНесъществуващ файл!!");
 	}
 }
 
@@ -324,7 +324,7 @@ void tekst(FILE *fp)
 	{
 		if (ferror(fp))
 		{
-			perror("Ãðåøêà:");
+			perror("Грешка:");
 		}
 		printf("%s", line);
 	}
@@ -335,7 +335,7 @@ void pok(FILE *fp)
 {
 	char c;
 	rewind(fp);
-	printf("Âúâåäåòå ñèìâîë:\n");
+	printf("Въведете символ:\n");
 	c = getchar();
 	scanf("%c", &c);
 	count(fp, c);
@@ -364,7 +364,7 @@ int main()
 		case 2:
 			if (f == NULL)
 			{
-				printf("\nÌîëÿ ïúðâî îòâîðåòå ôàéë\n\n");
+				printf("\nМоля първо отворете файл\n\n");
 				break;
 			}
 			tekst(f);
@@ -372,7 +372,7 @@ int main()
 		case 3:
 			if (f == NULL)
 			{
-				printf("\nÌîëÿ ïúðâî îòâîðåòå ôàéë\n\n");
+				printf("\nМоля първо отворете файл\n\n");
 				break;
 			}
 			tablica(f, fo);
@@ -380,7 +380,7 @@ int main()
 		case 4:
 			if (f == NULL)
 			{
-				printf("\nÌîëÿ ïúðâî îòâîðåòå ôàéë\n\n");
+				printf("\nМоля първо отворете файл\n\n");
 				break;
 			}
 			pok(f);
@@ -388,7 +388,7 @@ int main()
 		case 5:
 			if (f == NULL)
 			{
-				printf("\nÌîëÿ ïúðâî îòâîðåòå ôàéë\n\n");
+				printf("\nМоля първо отворете файл\n\n");
 				break;
 			}
 			replace(f, fo);
@@ -396,7 +396,7 @@ int main()
 		case 6:
 			if (f == NULL)
 			{
-				printf("\nÌîëÿ ïúðâî îòâîðåòå ôàéë\n\n");
+				printf("\nМоля първо отворете файл\n\n");
 				break;
 			}
 
