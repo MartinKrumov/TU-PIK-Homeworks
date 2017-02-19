@@ -9,7 +9,7 @@
 #include "my_func.h"
 //---------------------------------------------------------------------------
 
-FILE *getNameFile(char *name_file, char *mode, char *text)
+FILE *getNameFile(char *name_file, char *mode, char *text)// not finished
 {
 	FILE *fp;
 	int err;
@@ -61,7 +61,6 @@ void countSymbols(FILE *fp_in, FILE *fp_out) // not finished
 	while (1)
 	{
 		c = fgetc(fp_in);
-		printf("\n%c", c);
 
 		if (c == EOF)
 			break;
@@ -69,10 +68,10 @@ void countSymbols(FILE *fp_in, FILE *fp_out) // not finished
 		asciiTable[c]++;
 	}
 
-	printf("СИМВОЛ|ASCII-DEC|ASCII-HEX|BROI");
-	fprintf(fp_out, "СИМВОЛ|ASCII-DEC|ASCII-HEX|BROI");
+	printf("\nСИМВОЛ|ASCII-DEC|ASCII-HEX|BROI\n");
+	fprintf(fp_out, "\nСИМВОЛ|ASCII-DEC|ASCII-HEX|BROI\n");
 
-	for (short k = 0; k < 256; k++)
+	for (size_t k = 0; k < 256; k++)
 	{
 		if (asciiTable[k] > 0)
 		{
