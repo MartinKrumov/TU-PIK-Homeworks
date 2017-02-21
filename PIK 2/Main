@@ -7,7 +7,7 @@
 #include "my_func.h"
 
 //------------- менюта ------------------------------------
-char *txtMenuG[] =
+char *txtMenuG[] = //указател от чар масиви
 {
 	"-----ПРОГРАМА ТЕКСТОВ ФАЙЛ-----",
 	"Избор на входен файл за обработка.....................",
@@ -19,7 +19,7 @@ char *txtMenuG[] =
 	"Изход...........................................",
 	NULL
 };
-//----------------------------------------------------------
+
 char *txtMenuNumbers[] =
 {
 	"-----ПРЕБРОЯВАНЕ И ЗАПИС-----",
@@ -30,16 +30,14 @@ char *txtMenuNumbers[] =
 	"Изход...................................................................................",
 	NULL
 };
-//-----------------------------------------------------------
 
 int main()
 {
-	short mode, mode1, mode2, flag1 = 0, flag2 = 0, count1;
+	short mode, mode2, flag1 = 0;
 	FILE *fp_in = NULL, *fp_out = NULL;
-	char name_in[256], name_out[256], ch;
-	int *ptr = NULL, n = 0;
+	char nameIn[256], nameOut[256];
 	float average;
-	//------------------------------------------------------
+
 	SetConsoleOutputCP(1251);
 	SetConsoleCP(1251);
 	do
@@ -48,17 +46,17 @@ int main()
 		mode = menu(txtMenuG);
 		switch (mode)
 		{
-			//-------------------------------------------------------------------------------------------------
 		case 1:
 			system("cls");
-			if ((fp_in = getNameFile(name_in, "rt", "за четене")) != NULL)
+			if ((fp_in = getNameFile(nameIn, "rt", "за четене")) != NULL)
 				flag1 = 1;
 			break;
-			//----------------------------------------------------------------------------------------------
-		case 2:	printTextFile();
+
+		case 2:	
+			printTextFile();
 			break;
 
-		case 3:
+		case 3: 
 			if (flag1 == 0)
 			{
 				printf("\nНе сте отворили файл за обработка!");
@@ -67,74 +65,80 @@ int main()
 			}
 			system("cls");
 
-			if ((fp_out = getNameFile(name_out, "wt", "за запис")) != NULL)
+			if ((fp_out = getNameFile(nameOut, "wt", "за запис")) != NULL)
 				countSymbols(fp_in, fp_out);
-				system("pause");
+			system("pause");
+			fclose(fp_out);
+			break;
 
-				fclose(fp_out);
-				break;
-
-		case 4: if (flag1 == 0)
-				{
-					printf("\nНе сте отворили файл за обработка!");
-					system("pause");
-					break;
-				}
-				countChosenSymbol(fp_in);
+		case 4: 
+			if (flag1 == 0)
+			{
+				printf("\nНе сте отворили файл за обработка!");
 				system("pause");
 				break;
+			}
+			countChosenSymbol(fp_in);
+			system("pause");
+			break;
 
-		case 5: if (flag1 == 0)
+		case 5: 
+			if (flag1 == 0)
+			{
+				printf("\nНе сте отворили файл за обработка!");
+				system("pause");
+				break;
+			}
+
+			if ((fp_out = getNameFile(nameOut, "wt", "за запис")) != NULL)
+				changeSymbol(fp_in, fp_out);
+
+			fclose(fp_out);
+			break;
+
+		case 6: 
+			if (flag1 == 0)
+			{
+				printf("\nНе сте отворили файл за обработка!"); system("pause");
+				break;
+			}
+
+			do
+			{
+				system("cls");
+				mode2 = menu(txtMenuNumbers);
+				switch (mode2)
 				{
-					printf("\nНе сте отворили файл за обработка!");
+				case 1: 
+					maxMinNumbers(fp_in);
 					system("pause");
 					break;
-				}
 
-				if ((fp_out = getNameFile(name_out, "wt", "за запис")) != NULL)
-					changeSymbol(fp_in, fp_out);
-
-				fclose(fp_out);
-				break;
-
-		case 6: if (flag1 == 0)
-				{
-					printf("\nНе сте отворили файл за обработка!"); system("pause");
-					break;
-				}
-
-				do
-				{
-					system("cls");
-					mode2 = menu(txtMenuNumbers);
-					switch (mode2)
-					{
-					case 1: maxMinNumbers(fp_in);
-						system("pause");
-						break;
-
-					case 2:if ((fp_out = getNameFile(name_out, "wt", "за запис")) != NULL)
+				case 2:
+					if ((fp_out = getNameFile(nameOut, "wt", "за запис")) != NULL)
 						writeNumbersOfInterval(fp_in, fp_out); 
-						system("pause");
-						fclose(fp_out);
-						break;
+					system("pause");
+					fclose(fp_out);
+					break;
 
-					case 3: average = averageOfNumbers(fp_in);
-						printf("Средно аритметичното е = %f\n", average);
-						system("pause");
-						break;
+				case 3: 
+					average = averageOfNumbers(fp_in);
+					printf("Средно аритметичното е = %f\n", average);
+					system("pause");
+					break;
 
-					case 4: if ((fp_out = getNameFile(name_out, "wt", "за запис")) != NULL)
+				case 4: 
+					if ((fp_out = getNameFile(nameOut, "wt", "за запис")) != NULL)
 						changeNegativeNumbers(fp_in, fp_out);
-						system("pause");
-						fclose(fp_out);
-						break;
-					}
-				} while (mode2 != 5);
-				break;
+					system("pause");
+					fclose(fp_out);
+					break;
+				}
+			} while (mode2 != 5);
+			break;
 		}
 	} while (mode != 7);
-	_fcloseall();
+	_fcloseall(); // затваря всички потоци
 }
 
 
