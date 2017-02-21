@@ -15,7 +15,7 @@ FILE *getNameFile(char *name_file, char *mode, char *text)
 
 	do
 	{
-		printf("\nВъведете име на файла %s:", text);
+		printf("\nВъведете име на файла %s: ", text);
 		err = scanf("%s", name_file);
 	} while (err != 1);
 
@@ -36,7 +36,7 @@ FILE *getNameFile(char *name_file, char *mode, char *text)
 void printTextFile()
 {
 	FILE *fp = NULL;
-	char fileName[256], ch;
+	int fileName[256], ch;
 	if ((fp = getNameFile(fileName, "rt", "за четене")) != NULL)
 	{
 		while (1)
@@ -51,7 +51,7 @@ void printTextFile()
 	fclose(fp);
 }
 
-void countSymbols(FILE *fp_in, FILE *fp_out) 
+void countSymbols(FILE *fp_in, FILE *fp_out)
 {
 	short asciiTable[256] = { 0 }; //нулираме масива
 	short c = 0;
@@ -61,7 +61,7 @@ void countSymbols(FILE *fp_in, FILE *fp_out)
 	{
 		c = fgetc(fp_in);//четем символ
 
-		if (c == EOF)//докато не стигнем EOF
+		if (feof(fp_in))//докато не стигнем EOF 
 			break;
 
 		asciiTable[c]++;
@@ -70,7 +70,7 @@ void countSymbols(FILE *fp_in, FILE *fp_out)
 	printf("\nСИМВОЛ|ASCII-DEC|ASCII-HEX|BROI\n");
 	fprintf(fp_out, "\nСИМВОЛ|ASCII-DEC|ASCII-HEX|BROI\n");
 
-	for (size_t k = 0; k < 256; k++)
+	for (int k = 0; k < 256; k++)
 	{
 		if (asciiTable[k] > 0)
 		{
@@ -84,7 +84,8 @@ void countChosenSymbol(FILE *fp_in)
 {
 	short count = 0;
 	int allSymbols = 0;
-	char c, ch;
+	char ch;
+	int c;
 	float ratio;
 	rewind(fp_in);// връщаме файловия пойнтер в началото на файла
 
@@ -105,15 +106,16 @@ void countChosenSymbol(FILE *fp_in)
 		}
 		allSymbols++;
 	}
-	ratio =(float)count / allSymbols; // изчисляваме отношението
+	ratio = (float)count / allSymbols; // изчисляваме отношението
 
-	printf("\nОбщ брой символи: %d\n Брой на срещане на символ \'%c\' във входния файл е = %d пъти \n%0.2f%% спрямо общия брой\n\n", 
+	printf("\nОбщ брой символи: %d\n Брой на срещане на символ \'%c\' във входния файл е = %d пъти \n%0.2f%% спрямо общия брой\n\n",
 		allSymbols, ch, count, ratio);
 }
 
-void changeSymbol(FILE *fp_in, FILE *fp_out) 
+void changeSymbol(FILE *fp_in, FILE *fp_out)
 {
-	char ch1, ch2, c;
+	char ch1, ch2;
+	short c;
 	rewind(fp_in);
 
 	printf("\nВъведете символ за замяна:");
@@ -127,10 +129,10 @@ void changeSymbol(FILE *fp_in, FILE *fp_out)
 	{
 		c = fgetc(fp_in);
 
-		if (c == EOF) 
-			break; 
+		if (c == EOF)
+			break;
 
-		if (c == ch1) 
+		if (c == ch1)
 		{
 			fputc(ch2, fp_out); // ако има съвпадение заменяме със символа който сме избрали и го запаметяваме в fp_out
 		}
@@ -141,39 +143,52 @@ void changeSymbol(FILE *fp_in, FILE *fp_out)
 	}
 }
 
-void maxMinNumbers(FILE *fp_in) 
+void maxMinNumbers(FILE *fp_in)
 {
-	int num = 0;
+	char number[256], *reminder;
+	long int num = 0;
 	int min = INT_MAX, max = INT_MIN;
-	int flag = 0; // флаг в случай, че файлът е празен(няма чилса)
+	int isEmpty = 0; // флаг в случай, че файлът е празен(няма чилса)
 	rewind(fp_in);
 
-	while (fscanf(fp_in, "%d", &num) != EOF)
+	while (fscanf(fp_in, "%s", &number) != EOF) // докато има прочетен ред 
 	{
-		if (min > num) // проверяваме дали min е по-малко от прочетеното число във файла
+		num = strtol(number, &reminder, 10); // в Num присвояваме резултата от функцията strtol
+		if (reminder[0] != '\0') // проверяваме дали прочетения ред има символи (123а /аа125)
 		{
-			min = num; // ако е записваме стойноста му в min
-			flag = 1; // вдигаме флага в случай, че има прочетено число
+			printf("\nФайлът не може да бъде обработен\n");
+			system("pause");
+			return;
 		}
-		if (max < num) // проверяваме дали max е по-голямо от прочетеното число във файла
+		else
 		{
-			max = num; 
-			flag = 1;
+			if (min > num) // проверяваме дали min е по-малко от прочетеното число във файла
+			{
+				min = num; // ако е записваме стойноста му в min
+				isEmpty = 1; // вдигаме флага в случай, че има прочетено число
+			}
+			if (max < num) // проверяваме дали max е по-голямо от прочетеното число във файла
+			{
+				max = num;
+				isEmpty = 1;
+			}
 		}
 	}
 
-	if (flag == 1) // ако има прочетени числа 
+	if (isEmpty == 1) // ако има прочетени числа 
 		printf("\nМаксимална стойност: %d\nМинимална стойност: %d\n", max, min);
 
 	else
-		printf("\n Няма прочетени числа във файлът \n");
+		printf("\nФайлът не съдържа числа\n");
 }
 
-void writeNumbersOfInterval(FILE *fp_in, FILE *fp_out) 
+void writeNumbersOfInterval(FILE *fp_in, FILE *fp_out)
 {
+	char number[256], *reminder;
 	int lower, upper; // променливи за долно и горна граница
 	unsigned int col;
-	int num = 0, n = 0;
+	long int num = 0;
+	int n = 0;
 	rewind(fp_in);
 
 	printf("Въведете долна граница=");
@@ -187,46 +202,57 @@ void writeNumbersOfInterval(FILE *fp_in, FILE *fp_out)
 	printf("Въведете брой колони=");
 	scanf("%d", &col);
 
-	while (fscanf(fp_in, "%d", &num) != EOF)
+	while (fscanf(fp_in, "%s", &number) != EOF)
 	{
-		if (num >= lower && num <= upper) // проверяме дали числото се намира в интервала 
+		num = strtol(number, &reminder, 10); // в Num присвояваме резултата от функцията strtol
+		if (reminder[0] != '\0') // проверяваме дали прочетения ред има символи (123а /аа125)
 		{
-			if (n < col) 
+			printf("\nФайлът не може да бъде обработен\n");
+			system("pause");
+			return;
+		}
+		else
+		{
+			if (num >= lower && num <= upper) // проверяме дали числото се намира в интервала 
 			{
-				fprintf(fp_out, "%d\t", num); //докато N е по-малко от колоните записваме числата с 1 таб разтояние
-				n++; 
-			}
-			else
-			{
-				fprintf(fp_out, "\n%d\t", num); // когато N стане по-голямо от колоните записваме чилота на нов ред с 1 таб разтояние
-				n = 1; // ресетваме N
+				if (n < col)
+				{
+					fprintf(fp_out, "%d\t", num); //докато N е по-малко от колоните записваме числата с 1 таб разтояние
+					n++;
+				}
+				else
+				{
+					fprintf(fp_out, "\n%d\t", num); // когато N стане по-голямо от колоните записваме чилота на нов ред с 1 таб разтояние
+					n = 1; // ресетваме n
+				}
 			}
 		}
 	}
 }
 
-float averageOfNumbers(FILE *fp_in) 
+float averageOfNumbers(FILE *fp_in)
 {
 	char number[256], *reminder;
 	long int num, count = 0, sum = 0;
 	float average = 0;
-	errno = 0; 
+	int isEmpty = 0; //флаг в случай, че файлът е празен(няма чилса)
+	errno = 0;
 	rewind(fp_in);
 
 	while (fscanf(fp_in, "%s", &number) != EOF) // докато има прочетен ред 
 	{
 		num = strtol(number, &reminder, 10); // в Num присвояваме резултата от функцията strtol
-		if (reminder[0] != '\0') // проверяваме дали прочетения ред има цифри и символи, ако има дава грешка: (123а /аа125)
+		if (reminder[0] != '\0') // проверяваме дали прочетения ред има символи (123а /аа125)
 		{
-			printf("\nFormat exception\n");
+			printf("\nФайлът не може да бъде обработен\n");
 			system("pause");
-			exit(0); // изход
+			return;
 		}
 		else if (errno == ERANGE) // ако подадем прекалено голямо число на входа ни излиза съобщение за препълване
 		{
 			printf("\n!!Препълване на входа!!\n");
 			system("pause");
-			exit(0);
+			return;
 		}
 		else
 		{
@@ -242,29 +268,48 @@ float averageOfNumbers(FILE *fp_in)
 			{
 				sum += num;
 				count++;
+				isEmpty = 1;
 			}
 		}
 	}
-
-	average = (float)sum / count;
-	return average;
+	if (isEmpty == 1)
+	{
+		average = (float)sum / count;
+		return average;
+	}
+	else
+	{
+		printf("\nФайлът не съдържа числа\n");
+		return 0;
+	}
 }
 
 void changeNegativeNumbers(FILE *fp_in, FILE *fp_out)
 {
-	int num = 0;
+	char number[256], *reminder;
+	long int num = 0;
 	rewind(fp_in);
 
-	while (fscanf(fp_in, "%d", &num) != EOF)
+	while (fscanf(fp_in, "%s", &number) != EOF) // докато има прочетен ред 
 	{
-		if (num < 0) // проверка за отрицателно число
+		num = strtol(number, &reminder, 10); // в Num присвояваме резултата от функцията strtol
+		if (reminder[0] != '\0') // проверяваме дали прочетения ред има символи (123а /аа125)
 		{
-			num = 0; // нулираме прочетеното число 
-			fprintf(fp_out, "%d%c", num, ' '); // и го записваме в изходния файл
+			printf("\nФайлът не може да бъде обработен\n");
+			system("pause");
+			return; // връща в главната функция
 		}
 		else
 		{
-			fprintf(fp_out, "%d%c", num, ' '); //ако числото не е отрицателно го записваме в изходния файл
+			if (num < 0) // проверка за отрицателно число
+			{
+				num = 0; // нулираме прочетеното число 
+				fprintf(fp_out, "%d%c", num, ' '); // и го записваме в изходния файл
+			}
+			else
+			{
+				fprintf(fp_out, "%d%c", num, ' '); //ако числото не е отрицателно го записваме в изходния файл
+			}
 		}
 	}
 	printf("\nИнформацията е запазена\n");
