@@ -1,0 +1,14 @@
+#include <stdio.h>
+
+void countSymbols(FILE *fp_in, FILE *fp_out);
+FILE *getNameFile(char *name_file, char *mode, char *text);
+
+void printTextFile();
+void countChosenSymbol(FILE *fp_in);
+
+void changeSymbol(FILE *fp_in, FILE *fp_out);
+void maxMinNumbers(FILE *fp_in);
+
+void writeNumbersOfInterval(FILE *fp_in, FILE *fp_out);
+float averageOfNumbers(FILE *fp_in);
+void changeNegativeNumbers(FILE *fp_in, FILE *fp_out);
