@@ -7,9 +7,8 @@
 #include <errno.h>
 
 #include "my_func.h"
-//---------------------------------------------------------------------------
 
-FILE *getNameFile(char *name_file, char *mode, char *text)// not finished
+FILE *getNameFile(char *name_file, char *mode, char *text)
 {
 	FILE *fp;
 	int err;
@@ -33,7 +32,7 @@ FILE *getNameFile(char *name_file, char *mode, char *text)// not finished
 	}
 	return fp;
 }
-//---------------------------------------------------------------------------------------------
+
 void printTextFile()
 {
 	FILE *fp = NULL;
@@ -51,18 +50,18 @@ void printTextFile()
 	system("pause");
 	fclose(fp);
 }
-//---------------------------------------------------------------------------------------------
-void countSymbols(FILE *fp_in, FILE *fp_out) // not finished
+
+void countSymbols(FILE *fp_in, FILE *fp_out) 
 {
-	short asciiTable[256] = { 0 }; 
+	short asciiTable[256] = { 0 }; //нулираме масива
 	short c = 0;
 	rewind(fp_in);
 
 	while (1)
 	{
-		c = fgetc(fp_in);
+		c = fgetc(fp_in);//четем символ
 
-		if (c == EOF)
+		if (c == EOF)//докато не стигнем EOF
 			break;
 
 		asciiTable[c]++;
@@ -80,9 +79,8 @@ void countSymbols(FILE *fp_in, FILE *fp_out) // not finished
 		}
 	}
 }
-//------------------------------------------------------------------------
 
-void countChosenSymbol(FILE *fp_in)//done
+void countChosenSymbol(FILE *fp_in)
 {
 	short count = 0;
 	int allSymbols = 0;
@@ -112,8 +110,8 @@ void countChosenSymbol(FILE *fp_in)//done
 	printf("\nОбщ брой символи: %d\n Брой на срещане на символ \'%c\' във входния файл е = %d пъти \n%0.2f%% спрямо общия брой\n\n", 
 		allSymbols, ch, count, ratio);
 }
-//------------------------------------------------------------------------
-void changeSymbol(FILE *fp_in, FILE *fp_out) //done
+
+void changeSymbol(FILE *fp_in, FILE *fp_out) 
 {
 	char ch1, ch2, c;
 	rewind(fp_in);
@@ -142,8 +140,8 @@ void changeSymbol(FILE *fp_in, FILE *fp_out) //done
 		}
 	}
 }
-//--------------------------------------------------------------------------
-void maxMinNumbers(FILE *fp_in) // done
+
+void maxMinNumbers(FILE *fp_in) 
 {
 	int num = 0;
 	int min = INT_MAX, max = INT_MIN;
@@ -170,8 +168,8 @@ void maxMinNumbers(FILE *fp_in) // done
 	else
 		printf("\n Няма прочетени числа във файлът \n");
 }
-//---------------------------------------------------------------------------------------
-void writeNumbersOfInterval(FILE *fp_in, FILE *fp_out) //done
+
+void writeNumbersOfInterval(FILE *fp_in, FILE *fp_out) 
 {
 	int lower, upper; // променливи за долно и горна граница
 	unsigned int col;
@@ -206,7 +204,7 @@ void writeNumbersOfInterval(FILE *fp_in, FILE *fp_out) //done
 		}
 	}
 }
-//-------------------------------------------------------------------------------------------------------
+
 float averageOfNumbers(FILE *fp_in) 
 {
 	char number[256], *reminder;
@@ -251,8 +249,8 @@ float averageOfNumbers(FILE *fp_in)
 	average = (float)sum / count;
 	return average;
 }
-//--------------------------------------------------------
-void changeNegativeNumbers(FILE *fp_in, FILE *fp_out)//done
+
+void changeNegativeNumbers(FILE *fp_in, FILE *fp_out)
 {
 	int num = 0;
 	rewind(fp_in);
@@ -271,4 +269,3 @@ void changeNegativeNumbers(FILE *fp_in, FILE *fp_out)//done
 	}
 	printf("\nИнформацията е запазена\n");
 }
-//---------------------------------------------------------
