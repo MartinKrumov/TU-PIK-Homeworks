@@ -7,18 +7,18 @@ short menu(char *arr[])
 	int k, i = 1;
 	char ch;
 
-	printf("\n%s\n", arr[0]);
+	printf("%s\n", arr[0]); //принтира нулевия ред от матрицата
 	while (arr[i])
 	{
-		printf("\n<%d> - %s", i, arr[i]);
+		printf("\n<%d> - %s", i, arr[i]); //принтира докато не стигне NULL
 		i++;
 	}
 
 	printf("\n\nВашият избор: ");
 	do
 	{
-		ch = _getch();
-		k = ch - '0'; //превръща char в int
+		ch = _getch();//взима само един символ 
+		k = ch - '0'; //превръща char в int (взима аски кода и му маха кода на 0-та)
 	} while (k <= 0 || k > i);
 
 	printf("%c\n", ch);
