@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 typedef enum sentences
 {
 	NoneSen, Sentence, EndSentence
@@ -6,6 +10,18 @@ typedef enum sentences
 sentence ComputeSentences(int c, char *line, sentence status);
 int GetSentences(FILE *fp_in, FILE *fp_out);
 
+int SentencesChecker(int c)
+{
+	int i = 0;
+	int delimiters[] = { '.', '?', '!', ':', ';', EOF, 0 };
+
+	while (delimiters[i])
+	{
+		if (c == delimiters[i++])
+			return 1; //--- символът с е разделител ---
+	}
+	return 0;
+}
 
 sentence ComputeSentences(int c, char *line, sentence status)
 {
