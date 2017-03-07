@@ -1,0 +1,509 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <errno.h>
+#include <string.h>
+#include <stdlib.h>
+#include "automat_f.h"
+#include <conio.h>
+#include <stdio.h>
+
+FILE *getNameFile(char *name_file, char *mode, char *text)
+{
+	FILE *fp;
+	int err;
+	errno = 0;
+
+	do
+	{
+		printf("Въведете име на файла %s: ", text);
+		err = scanf("%s", name_file);
+	} while (err != 1);
+
+	if ((fp = fopen(name_file, mode)) == NULL)
+	{
+		printf("\nФайлът <%s> Не може да се отвори - error No % d !!!\n", name_file, errno);
+		printf("ГРЕШКА No %d %s", errno, strerror(errno));
+		system("pause");
+	}
+	else
+	{
+		printf("\nФайлът <%s> е отворен успешно за обработка !\n\n", name_file);
+		system("pause");
+	}
+	return fp;
+}
+
+int IsDelimiter(int c)
+{
+	int i = 0;
+	int delimiters[] = { '"', '\'', ' ', ',', '.', '?', '!', ':', ';', '/', '\\', '*',
+		'<', '>', '(', ')', '{', '}', '[', ']', '\n', '\t', EOF, 0 };
+
+	while (delimiters[i])
+	{
+		if (c == delimiters[i++])
+			return 1; //--- символът с е разделител ---
+	}
+	return 0;
+}
+
+s_word ComputeWord(int c,	//--- текущ символ, които се анализира ---
+	char *word,   //--- символен масив за отделяне на дума
+	s_word status) //--- текущ статус на автоматната функция
+{
+	static int ind = 0;
+	int ch = c;
+
+	if (status == End_Word)
+	{
+		status = None;
+		ind = 0;
+	}
+	switch (status)
+	{
+	case None:
+		if (!IsDelimiter(ch))
+		{
+			status = In_Word;
+			word[ind++] = c;
+		}
+		break;
+
+	case In_Word:
+		if (IsDelimiter(ch))
+		{
+			status = End_Word;
+			word[ind] = 0;
+		}
+		else
+		{
+			word[ind++] = c;
+		}
+	}
+	return status;
+}
+
+int GetWords(FILE *fp, FILE *fp_out)
+{
+	int c, br_word = 0;
+	s_word status = None;
+	char word[256];
+	rewind(fp);
+
+	do
+	{
+		c = fgetc(fp);
+		status = ComputeWord(c, word, status);
+
+		if (status == End_Word && c != '\n')
+		{
+			br_word++;
+			printf("word => %s\n", word);
+			fprintf(fp_out, "%s\n", word);
+		}
+	} while (c != EOF);
+	return br_word;
+}//_______________________________________________________________________________
+
+int CountOfSentences(FILE *fp_in)
+{
+	int c;
+	size_t countOfSenetences = 0;
+	int state = 1;
+
+	rewind(fp_in);
+
+	while ((c = fgetc(fp_in)) != EOF)
+	{
+		switch (state)
+		{
+		case 1:
+			if (isalpha(c))
+				state = 2;
+			break;
+		case 2:
+			switch (c)
+			{
+			case '.':
+			case '!':
+			case '?':
+			case ':':
+				countOfSenetences++;
+				state = 1;
+				break;
+			}
+			break;
+		}
+	}
+	return countOfSenetences;
+}
+
+void PrintSentences(FILE *fp_in, FILE *fp_out)
+{
+	char c;
+	int mark = 0;
+	int flag = 0;
+	int letter = 0;
+
+	rewind(fp_in);
+
+	while ((c = fgetc(fp_in)) != EOF)
+	{
+		if (isalpha(c))
+		{
+			mark = 0;
+			flag = 0;
+			letter = 1;
+		}
+
+		if (mark == 0 && letter == 1)
+		{
+			printf("%c", c);
+			fprintf(fp_out, "%c", c);
+		}
+		if (c == '.' || c == '!' || c == '?' || c == ':')
+		{
+			mark = 1;
+			letter = 0;
+		}
+		if (mark == 1 && flag == 0)
+		{
+			fprintf(fp_out, "\n");
+			fprintf(stdout, "\n");
+			mark = 0;
+			flag = 1;
+		}
+	}
+}
+//--------------------------------------------------------------------------------
+
+void IntConstant(FILE *fp_in)
+{
+	char digit[256];
+	char temp[256];
+	int state = 0;
+	int index = 0;
+	int countOfDigits = 0;
+
+	rewind(fp_in);
+	while ((fgets(temp, sizeof(temp), fp_in)) != NULL)
+	{
+		size_t len = strlen(temp);
+		for (size_t i = 0; i < len; i++)
+		{
+			switch (state)
+			{
+			case 0:
+				if (isdigit(temp[i]))
+				{
+					digit[index] = temp[i];
+					index++;
+
+					state = 2;
+
+					break;
+				}
+			case 1:
+				if (temp[i] == '+' || temp[i] == '-')
+				{
+					if (isdigit(temp[(i + 1)]))
+					{
+						state = 2;
+						digit[index] = temp[i];
+						index++;
+						break;
+					}
+					else
+						state = 3;
+				}
+				break;
+			case 2:
+				if (isdigit(temp[i]) || (temp[i] == 'L' || temp[i] == 'l'))
+				{
+					digit[index] = temp[i];
+					index++;
+				}
+
+				else
+				{
+					if (IsDelimiter(temp[i])) //..............
+					{
+						digit[index] = '\0';
+						countOfDigits++;
+						printf("%s\n", digit);
+						state = 0;
+					}
+					else
+						state = 3;
+
+					index = 0;
+					digit[0] = '\0';
+
+				}
+				break;
+			case 3:
+				if (IsDelimiter(temp[i]))
+					state = 0;
+
+				break;
+			}
+		}
+	}
+
+	printf("Броя на цифрите е: %d\n", countOfDigits);
+}
+//---------------------------------------------------------------------
+
+void RealConstant(FILE *fp_in)
+{
+	char digit[256];
+	char temp[256];
+	int i;
+	int l;
+	int state = 0;
+	int index = 0;
+	int aint = 0;
+	int flag = 0;
+	rewind(fp_in);
+
+	while ((fgets(temp, sizeof(temp), fp_in)) != NULL)
+	{
+		l = strlen(temp);
+		for (i = 0; i < l; i++)
+		{
+			switch (state)
+			{
+			case 0:
+				flag = 0;
+				if (isdigit(temp[i]))
+				{
+					digit[index] = temp[i];
+					index++;
+					state = 1;
+					break;
+				}
+
+				else if (temp[i] == '+' || temp[i] == '-')
+				{
+					if (isdigit(temp[(i + 1)]))
+					{
+						digit[index] = temp[i];
+						state = 1;
+						index++;
+						break;
+					}
+				}
+				break;
+
+			case 1:
+				if (isdigit(temp[i]))
+				{
+					digit[index] = temp[i];
+					index++;
+					break;
+				}
+				else if (temp[i] == '.')
+				{
+					digit[index] = temp[i];
+					index++;
+					state = 2;
+					break;
+				}
+				else if (temp[i] == 'e' || temp[i] == 'E')
+				{
+					digit[index] = temp[i];
+					index++;
+					state = 3;
+					break;
+				}
+				else
+				{
+					digit[0] = '\0';
+					index = 0;
+					state = 0;
+				}
+				break;
+
+			case 2:
+				if (isdigit(temp[i]))
+				{
+					digit[index] = temp[i];
+					index++;
+					flag = 1;
+					break;
+				}
+				else if (temp[i] == 'e' || temp[i] == 'E')
+				{
+					digit[index] = temp[i];
+					index++;
+					state = 3;
+					break;
+				}
+				else
+				{
+					if (IsDelimiter(temp[i]))
+					{
+						if (flag == 1)
+						{
+							digit[index] = '\0';
+							printf("%s\n", digit);
+
+							aint++;
+							digit[0] = '\0';
+							index = 0;
+							state = 0;
+							break;
+						}
+						else
+						{
+							digit[0] = '\0';
+							index = 0;
+							state = 0;
+							break;
+						}
+					}
+					else
+					{
+						state = 5;
+						digit[0] = '\0';
+						index = 0;
+					}
+				}
+				break;
+
+			case 3:
+				if (temp[i] == '+' || temp[i] == '-')
+				{
+					if (isdigit(temp[(i + 1)]))
+					{
+						digit[index] = temp[i];
+						index++;
+						state = 4;
+						break;
+					}
+				}
+				else if (isdigit(temp[i]))
+				{
+					digit[index] = temp[i];
+					index++;
+					state = 4;
+					break;
+				}
+				else
+				{
+					state = 4;
+					digit[0] = '\0';
+					index = 0;
+				}
+				break;
+
+			case 4:
+				if (isdigit(temp[i]))
+				{
+					digit[index] = temp[i];
+					index++;
+					break;
+				}
+				else if (IsDelimiter(temp[i]))
+				{
+					digit[index] = '\0';
+					printf("%s\n", digit);
+					aint++;
+					digit[0] = '\0';
+					index = 0;
+					state = 0;
+					break;
+				}
+				else
+				{
+					state = 5;
+					digit[0] = '\0';
+					index = 0;
+				}
+				break;
+
+			case 5:
+				if ((isdigit(temp[i])) || temp[i] == '+' || temp[i] == '-')
+				{
+					if (isdigit(temp[(i + 1)]))
+					{
+						digit[index] = temp[i];
+						state = 1;
+						index++;
+						break;
+					}
+				}
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	printf("Броя на цифрите е: %d\n", aint);
+}
+
+int ZabraneniSimvoli(char symbol)
+{
+	switch (symbol)
+	{
+	case '|': return 1;
+	case '/': return 1;
+	case '\\': return 1;
+	case '"': return 1;
+	case '<': return 1;
+	case '>': return 1;
+	case ':': return 1;
+	case '?': return 1;
+	case '*': return 1;
+	default: break;
+	}
+	return 0;
+}
+
+int ValidDirectory(char *path)
+{
+	size_t length = strlen(path);
+	int state = 0;
+	for (size_t i = 0; i < length - 1; i++)
+	{
+		char n = path[i];
+		switch (state)
+		{
+		case 0:
+			if (isalpha(n))
+				state = 1;
+			else return 0;
+			break;
+		case 1:
+			if (n == ':')
+				state = 2;
+			else return 0;
+			break;
+		case 2:
+			if (n == '\\')
+				state = 3;
+			else return 0;
+			break;
+		case 3:
+			if (!ZabraneniSimvoli(n) || (n >= '0' && n <= '9') || isalpha(n) || n == '-')
+				break;
+			else
+			{
+				if (n == '\\')
+				{
+					state = 4;
+					break;
+				}
+			}
+			return 0;
+		case 4:
+			if (ZabraneniSimvoli(n))
+				return 0;
+			else
+				state = 3;
+			break;
+		default:
+			break;
+		}
+	}
+	return 1;
+}
