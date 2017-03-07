@@ -1,0 +1,91 @@
+typedef enum sentences
+{
+	NoneSen, Sentence, EndSentence
+}sentence;
+
+sentence ComputeSentences(int c, char *line, sentence status);
+int GetSentences(FILE *fp_in, FILE *fp_out);
+
+
+sentence ComputeSentences(int c, char *line, sentence status)
+{
+	static int index = 0;
+	int currentChar = c;
+
+	if (status == EndSentence)
+	{
+		status = NoneSen;
+		index = 0;
+	}
+
+	switch (status)
+	{
+	case NoneSen:
+		if (!SentencesChecker(currentChar))
+		{
+			status = Sentence;
+			line[index++] = c;
+		}
+		break;
+
+	case Sentence:
+		if (SentencesChecker(currentChar))
+		{
+			status = EndSentence;
+			line[index] = 0;
+		}
+		else
+		{
+			line[index++] = c;
+		}
+	}
+	return status;
+}
+
+int GetSentences(FILE *fp_in, FILE *fp_out)
+{
+	int c, countSentences = 0;
+	sentence status = NoneSen;
+	char line[256];
+	rewind(fp_in);
+
+	do
+	{
+		c = fgetc(fp_in);
+		status = ComputeSentences(c, line, status);
+
+		if (status == EndSentence)
+		{
+			if (line[0] == '\r' && line[1] == '\n')
+			{
+				size_t size = strlen(line) - 2;
+				char *newLine = (char*)malloc(size);
+				int len = 0;
+
+				if (newLine == NULL)
+				{
+					printf("Error Allocating memomry\n");
+					return 1;
+				}
+				while (len <= size)
+				{
+					newLine[len] = line[len + 2];
+					len++;
+				}
+
+				countSentences++;
+				printf("sentece => %s\n", newLine);
+				fprintf(fp_out, "%s\n", newLine);
+
+				//free(newLine);
+			}
+			else
+			{
+				countSentences++;
+				printf("sentece => %s\n", line);
+				fprintf(fp_out, "%s\n", line);
+			}
+		}
+	} while (c != EOF);
+	return countSentences;
+}
