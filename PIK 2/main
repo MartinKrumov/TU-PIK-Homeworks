@@ -1,144 +1,129 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <conio.h>
-#include <windows.h>
 #include <stdlib.h>
+#include <Windows.h>
 #include "menu.h"
-#include "my_func.h"
+#include "automat_f.h"
 
-
-
-//------------- менюта ------------------------------------
-char *txtMenuG[] = //указател от чар масиви
+#define NAMES 256
+//------------- менюто -----------------------
+char *txtMenu[] =
 {
-	"-----ПРОГРАМА ТЕКСТОВ ФАЙЛ-----",
-	"Избор на входен файл за обработка.....................",
-	"Показване съдържанието на текстов файл................",
-	"Преброяване и запис на символи........................",
-	"Брой на срещане на избран символ......................",
-	"Замяна на символ с друг символ и записа му в нов файл.",
-	"Обработка на числова информация от текстови файл......",
-	"Изход...........................................",
-	NULL
-};
+	"\tГЛАВНО МЕНЮ",
 
-char *txtMenuNumbers[] =
-{
-	"-----ПРЕБРОЯВАНЕ И ЗАПИС-----",
-	"Намиране на мин. и макс. числа във файла ...............................................",
-	"Запис на числата в зададен интервал в нов файл в предварително избран брой колони на ред",
-	"Изчисляване на ср.ар. от числата във входния файл, като се следи за препълване..........",
-	"Замяна на отр. числа във файла с нули и запис в нов файл................................",
-	"Изход...................................................................................",
+	"Избор на входен файл.",
+	"Преброяване на думите и записване на думите във файл.",
+	"Преброяване на изреченията и записване на изреченията във файл.",
+	"Разпознаване на С константи.",//not
+	"Разпознаване на реални константи.",//not
+	"Проверка за валидна директория.",//working, need more tests
+	"Изход.",
 	NULL
 };
 
 int main()
 {
-	short mode, mode2, flag1 = 0; //използваме флага, за да проверим дали сме избрали файл за четене
+	int mode;
 	FILE *fp_in = NULL, *fp_out = NULL;
-	char nameIn[256], nameOut[256];
+	char inputFName[NAMES], outputFName[NAMES];
+	char path[NAMES];
+	int flag = 0;
+	//------------------------------------------------------
+	size_t countOfWords = 0;
+	size_t countOfSentences = 0;
 
-	SetConsoleOutputCP(1251);
 	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+
 	do
 	{
 		system("cls");
-		mode = menu(txtMenuG);
+		mode = menu(txtMenu);
 		switch (mode)
 		{
 		case 1:
-			system("cls");
-			if ((fp_in = getNameFile(nameIn, "rb", "за четене")) != NULL) 
-				flag1 = 1;
+			if ((fp_in = getNameFile(inputFName, "rb", "за четене")) != NULL)
+				flag = 1;
 			break;
 
-		case 2:	
-			printTextFile();
-			break;
-
-		case 3: 
-			if (flag1 == 0)
-			{
-				printf("\nНе сте отворили файл за обработка!");
-				system("pause");
-				break;
-			}
-			system("cls");
-
-			if ((fp_out = getNameFile(nameOut, "wt", "за запис")) != NULL)
-				countSymbols(fp_in, fp_out);
-			system("pause");
-			fclose(fp_out);
-			break;
-
-		case 4: 
-			if (flag1 == 0)
-			{
-				printf("\nНе сте отворили файл за обработка!");
-				system("pause");
-				break;
-			}
-			countChosenSymbol(fp_in);
-			system("pause");
-			break;
-
-		case 5: 
-			if (flag1 == 0)
+		case 2:
+			if (flag == 0)
 			{
 				printf("\nНе сте отворили файл за обработка!");
 				system("pause");
 				break;
 			}
 
-			if ((fp_out = getNameFile(nameOut, "wt", "за запис")) != NULL)
-				changeSymbol(fp_in, fp_out);
-
-			fclose(fp_out);
-			break;
-
-		case 6: 
-			if (flag1 == 0)
-			{
-				printf("\nНе сте отворили файл за обработка!"); system("pause");
-				break;
-			}
-
-			do
+			if ((fp_out = getNameFile(outputFName, "wt", "за запис")) != NULL)
 			{
 				system("cls");
-				mode2 = menu(txtMenuNumbers);
-				switch (mode2)
-				{
-				case 1: 
-					maxMinNumbers(fp_in);
-					system("pause");
-					break;
+				countOfWords = GetWords(fp_in, fp_out);
+				if (countOfWords)
+					printf("\n\nПреброените думи във файлът %s са: %d\n\n", inputFName, countOfWords);
+			}
 
-				case 2:
-					if ((fp_out = getNameFile(nameOut, "wt", "за запис")) != NULL)
-						writeNumbersOfInterval(fp_in, fp_out); 
-					system("pause");
-					fclose(fp_out);
-					break;
+			system("pause");
+			fclose(fp_out);
+			break;
 
-				case 3: 
-					averageOfNumbers(fp_in);
-					system("pause");
-					break;
+		case 3:
+			if (flag == 0)
+			{
+				printf("\nНе сте отворили файл за обработка!");
+				system("pause");
+				break;
+			}
 
-				case 4: 
-					if ((fp_out = getNameFile(nameOut, "wt", "за запис")) != NULL)
-						changeNegativeNumbers(fp_in, fp_out);
-					system("pause");
-					fclose(fp_out);
-					break;
-				}
-			} while (mode2 != 5);
+			if ((fp_out = getNameFile(outputFName, "wt", "за запис")) != NULL)
+			{
+				system("cls");
+				PrintSentences(fp_in, fp_out);
+				countOfSentences = CountOfSentences(fp_in);
+				//countOfSentences = GetSentences(fp_in, fp_out);
+				printf("\n\nПреброените изречения във файлът %s са: %d\n\n", inputFName, countOfSentences);
+			}
+			system("pause");
+			fclose(fp_out);
+			break;
+
+		case 4:
+			if (flag == 0)
+			{
+				printf("\nНе сте отворили файл за обработка!");
+				system("pause");
+				break;
+			}
+
+			IntConstant(fp_in);
+			system("pause");
+			break;
+
+		case 5:
+			if (flag == 0)
+			{
+				printf("\nНе сте отворили файл за обработка!");
+				system("pause");
+				break;
+			}
+
+			RealConstant(fp_in);
+			system("pause");
+			break;
+
+		case 6:
+			printf("Въведете директория за проверяване: ");
+			fscanf(stdin, "%s", path);
+
+			if (ValidDirectory(path))
+				printf("Въведената директория е валидна.\n");
+			else
+				printf("Въведената директория е не валидна.\n");
+
+			system("pause");
 			break;
 		}
 	} while (mode != 7);
 	_fcloseall(); // затваря всички потоци
 }
-
 
