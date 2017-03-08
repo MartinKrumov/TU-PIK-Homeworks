@@ -7,17 +7,17 @@
 #include "automat_f.h"
 
 #define NAMES 256
-//------------- менюто -----------------------
+
 char *txtMenu[] =
 {
 	"\tГЛАВНО МЕНЮ",
 
 	"Избор на входен файл.",
 	"Преброяване на думите и записване на думите във файл.",
-	"Преброяване на изреченията и записване на изреченията във файл.",
-	"Разпознаване на С константи.",//not
-	"Разпознаване на реални константи.",//not
-	"Проверка за валидна директория.",//working, need more tests
+	"Преброяване на изреченията и записване на изреченията във файл.", //isalpha() за кирилица!
+	"Разпознаване на С константи.",//working, needs more tests
+	"Разпознаване на реални константи.",//not, problem pri cheteneto na posledniq red
+	"Проверка за валидна директория.",
 	"Изход.",
 	NULL
 };
@@ -29,7 +29,7 @@ int main()
 	char inputFName[NAMES], outputFName[NAMES];
 	char path[NAMES];
 	int flag = 0;
-	//------------------------------------------------------
+
 	size_t countOfWords = 0;
 	size_t countOfSentences = 0;
 
@@ -50,7 +50,7 @@ int main()
 		case 2:
 			if (flag == 0)
 			{
-				printf("\nНе сте отворили файл за обработка!");
+				printf("\nНе сте отворили файл за обработка!\n");
 				system("pause");
 				break;
 			}
@@ -70,7 +70,7 @@ int main()
 		case 3:
 			if (flag == 0)
 			{
-				printf("\nНе сте отворили файл за обработка!");
+				printf("\nНе сте отворили файл за обработка!\n");
 				system("pause");
 				break;
 			}
@@ -80,7 +80,7 @@ int main()
 				system("cls");
 				PrintSentences(fp_in, fp_out);
 				countOfSentences = CountOfSentences(fp_in);
-				//countOfSentences = GetSentences(fp_in, fp_out);
+
 				printf("\n\nПреброените изречения във файлът %s са: %d\n\n", inputFName, countOfSentences);
 			}
 			system("pause");
@@ -90,7 +90,7 @@ int main()
 		case 4:
 			if (flag == 0)
 			{
-				printf("\nНе сте отворили файл за обработка!");
+				printf("\nНе сте отворили файл за обработка!\n");
 				system("pause");
 				break;
 			}
@@ -102,7 +102,7 @@ int main()
 		case 5:
 			if (flag == 0)
 			{
-				printf("\nНе сте отворили файл за обработка!");
+				printf("\nНе сте отворили файл за обработка!\n");
 				system("pause");
 				break;
 			}
@@ -114,11 +114,7 @@ int main()
 		case 6:
 			printf("Въведете директория за проверяване: ");
 			fscanf(stdin, "%s", path);
-
-			if (ValidDirectory(path))
-				printf("Въведената директория е валидна.\n");
-			else
-				printf("Въведената директория е не валидна.\n");
+			ValidDirectory(path);
 
 			system("pause");
 			break;
