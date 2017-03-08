@@ -20,4 +20,4 @@ void IntConstant(FILE *fp_in);
 void RealConstant(FILE *fp_in);
 
 int ZabraneniSimvoli(char symbol);
-int ValidDirectory(char *path);
+void ValidDirectory(char *path);
