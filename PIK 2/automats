@@ -1,10 +1,23 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include <errno.h>
-#include <string.h>
+#include "stdio.h"
+#include "conio.h"
 #include <stdlib.h>
-#include "automat_f.h"
-#include <conio.h>
-#include <stdio.h>
+#include <string.h>
+#include "dict_func.h"
+#define NAMES 64
+
+char delimiters_word[] = { ' ', ',', '.', '?', '!', ':', ';', '/', '\\', '*', '(', ')', '{', '}', '[', ']', '\n', '\t', 0 };
+
+int IsDelimiter(char *delimiters, char c)
+{
+	int i = 0;
+	while (delimiters[i])
+	{
+		if (c == delimiters[i++])
+			return 1; //--- символът с е разделител ---
+	}
+	return 0;
+}
 
 FILE *getNameFile(char *name_file, char *mode, char *text)
 {
@@ -21,7 +34,7 @@ FILE *getNameFile(char *name_file, char *mode, char *text)
 	if ((fp = fopen(name_file, mode)) == NULL)
 	{
 		printf("\nФайлът <%s> Не може да се отвори - error No % d !!!\n", name_file, errno);
-		printf("ГРЕШКА No %d %s", errno, strerror(errno));
+		printf("ГРЕШКА No %d %s\n", errno, strerror(errno));
 		system("pause");
 	}
 	else
@@ -32,478 +45,440 @@ FILE *getNameFile(char *name_file, char *mode, char *text)
 	return fp;
 }
 
-int IsDelimiter(int c)
-{
-	int i = 0;
-	int delimiters[] = { '"', '\'', ' ', ',', '.', '?', '!', ':', ';', '/', '\\', '*',
-		'<', '>', '(', ')', '{', '}', '[', ']', '\n', '\t', EOF, 0 };
-
-	while (delimiters[i])
-	{
-		if (c == delimiters[i++])
-			return 1; //--- символът с е разделител ---
-	}
-	return 0;
-}
-
-s_word ComputeWord(int c,	//--- текущ символ, които се анализира ---
+void ComputeWord(int c,        //--- текущ символ, които се анализира ---
 	char *word,   //--- символен масив за отделяне на дума
-	s_word status) //--- текущ статус на автоматната функция
+	int *ind,     //--- текуща позиция в думата
+	int *status   //--- текущ статус на автоматната функция
+	)
 {
-	static int ind = 0;
-	int ch = c;
-
-	if (status == End_Word)
+	char ch = c;
+	if (*status == 2)
 	{
-		status = None;
-		ind = 0;
+		*status = 0;
+		*ind = 0;
 	}
-	switch (status)
+	switch (*status)
 	{
-	case None:
-		if (!IsDelimiter(ch))
+	case 0:
+		if (!IsDelimiter(delimiters_word, ch))
 		{
-			status = In_Word;
-			word[ind++] = c;
+			*status = 1;
+			word[(*ind)++] = c;
+			word[*ind] = 0;
 		}
 		break;
 
-	case In_Word:
-		if (IsDelimiter(ch))
+	case 1:
+		if (IsDelimiter(delimiters_word, ch))
+			*status = 2;
+		else
 		{
-			status = End_Word;
-			word[ind] = 0;
+			word[(*ind)++] = c;
+			word[*ind] = 0;
+		}
+	}
+}
+
+char **MakeDictionary(FILE *fp, char **dict, int *size_dict, int *index, int **count_words, int *status)
+{
+	int c, countOfWords = 0, ind = 0;
+	int sta = 0;
+	char word[256];
+	int(*fff)(FILE *fp);
+	char **work;
+	//----------------------------------------------
+	if (fp == stdin)
+		fff = my_fgetc;
+	else
+		fff = fgetc;
+	//----------------------------------------------
+	rewind(fp);
+	while ((c = fff(fp)) != EOF)
+	{
+		ComputeWord(c, word, &ind, &sta);
+
+		if (sta == 2)
+		{
+			countOfWords++;
+			ToUpper(word);
+			if ((work = AddToDictionary(dict, size_dict, index, count_words, word)) == NULL)
+			{
+				*status = 0; 
+				return dict;
+			}
+			else
+			{
+				*status = 1; 
+				dict = work;
+			}
+		}
+	}
+	if (sta == 1)
+	{
+		countOfWords++;
+		ToUpper(word);
+		if ((work = AddToDictionary(dict, size_dict, index, count_words, word)) == NULL)
+		{
+			*status = 0; 
+			return dict;
 		}
 		else
 		{
-			word[ind++] = c;
+			*status = 1; 
+			dict = work;
 		}
 	}
-	return status;
+	return dict;
 }
 
-int GetWords(FILE *fp, FILE *fp_out)
+char **AddToDictionary(char **dict, int *size_dict, int *index, int **count_words, char *word)
 {
-	int c, br_word = 0;
-	s_word status = None;
-	char word[256];
-	rewind(fp);
+	int ind;
+	char **work_dict;
+	int *work_count_words;
 
-	do
+	if (dict == NULL)
 	{
-		c = fgetc(fp);
-		status = ComputeWord(c, word, status);
-
-		if (status == End_Word && c != '\n')
+		if ((work_dict = (char **)malloc(*size_dict*sizeof(char *))) == NULL)  return NULL;
+		dict = work_dict;
+	}
+	if (*count_words == NULL)
+	{
+		if ((work_count_words = (int *)malloc(*size_dict*sizeof(int))) == NULL)
 		{
-			br_word++;
-			printf("word => %s\n", word);
-			fprintf(fp_out, "%s\n", word);
+			return NULL;
 		}
-	} while (c != EOF);
-	return br_word;
-}//_______________________________________________________________________________
-
-int CountOfSentences(FILE *fp_in)
-{
-	int c;
-	size_t countOfSenetences = 0;
-	int state = 1;
-
-	rewind(fp_in);
-
-	while ((c = fgetc(fp_in)) != EOF)
+		*count_words = work_count_words;
+	}
+	if ((ind = FindInToDictionary(dict, *index, word)) != -1)
 	{
-		switch (state)
+		(*count_words)[ind]++;
+		return dict;
+	}
+	if ((dict[*index] = (char *)malloc(sizeof(char)*(strlen(word) + 1))) == NULL) 
+	{
+		return NULL;
+	}
+
+	strcpy(dict[*index], word);
+	(*count_words)[*index] = 1;
+	(*index)++;
+
+	if (*index == *size_dict)
+	{
+		*size_dict += DELTA_SIZE;
+		if ((work_dict = (char **)realloc(dict, *size_dict* sizeof(char *))) == NULL)
 		{
-		case 1:
-			if (isalpha(c))
-				state = 2;
-			break;
-		case 2:
-			switch (c)
+			return NULL;
+		}
+
+		dict = work_dict;
+		if ((work_count_words = (int *)realloc(*count_words, *size_dict*sizeof(int))) == NULL)
+		{
+			return NULL;
+		}
+		*count_words = work_count_words;
+	}
+	return dict;
+}
+
+int FindInToDictionary(char **dict, int index_dict, char *word)
+{
+	//int flag = -1;
+
+	for (size_t i = 0; i < index_dict; i++)
+	{
+		if (strcmp(dict[i], word) == 0)
+			return i;
+	}
+
+	return -1;
+}
+
+int my_fgetc(FILE *fp)
+{
+	int ch;
+	ch = _getche();
+
+	if (ch == 26) 
+		return EOF;
+
+	if (ch == '\r')
+	{
+		printf("\n");
+		ch = '\n';
+	}
+	return ch;
+}
+
+void DeleteDictionary(char **dict, int *count_words, int index_dict)
+{
+	if (dict)
+	{
+		for (size_t i = 0; i < index_dict; i++)
+		{
+			free(dict[i]);
+		}
+
+		free(dict);
+		free(count_words);
+	}
+}
+
+void PrintDictionary(char **dict, int index_dict, int *count_words, int status)
+{
+	if (index_dict)
+		printf("   РЕЧНИК:\n");
+
+	printf("  БРОЙ | ДУМИ\n");
+	for (size_t i = 0; i < index_dict; i++)
+	{
+		printf("\n  %d\t %s", count_words[i], dict[i]);
+		if (i > 0 && !(i % 128))
+		{
+			printf("\n--Press any key to continue--\n");
+			_getch();
+		}
+	}
+	if (!index_dict)
+		printf("\nРечникът е празен !!!\n\n");
+	else
+	{
+		printf("\nБрой на думите в речника -> %d", index_dict);
+
+		if (!status)
+			printf(" - речника е недовършен - липса на достатъчнo ПАМЕТ !!!\n\n");
+		else
+			printf("\n\n");
+	}
+}
+
+void SearchInDictionary(char **dict, int index_dict)
+{
+	char word[16];
+	printf("Въведете дума за търсене в речника: ");
+	scanf("%s", &word);
+	ToLower(word);
+	int found = 0;
+
+
+	for (size_t i = 0; i < index_dict; i++)
+	{
+		ToLower(dict[i]);
+		if (strcmp(dict[i], word) == 0)
+		{
+			found = 1;
+		}
+	}
+
+	if (found == 1)
+		printf("Думата *%s* се среща в речникa\n", word);
+	else
+		printf("Думата *%s* не се среща в речникa\n", word);
+}
+
+void PrintErrors(int err, char *name_file, char *name_dict)
+{
+	switch (err)
+	{
+	case 0:
+		printf("\n\nРечникът е зaреден от файла <%s>, като е бил създаден от файла <%s> !\n ", name_dict, name_file);
+		break;
+	case 1:
+		printf("\n\nГРЕШКА - липсва името на изходния файл, от които е създаден речника !!!\n ");
+		break;
+	case 2:
+		printf("\n\nГРЕШКА при четене на текуща дума от речника");
+		break;
+	case 3:
+		printf("\n\nГРЕШКА - недостатъчна памет за възтановяване на речника !!!\n ");
+		break;
+	}
+}
+
+void ToUpper(unsigned char *line)
+{
+	int i, len;
+	len = strlen(line);
+	for (i = 0; i < len; i++)
+	{
+		if (line[i] >= 0xE0)
+			line[i] = line[i] - 0x20;
+		else
+			line[i] = (unsigned char)toupper(line[i]);
+	}
+}
+
+void ToLower(unsigned char *line)
+{
+	int i, len;
+	len = strlen(line);
+	for (i = 0; i < len; i++)
+	{
+		if (line[i] >= 0xC0 && line[i] <= 0xDF)
+			line[i] = line[i] + 0x20;
+		else
+			line[i] = (unsigned char)tolower(line[i]);
+	}
+}
+
+void SortByAlphabet(char **dict, int size, int *countOfWords)
+{
+	char word[32];
+	int temp2;
+	int swap = 1;
+	int found;
+
+	while (swap)
+	{
+		swap = 0;
+		for (size_t i = 0; i < size; i++)
+		{
+			for (size_t j = i + 1; j < size; j++)
 			{
-			case '.':
-			case '!':
-			case '?':
-			case ':':
-				countOfSenetences++;
-				state = 1;
-				break;
-			}
-			break;
-		}
-	}
-	return countOfSenetences;
-}
-
-void PrintSentences(FILE *fp_in, FILE *fp_out)
-{
-	char c;
-	int mark = 0;
-	int flag = 0;
-	int letter = 0;
-
-	rewind(fp_in);
-
-	while ((c = fgetc(fp_in)) != EOF)
-	{
-		if (isalpha(c))
-		{
-			mark = 0;
-			flag = 0;
-			letter = 1;
-		}
-
-		if (mark == 0 && letter == 1)
-		{
-			printf("%c", c);
-			fprintf(fp_out, "%c", c);
-		}
-		if (c == '.' || c == '!' || c == '?' || c == ':')
-		{
-			mark = 1;
-			letter = 0;
-		}
-		if (mark == 1 && flag == 0)
-		{
-			fprintf(fp_out, "\n");
-			fprintf(stdout, "\n");
-			mark = 0;
-			flag = 1;
-		}
-	}
-}
-//--------------------------------------------------------------------------------
-
-void IntConstant(FILE *fp_in)
-{
-	char digit[256];
-	char temp[256];
-	int state = 0;
-	int index = 0;
-	int countOfDigits = 0;
-
-	rewind(fp_in);
-	while ((fgets(temp, sizeof(temp), fp_in)) != NULL)
-	{
-		size_t len = strlen(temp);
-		for (size_t i = 0; i < len; i++)
-		{
-			switch (state)
-			{
-			case 0:
-				if (isdigit(temp[i]))
+				if (strcmp(dict[i], dict[j]) > 0)
 				{
-					digit[index] = temp[i];
-					index++;
+					strcpy(word, dict[i]); //сортираме по азбучен ред
+					dict[i] = _strdup(dict[j]);
+					dict[j] = _strdup(word);
 
-					state = 2;
+					temp2 = countOfWords[i]; //после сортираме и срещането спрямо азбуката
+					countOfWords[i] = countOfWords[j];
+					countOfWords[j] = temp2;
 
-					break;
+					swap = 1;
 				}
-			case 1:
-				if (temp[i] == '+' || temp[i] == '-')
-				{
-					if (isdigit(temp[(i + 1)]))
-					{
-						state = 2;
-						digit[index] = temp[i];
-						index++;
-						break;
-					}
-					else
-						state = 3;
-				}
-				break;
-			case 2:
-				if (isdigit(temp[i]) || (temp[i] == 'L' || temp[i] == 'l'))
-				{
-					digit[index] = temp[i];
-					index++;
-				}
-
-				else
-				{
-					if (IsDelimiter(temp[i])) //..............
-					{
-						digit[index] = '\0';
-						countOfDigits++;
-						printf("%s\n", digit);
-						state = 0;
-					}
-					else
-						state = 3;
-
-					index = 0;
-					digit[0] = '\0';
-
-				}
-				break;
-			case 3:
-				if (IsDelimiter(temp[i]))
-					state = 0;
-
-				break;
-			}
-		}
-	}
-
-	printf("Броя на цифрите е: %d\n", countOfDigits);
-}
-//---------------------------------------------------------------------
-
-void RealConstant(FILE *fp_in)
-{
-	char digit[256];
-	char temp[256];
-	int i;
-	int l;
-	int state = 0;
-	int index = 0;
-	int aint = 0;
-	int flag = 0;
-	rewind(fp_in);
-
-	while ((fgets(temp, sizeof(temp), fp_in)) != NULL)
-	{
-		l = strlen(temp);
-		for (i = 0; i < l; i++)
-		{
-			switch (state)
-			{
-			case 0:
-				flag = 0;
-				if (isdigit(temp[i]))
-				{
-					digit[index] = temp[i];
-					index++;
-					state = 1;
-					break;
-				}
-
-				else if (temp[i] == '+' || temp[i] == '-')
-				{
-					if (isdigit(temp[(i + 1)]))
-					{
-						digit[index] = temp[i];
-						state = 1;
-						index++;
-						break;
-					}
-				}
-				break;
-
-			case 1:
-				if (isdigit(temp[i]))
-				{
-					digit[index] = temp[i];
-					index++;
-					break;
-				}
-				else if (temp[i] == '.')
-				{
-					digit[index] = temp[i];
-					index++;
-					state = 2;
-					break;
-				}
-				else if (temp[i] == 'e' || temp[i] == 'E')
-				{
-					digit[index] = temp[i];
-					index++;
-					state = 3;
-					break;
-				}
-				else
-				{
-					digit[0] = '\0';
-					index = 0;
-					state = 0;
-				}
-				break;
-
-			case 2:
-				if (isdigit(temp[i]))
-				{
-					digit[index] = temp[i];
-					index++;
-					flag = 1;
-					break;
-				}
-				else if (temp[i] == 'e' || temp[i] == 'E')
-				{
-					digit[index] = temp[i];
-					index++;
-					state = 3;
-					break;
-				}
-				else
-				{
-					if (IsDelimiter(temp[i]))
-					{
-						if (flag == 1)
-						{
-							digit[index] = '\0';
-							printf("%s\n", digit);
-
-							aint++;
-							digit[0] = '\0';
-							index = 0;
-							state = 0;
-							break;
-						}
-						else
-						{
-							digit[0] = '\0';
-							index = 0;
-							state = 0;
-							break;
-						}
-					}
-					else
-					{
-						state = 5;
-						digit[0] = '\0';
-						index = 0;
-					}
-				}
-				break;
-
-			case 3:
-				if (temp[i] == '+' || temp[i] == '-')
-				{
-					if (isdigit(temp[(i + 1)]))
-					{
-						digit[index] = temp[i];
-						index++;
-						state = 4;
-						break;
-					}
-				}
-				else if (isdigit(temp[i]))
-				{
-					digit[index] = temp[i];
-					index++;
-					state = 4;
-					break;
-				}
-				else
-				{
-					state = 4;
-					digit[0] = '\0';
-					index = 0;
-				}
-				break;
-
-			case 4:
-				if (isdigit(temp[i]))
-				{
-					digit[index] = temp[i];
-					index++;
-					break;
-				}
-				else if (IsDelimiter(temp[i]))
-				{
-					digit[index] = '\0';
-					printf("%s\n", digit);
-					aint++;
-					digit[0] = '\0';
-					index = 0;
-					state = 0;
-					break;
-				}
-				else
-				{
-					state = 5;
-					digit[0] = '\0';
-					index = 0;
-				}
-				break;
-
-			case 5:
-				if ((isdigit(temp[i])) || temp[i] == '+' || temp[i] == '-')
-				{
-					if (isdigit(temp[(i + 1)]))
-					{
-						digit[index] = temp[i];
-						state = 1;
-						index++;
-						break;
-					}
-				}
-				break;
-			default:
-				break;
 			}
 		}
 	}
-	printf("Броя на цифрите е: %d\n", aint);
+	printf("Сортирането e успешно.\n");
 }
 
-int ZabraneniSimvoli(char symbol)
+void SortByFrequency(char **dict, int *values, int size)
 {
-	switch (symbol)
-	{
-	case '|': return 1;
-	case '/': return 1;
-	case '\\': return 1;
-	case '"': return 1;
-	case '<': return 1;
-	case '>': return 1;
-	case ':': return 1;
-	case '?': return 1;
-	case '*': return 1;
-	default: break;
-	}
-	return 0;
-}
+	int temp;
+	int swap = 1;
+	char word[32];
 
-int ValidDirectory(char *path)
-{
-	size_t length = strlen(path);
-	int state = 0;
-	for (size_t i = 0; i < length - 1; i++)
+	while (swap)
 	{
-		char n = path[i];
-		switch (state)
+		swap = 0;
+		for (size_t i = 0; i < size - 1; i++)
 		{
-		case 0:
-			if (isalpha(n))
-				state = 1;
-			else return 0;
-			break;
-		case 1:
-			if (n == ':')
-				state = 2;
-			else return 0;
-			break;
-		case 2:
-			if (n == '\\')
-				state = 3;
-			else return 0;
-			break;
-		case 3:
-			if (!ZabraneniSimvoli(n) || (n >= '0' && n <= '9') || isalpha(n) || n == '-')
-				break;
-			else
+			if (values[i] > values[i + 1])
 			{
-				if (n == '\\')
-				{
-					state = 4;
-					break;
-				}
+				temp = values[i];
+				values[i] = values[i + 1];
+				values[i + 1] = temp;
+
+				strcpy(word, dict[i]); 
+				dict[i] = _strdup(dict[i + 1]);
+				dict[i + 1] = _strdup(word);
+
+				swap = 1;
 			}
-			return 0;
-		case 4:
-			if (ZabraneniSimvoli(n))
-				return 0;
-			else
-				state = 3;
-			break;
-		default:
-			break;
 		}
 	}
-	return 1;
+	printf("Сортирането е успешно.\n");
+}
+
+void SaveDictInFile(char **dict, int *values, int size, char *inputFName, int mode)
+{
+	char outputFileName[NAMES];
+	FILE *fp_out;
+
+	printf("\nВъведете името на файла за записване на речника: ");
+	scanf("%s", outputFileName);
+
+	if (!(fp_out = fopen(outputFileName, "w"))) 
+	{
+		printf("Проблем със файлът за записване.\n");
+		system("pause");
+		return;
+	}
+
+	if (mode == 1)
+		fprintf(fp_out, "Речника е създаден от клавиатурата\n");
+	else
+		fprintf(fp_out, "Речника е създаден от: \"%s\"\n", inputFName);
+
+	for (size_t i = 0; i < size; i++)
+	{
+		fprintf(fp_out, "%s - %d\n", dict[i], values[i]);
+	}
+
+	if (fp_out) //затваря отворения файл, ако няма такъв нищо не прави
+		fclose(fp_out);
+
+	printf("\nЗаписването е успешно!\n");
+}
+
+void SaveDictInCNTFile(char **dict, int *values, int size, char *inputFName, int mode)
+{
+	char outputFileName[NAMES];
+	char cntFile[NAMES];
+
+	FILE *fp_cnt = NULL;
+	FILE *fp_out = NULL;
+
+	printf("\nВъведете името на файла за записване на речника: ");
+	scanf("%s", outputFileName);
+
+	if (!(fp_out = fopen(outputFileName, "w")))
+	{
+		printf("Проблем със файлът за записване.\n");
+		system("pause");
+		return;
+	}
+
+	if (mode == 1)
+		fprintf(fp_out, "Речника е създаден от клавиатурата\n");
+	else
+		fprintf(fp_out, "Речника е създаден от: \"%s\"\n", inputFName);
+
+	strcpy(cntFile, outputFileName);
+
+	if (strchr(cntFile, '.'))
+		strcat(cntFile, ".cnt");
+
+	fp_cnt = fopen(cntFile, "w");
+	for (size_t i = 0; i < size; i++) 
+	{
+		fprintf(fp_out, "%s\n", dict[i]); //записва думата в текстовия файл
+		fprintf(fp_cnt, "%d\n", values[i]); //записва честотата на думата в .cnt файла
+	}
+
+	if (fp_out)
+		fclose(fp_out);
+	if (fp_cnt) //затваря отворения файл, ако няма такъв нищо не прави
+		fclose(fp_cnt);
+
+	printf("\nЗаписването е успешно!\n");
+}
+
+int CodingFile(char **dict, int index, char *inputFName)
+{
+	char inputFileName[NAMES], outputFileName[NAMES];
+	char line[256];
+	char *token;
+	char *copy;
+
+	FILE *fp_out = NULL;
+
+
+	printf("\nВъведете файл за записване на кодирания текст: ");
+	scanf("%s", outputFileName);
+
+	if (!(fp_out = fopen(outputFileName, "w")))
+	{
+		printf("Проблем със файлът за записване.\n");
+		system("pause");
+		return;
+	}
+
+	fprintf(fp_out, "Речника е създаден от: \"%s\"\n", inputFName);
+
+
+
+	
 }
