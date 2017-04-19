@@ -1,0 +1,39 @@
+#include<stdio.h>
+
+typedef struct Date
+{
+	size_t day;
+	size_t month;
+	size_t year;
+}Date;
+
+typedef struct Names
+{
+	char firstName[21];
+	char surname[21];
+	char lastName[21];
+}Names;
+
+typedef struct Document
+{
+	char Id[7];
+	char documentName[31];
+	//size_t sizeOfDoc;
+	Date date;
+	Names author;
+}Document;
+
+typedef struct Node
+{
+	Document data;
+	struct Node *next;
+}Node;
+
+int CheckForOverflow(size_t max, char *arr);
+int CheckForValidId(char *arr);
+int CheckForUniqueId(Node *head, char *id);
+
+Node *AddElement(Node *head);
+void PrintAllElements(Node *head);
+Node *DeleteElement(Node *currP, char *value);
+void PrintElement(Node *head, char *key);
