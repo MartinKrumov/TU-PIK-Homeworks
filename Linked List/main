@@ -1,0 +1,54 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <Windows.h>
+#include "funcs.h"
+#include "menu.h"
+
+char *mainMenu[] =
+{
+	"Обработка и Съхранение на Документи",
+
+	"+Въвеждане на нов документ към списъка.",
+	"+Изтриване на документ.",
+	"+Изписване на информацията на документа.",
+	"Записване на документите от текстов или двоичен файл.", //TODO:
+	"Прочитане на документите от текстов или двоичен файл.", //TODO:
+	"+Изписване последователно на данните на всички документи.",
+	"**Сортиране на документите по дата на създаване.",
+	"**И една шитня с дати :("
+};
+
+char *fileMenu[] =
+{
+	"Изберете вида на файла:",
+
+	"Текстови файл (.txt)",
+	"Двоичен файл (.dat)"
+};
+
+int main() 
+{
+	Node *head = NULL;
+	char find[7];
+
+	for (size_t i = 0; i < 3; i++)
+	{
+		head = AddElement(head);
+	}
+
+	PrintAllElements(head);
+
+	printf("\nEnter ID: ");
+	scanf("%s", &find);
+
+	PrintElement(head, find); 
+
+	printf("\n");
+	head = DeleteElement(head, find);
+	PrintAllElements(head);
+
+	system("pause");
+	return 0;
+}
