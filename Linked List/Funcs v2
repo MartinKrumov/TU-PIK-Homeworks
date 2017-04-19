@@ -1,0 +1,302 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include "funcs.h"
+
+
+int CheckForOverflow(size_t max, char *arr)
+{
+	size_t size = strlen(arr);
+	if (size >= max)
+	{
+		fprintf(stderr, "--Overflow!.Too much symbols entered.--\n");
+		return 1;
+	}
+
+	fflush(stdin);
+	return 0;
+}
+
+int CheckForValidId(char *arr)
+{
+	for (size_t i = 0; i < 6; i++)
+	{
+		if ((i >= 0 && i < 2) || i == 5)
+		{
+			if (arr[i] < 'A' || arr[i] > 'Z')
+			{
+				fprintf(stderr, "--Invalid Id.--\n");
+				return 1;
+			}
+		}
+		else
+		{
+			if (!isdigit(arr[i]))
+			{
+				fprintf(stderr, "--Invalid Id.--\n");
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+int CheckForUniqueId(Node *head, char *id)
+{
+	if (head == NULL)
+	{
+		return 1;
+	}
+
+	while (head != NULL)
+	{
+		if (strcmp(id, head->data.Id) == 0)
+		{
+			fprintf(stderr, "--The ID already exist.Please enter new ID.--\n");
+			return 0;
+		}
+		head = head->next;
+	}
+
+	return 1;
+}
+
+Node *AddElement(Node *head)
+{
+	int flag;
+	int unique = 0;
+	Node *temp = (Node*)malloc(sizeof(Node));
+
+	if (temp == NULL)
+	{
+		fprintf(stderr, "Unable to allocate memory for new node\n");
+		return;
+	}
+
+	do
+	{
+		printf("Id: ");
+		scanf("%s", temp->data.Id);
+
+		flag = CheckForOverflow(7, temp->data.Id);
+		flag = CheckForValidId(temp->data.Id); 
+		unique = CheckForUniqueId(head, temp->data.Id); 
+
+	} while (flag != 0 || unique != 1); 
+
+	do
+	{
+		printf("Document Name: ");
+		scanf("%s", temp->data.documentName);
+		flag = CheckForOverflow(30, temp->data.documentName);
+	} while (flag != 0);
+
+	//do
+	//{
+	//	printf("Name: ");
+	//	scanf("%s", temp->data.author.firstName);
+	//	flag = CheckForOverflow(20, temp->data.author.firstName);
+	//} while (flag != 0);
+
+	//do
+	//{
+	//	printf("Surname: ");
+	//	scanf("%s", temp->data.author.surname);
+	//	flag = CheckForOverflow(20, temp->data.author.surname);
+	//} while (flag != 0);
+
+	//do
+	//{
+	//	printf("Last Name: ");
+	//	scanf("%s", temp->data.author.lastName);
+	//	flag = CheckForOverflow(20, temp->data.author.lastName);
+	//} while (flag != 0);
+
+	//printf("Day: ");
+	//scanf("%u", &temp->data.date.day);
+
+	//printf("Month: ");
+	//scanf("%u", &temp->data.date.month);
+
+	//printf("Year: ");
+	//scanf("%u", &temp->data.date.year);
+
+	printf("-----------------\n");
+
+	temp->next = NULL;
+
+	if (head == NULL)
+	{
+		head = temp;
+		//printf("added at beginning\n");
+	}
+	else
+	{
+		Node *current = head;
+		while (current->next != NULL)
+		{
+			current = current->next;
+		}
+		current->next = temp;
+		//printf("added later\n");
+	}
+
+	return head;
+}
+
+
+void PrintAllElements(Node *head)
+{
+	if (head == NULL)
+	{
+		fprintf(stderr, "The list is empty!\n");
+	}
+
+	while (head != NULL)
+	{
+		printf("+++++++++++++++++++\n");
+		printf("ID       : %s\n", head->data.Id);
+		printf("Doc Name : %s\n", head->data.documentName);
+		//printf("Name     : %s\n", head->data.author.firstName);
+		//printf("Surname  : %s\n", head->data.author.surname);
+		//printf("Last name: %s\n", head->data.author.lastName);
+		//printf("Day      : %u\n", head->data.date.day);
+		//printf("Month    : %u\n", head->data.date.month);
+		//printf("Year     : %u\n", head->data.date.year);
+		head = head->next;
+	}
+}
+
+Node *DeleteElement(Node *currP, char *value)
+{
+	/* See if we are at end of list. */
+	if (currP == NULL)
+		return NULL;
+
+	/*
+	* Check to see if current node is one
+	* to be deleted.
+	*/
+	if (strcmp(value, currP->data.Id) == 0)
+	{
+		Node *tempNextP;
+
+		/* Save the next pointer in the node. */
+		tempNextP = currP->next;
+
+		/* Deallocate the node. */
+		free(currP);
+
+		/*
+		* Return the NEW pointer to where we
+		* were called from.  I.e., the pointer
+		* the previous call will use to "skip
+		* over" the removed node.
+		*/
+		return tempNextP;
+	}
+
+	/*
+	* Check the rest of the list, fixing the next
+	* pointer in case the next node is the one
+	* removed.
+	*/
+	currP->next = DeleteElement(currP->next, value);
+
+
+	/*
+	* Return the pointer to where we were called
+	* from.  Since we did not remove this node it
+	* will be the same.
+	*/
+	return currP;
+}
+
+void PrintElement(Node *head, char *key)
+{
+	if (head == NULL)
+	{
+		fprintf(stderr, "The list is empty!\n");
+		return;
+	}
+
+	while (head != NULL)
+	{
+		if (strcmp(key, head->data.Id) == 0)
+		{
+			printf("ID       :: %s\n", head->data.Id);
+			printf("Doc Name :: %s\n", head->data.documentName);
+		}
+		head = head->next;
+	}
+}
+
+void FreeList(Node *head)
+{
+	Node *temp;
+	while (head != NULL)
+	{
+		temp = head;
+		head = head->next;
+		free(temp);
+	}
+}
+
+FILE *GetFileName(char *name_file, char *mode, char *text)
+{
+	FILE *fp;
+	int err;
+	errno = 0;
+
+	do
+	{
+		printf("Въведете име на файла %s: ", text);
+		err = scanf("%s", name_file);
+	} while (err != 1);
+
+	if ((fp = fopen(name_file, mode)) == NULL)
+	{
+		printf("\nФайлът <%s> Не може да се отвори - error No % d !!!\n", name_file, errno);
+		printf("ГРЕШКА No %d %s\n", errno, strerror(errno));
+		system("pause");
+	}
+	else
+	{
+		printf("\nФайлът <%s> е отворен успешно за обработка !\n\n", name_file);
+		system("pause");
+	}
+	return fp;
+}
+
+int SaveListInFile(Node *head)
+{
+	char fileName[NAME];
+	char mode[4];
+	FILE *destFile = NULL;
+
+	printf("Enter mode (wt or wb): ");
+	scanf("%s", mode);
+
+	if ((destFile = GetFileName(fileName, mode, "за четене")) == NULL)
+	{
+		return 1;
+	}
+
+	while (head != NULL)
+	{
+		if (!fwrite(head->data.Id, strlen(head->data.Id) + 1, 1, destFile))
+			return 1; 
+
+		if (!fwrite(head->data.documentName, strlen(head->data.documentName) + 1, 1, destFile))
+			return 1;
+
+		head = head->next;
+	}
+
+	if (destFile)
+		fclose(destFile);
+
+	return 0;
+}
