@@ -5,7 +5,6 @@
 #include <errno.h>
 #include "funcs.h"
 
-
 int CheckForOverflow(size_t max, char *arr)
 {
 	size_t size = strlen(arr);
@@ -63,6 +62,26 @@ int CheckForUniqueId(Node *head, char *id)
 	return 1;
 }
 
+int CheckForValidDay(size_t day)
+{
+	fflush(stdin);
+	if (day < 1 || day > 31)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+int CheckForValidMonth(size_t month)
+{
+	fflush(stdin);
+	if (month < 1 || month > 12)
+	{
+		return 1;
+	}
+	return 0;
+}
+
 Node *AddElement(Node *head)
 {
 	int flag;
@@ -93,35 +112,44 @@ Node *AddElement(Node *head)
 		flag = CheckForOverflow(30, temp->data.documentName);
 	} while (flag != 0);
 
-	//do
-	//{
-	//	printf("Name: ");
-	//	scanf("%s", temp->data.author.firstName);
-	//	flag = CheckForOverflow(20, temp->data.author.firstName);
-	//} while (flag != 0);
+	do
+	{
+		printf("Name: ");
+		scanf("%s", temp->data.author.firstName);
+		flag = CheckForOverflow(20, temp->data.author.firstName);
+	} while (flag != 0);
 
-	//do
-	//{
-	//	printf("Surname: ");
-	//	scanf("%s", temp->data.author.surname);
-	//	flag = CheckForOverflow(20, temp->data.author.surname);
-	//} while (flag != 0);
+	do
+	{
+		printf("Surname: ");
+		scanf("%s", temp->data.author.surname);
+		flag = CheckForOverflow(20, temp->data.author.surname);
+	} while (flag != 0);
 
-	//do
-	//{
-	//	printf("Last Name: ");
-	//	scanf("%s", temp->data.author.lastName);
-	//	flag = CheckForOverflow(20, temp->data.author.lastName);
-	//} while (flag != 0);
+	do
+	{
+		printf("Last Name: ");
+		scanf("%s", temp->data.author.lastName);
+		flag = CheckForOverflow(20, temp->data.author.lastName);
+	} while (flag != 0);
 
-	//printf("Day: ");
-	//scanf("%u", &temp->data.date.day);
+	do
+	{
+		printf("Day: ");
+		scanf("%u", &temp->data.date.day);
+		flag = CheckForValidDay(temp->data.date.day);
+	} while (flag != 0);
 
-	//printf("Month: ");
-	//scanf("%u", &temp->data.date.month);
+	do
+	{
+		printf("Month: ");
+		scanf("%u", &temp->data.date.month);
+		flag = CheckForValidMonth(temp->data.date.month);
+	} while (flag != 0);
 
-	//printf("Year: ");
-	//scanf("%u", &temp->data.date.year);
+
+	printf("Year: ");
+	scanf("%u", &temp->data.date.year);
 
 	printf("-----------------\n");
 
@@ -159,12 +187,12 @@ void PrintAllElements(Node *head)
 		printf("+++++++++++++++++++\n");
 		printf("ID       : %s\n", head->data.Id);
 		printf("Doc Name : %s\n", head->data.documentName);
-		//printf("Name     : %s\n", head->data.author.firstName);
-		//printf("Surname  : %s\n", head->data.author.surname);
-		//printf("Last name: %s\n", head->data.author.lastName);
-		//printf("Day      : %u\n", head->data.date.day);
-		//printf("Month    : %u\n", head->data.date.month);
-		//printf("Year     : %u\n", head->data.date.year);
+		printf("Day      : %u\n", head->data.date.day);
+		printf("Month    : %u\n", head->data.date.month);
+		printf("Year     : %u\n", head->data.date.year);
+		printf("Name     : %s\n", head->data.author.firstName);
+		printf("Surname  : %s\n", head->data.author.surname);
+		printf("Last name: %s\n", head->data.author.lastName);
 		head = head->next;
 	}
 }
@@ -183,6 +211,12 @@ void PrintElement(Node *head, char *key)
 		{
 			printf("ID       :: %s\n", head->data.Id);
 			printf("Doc Name :: %s\n", head->data.documentName);
+			printf("Day      :: %u\n", head->data.date.day);
+			printf("Month    :: %u\n", head->data.date.month);
+			printf("Year     :: %u\n", head->data.date.year);
+			printf("Name     :: %s\n", head->data.author.firstName);
+			printf("Surname  :: %s\n", head->data.author.surname);
+			printf("Last name:: %s\n", head->data.author.lastName);
 		}
 		head = head->next;
 	}
@@ -190,8 +224,7 @@ void PrintElement(Node *head, char *key)
 
 Node *DeleteElement(Node *currP, char *value)
 {
-	/* See if we are at end of list. */
-	if (currP == NULL)
+	if (currP == NULL) // See if we are at end of list.
 		return NULL;
 
 
@@ -200,38 +233,26 @@ Node *DeleteElement(Node *currP, char *value)
 	{
 		Node *tempNextP;
 
-		/* Save the next pointer in the node. */
-		tempNextP = currP->next;
+		tempNextP = currP->next; //Save the next pointer in the node. 
 
-		/* Deallocate the node. */
-		free(currP);
+		free(currP); //Deallocate the node. 
 
-		/*
-		* Return the NEW pointer to where we
+		/* Return the NEW pointer to where we
 		* were called from.  I.e., the pointer
 		* the previous call will use to "skip
-		* over" the removed node.
-		*/
+		* over" the removed node.*/
 		return tempNextP;
 	}
 
-	/*
-	* Check the rest of the list, fixing the next
-	* pointer in case the next node is the one
-	* removed.
-	*/
+	/*Check the rest of the list, fixing the next
+	  pointer in case the next node is the one removed.*/
 	currP->next = DeleteElement(currP->next, value);
 
 
-	/*
-	* Return the pointer to where we were called
-	* from.  Since we did not remove this node it
-	* will be the same.
-	*/
+	/*Return the pointer to where we were called from. 
+	Since we did not remove this node it will be the same.*/
 	return currP;
 }
-
-
 
 Node *DeleteList(Node *head)
 {
@@ -245,7 +266,7 @@ Node *DeleteList(Node *head)
 	return head;
 }
 
-FILE *GetFileName(char *name_file, char *mode, char *text) //Мода да се въвежда от функцията :)
+FILE *GetFileName(char *name_file, char *mode, char *text) //Мода да се въвежда в функцията :)
 {
 	FILE *fp;
 	int err;
@@ -271,7 +292,7 @@ FILE *GetFileName(char *name_file, char *mode, char *text) //Мода да се 
 	return fp;
 }
 
-int SaveListInFile(Node *head)
+void WriteListInFile(Node *head)
 {
 	char fileName[NAME];
 	char mode[4];
@@ -282,27 +303,59 @@ int SaveListInFile(Node *head)
 
 	if ((destFile = GetFileName(fileName, mode, "за записване")) == NULL)
 	{
-		return 1;
+		return;
 	}
 
-	while (head != NULL)
+	Node *currentDoc = head;
+
+	Node *holdNext = NULL;
+
+	while (currentDoc != NULL)
 	{
-		if (!fwrite(head->data.Id, strlen(head->data.Id) + 1, 1, destFile))
-			return 1; 
+		holdNext = currentDoc->next;
+		currentDoc->next = NULL;
 
-		if (!fwrite(head->data.documentName, strlen(head->data.documentName) + 1, 1, destFile))
-			return 1;
+		fseek(destFile, 0, SEEK_END);
+		fwrite(currentDoc, sizeof(Node), 1, destFile);
 
-		head = head->next;
+		printf("Wrriting: %s to file\n", currentDoc->data.Id);
+		printf("Wrriting: %s to file\n", currentDoc->data.documentName);
+
+		currentDoc->next = holdNext;
+		holdNext = NULL;
+
+		currentDoc = currentDoc->next;
 	}
 
 	if (destFile)
 		fclose(destFile);
-
-	return 0;
 }
 
-Node *ReadListFromFile()
+Node *ReadNextFromFile(Node *head, FILE *srcFile) 
+{
+	size_t returnValue;
+	if (head == NULL) 
+	{
+		head =(Node*)malloc(sizeof(Node));
+		returnValue = fread(head, sizeof(Node), 1, srcFile);
+		head->next = NULL;
+	}
+	else 
+	{
+		Node *indexDoc = head;
+		Node *newDoc = (Node*)malloc(sizeof(Node));
+		while (indexDoc->next != NULL) 
+		{
+			indexDoc = indexDoc->next;
+		}
+		returnValue = fread(newDoc, sizeof(Node), 1, srcFile);
+		indexDoc->next = newDoc;
+		newDoc->next = NULL;
+	}
+	return head;
+}
+
+Node *ReadListFromFile() 
 {
 	Node *head = NULL;
 	Node *newNode = NULL;
@@ -310,33 +363,30 @@ Node *ReadListFromFile()
 
 	char fileName[NAME];
 	char mode[4];
+	size_t readBites = 1;
 
 	printf("Enter mode (rt or rb): ");
 	scanf("%s", mode);
 
 	srcFile = GetFileName(fileName, mode, "за четене");
 
-	while (1)
+	head = DeleteList(head);
+
+	fseek(srcFile, 0, SEEK_END);
+	long fileSize = ftell(srcFile);
+	rewind(srcFile);
+
+	int numEntries = (int)(fileSize / (sizeof(Node)));
+	printf("numEntries:%d\n", numEntries);
+
+	for (size_t loop = 0; loop < numEntries; ++loop)
 	{
-		newNode = (Node*)malloc(sizeof(Node));
-		if (!fread(newNode->data.Id, trlen(head->data.Id) + 1, 1, srcFile))
-		{
-			if (ferror(srcFile))
-				return NULL;
-			else
-				break;
-		}
-		
-		if (!fread(newNode->data.documentName, strlen(head->data.documentName) + 1, 1, srcFile))
-		{
-			if (ferror(srcFile))
-				return NULL;
-			else
-				break;
-		}
-		newNode->next = head;
-		head = newNode;
+		fseek(srcFile, (sizeof(Node)* loop), SEEK_SET);
+		head = ReadNextFromFile(head, srcFile);
 	}
+
+	if (srcFile)
+		fclose(srcFile);
 
 	return head;
 }
