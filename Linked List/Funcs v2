@@ -169,16 +169,33 @@ void PrintAllElements(Node *head)
 	}
 }
 
+void PrintElement(Node *head, char *key)
+{
+	if (head == NULL)
+	{
+		fprintf(stderr, "The list is empty!\n");
+		return;
+	}
+
+	while (head != NULL)
+	{
+		if (strcmp(key, head->data.Id) == 0)
+		{
+			printf("ID       :: %s\n", head->data.Id);
+			printf("Doc Name :: %s\n", head->data.documentName);
+		}
+		head = head->next;
+	}
+}
+
 Node *DeleteElement(Node *currP, char *value)
 {
 	/* See if we are at end of list. */
 	if (currP == NULL)
 		return NULL;
 
-	/*
-	* Check to see if current node is one
-	* to be deleted.
-	*/
+
+	// Check to see if current node is one to be deleted.
 	if (strcmp(value, currP->data.Id) == 0)
 	{
 		Node *tempNextP;
@@ -214,26 +231,9 @@ Node *DeleteElement(Node *currP, char *value)
 	return currP;
 }
 
-void PrintElement(Node *head, char *key)
-{
-	if (head == NULL)
-	{
-		fprintf(stderr, "The list is empty!\n");
-		return;
-	}
 
-	while (head != NULL)
-	{
-		if (strcmp(key, head->data.Id) == 0)
-		{
-			printf("ID       :: %s\n", head->data.Id);
-			printf("Doc Name :: %s\n", head->data.documentName);
-		}
-		head = head->next;
-	}
-}
 
-void FreeList(Node *head)
+Node *DeleteList(Node *head)
 {
 	Node *temp;
 	while (head != NULL)
@@ -242,9 +242,10 @@ void FreeList(Node *head)
 		head = head->next;
 		free(temp);
 	}
+	return head;
 }
 
-FILE *GetFileName(char *name_file, char *mode, char *text)
+FILE *GetFileName(char *name_file, char *mode, char *text) //Мода да се въвежда от функцията :)
 {
 	FILE *fp;
 	int err;
@@ -279,7 +280,7 @@ int SaveListInFile(Node *head)
 	printf("Enter mode (wt or wb): ");
 	scanf("%s", mode);
 
-	if ((destFile = GetFileName(fileName, mode, "за четене")) == NULL)
+	if ((destFile = GetFileName(fileName, mode, "за записване")) == NULL)
 	{
 		return 1;
 	}
@@ -299,4 +300,43 @@ int SaveListInFile(Node *head)
 		fclose(destFile);
 
 	return 0;
+}
+
+Node *ReadListFromFile()
+{
+	Node *head = NULL;
+	Node *newNode = NULL;
+	FILE *srcFile = NULL;
+
+	char fileName[NAME];
+	char mode[4];
+
+	printf("Enter mode (rt or rb): ");
+	scanf("%s", mode);
+
+	srcFile = GetFileName(fileName, mode, "за четене");
+
+	while (1)
+	{
+		newNode = (Node*)malloc(sizeof(Node));
+		if (!fread(newNode->data.Id, trlen(head->data.Id) + 1, 1, srcFile))
+		{
+			if (ferror(srcFile))
+				return NULL;
+			else
+				break;
+		}
+		
+		if (!fread(newNode->data.documentName, strlen(head->data.documentName) + 1, 1, srcFile))
+		{
+			if (ferror(srcFile))
+				return NULL;
+			else
+				break;
+		}
+		newNode->next = head;
+		head = newNode;
+	}
+
+	return head;
 }
