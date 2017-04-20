@@ -1,4 +1,6 @@
 #include<stdio.h>
+#define BUFFER_SIZE 4096
+#define NAME 128
 
 typedef struct Date
 {
@@ -34,6 +36,13 @@ int CheckForValidId(char *arr);
 int CheckForUniqueId(Node *head, char *id);
 
 Node *AddElement(Node *head);
-void PrintAllElements(Node *head);
-Node *DeleteElement(Node *currP, char *value);
 void PrintElement(Node *head, char *key);
+void PrintAllElements(Node *head);
+
+Node *DeleteElement(Node *currP, char *value);
+Node *DeleteList(Node *head);
+
+
+FILE *GetFileName(char *name_file, char *mode, char *text);
+int SaveListInFile(Node *head);
+Node *ReadListFromFile();
