@@ -100,10 +100,10 @@ Node *AddElement(Node *head)
 		scanf("%s", temp->data.Id);
 
 		flag = CheckForOverflow(7, temp->data.Id);
-		flag = CheckForValidId(temp->data.Id); 
-		unique = CheckForUniqueId(head, temp->data.Id); 
+		flag = CheckForValidId(temp->data.Id);
+		unique = CheckForUniqueId(head, temp->data.Id);
 
-	} while (flag != 0 || unique != 1); 
+	} while (flag != 0 || unique != 1);
 
 	do
 	{
@@ -111,6 +111,24 @@ Node *AddElement(Node *head)
 		scanf("%s", temp->data.documentName);
 		flag = CheckForOverflow(30, temp->data.documentName);
 	} while (flag != 0);
+
+	do
+	{
+		printf("Day: ");
+		scanf("%u", &temp->data.date.day);
+		flag = CheckForValidDay(temp->data.date.day);
+	} while (flag != 0);
+
+	do
+	{
+		printf("Month: ");
+		scanf("%u", &temp->data.date.month);
+		flag = CheckForValidMonth(temp->data.date.month);
+	} while (flag != 0);
+
+
+	printf("Year: ");
+	scanf("%u", &temp->data.date.year);
 
 	do
 	{
@@ -133,23 +151,7 @@ Node *AddElement(Node *head)
 		flag = CheckForOverflow(20, temp->data.author.lastName);
 	} while (flag != 0);
 
-	do
-	{
-		printf("Day: ");
-		scanf("%u", &temp->data.date.day);
-		flag = CheckForValidDay(temp->data.date.day);
-	} while (flag != 0);
 
-	do
-	{
-		printf("Month: ");
-		scanf("%u", &temp->data.date.month);
-		flag = CheckForValidMonth(temp->data.date.month);
-	} while (flag != 0);
-
-
-	printf("Year: ");
-	scanf("%u", &temp->data.date.year);
 
 	printf("-----------------\n");
 
@@ -249,7 +251,7 @@ Node *DeleteElement(Node *currP, char *value)
 	currP->next = DeleteElement(currP->next, value);
 
 
-	/*Return the pointer to where we were called from. 
+	/*Return the pointer to where we were called from.
 	Since we did not remove this node it will be the same.*/
 	return currP;
 }
@@ -292,16 +294,12 @@ FILE *GetFileName(char *name_file, char *mode, char *text) //Мода да се 
 	return fp;
 }
 
-void WriteListInFile(Node *head)
+void WriteListToBinFile(Node *head)
 {
 	char fileName[NAME];
-	char mode[4];
 	FILE *destFile = NULL;
 
-	printf("Enter mode (wt or wb): ");
-	scanf("%s", mode);
-
-	if ((destFile = GetFileName(fileName, mode, "за записване")) == NULL)
+	if ((destFile = GetFileName(fileName, "wb", "за записване")) == NULL)
 	{
 		return;
 	}
@@ -331,44 +329,42 @@ void WriteListInFile(Node *head)
 		fclose(destFile);
 }
 
-Node *ReadNextFromFile(Node *head, FILE *srcFile) 
+Node *ReadNextFromFile(Node *head, FILE *srcFile)
 {
 	size_t returnValue;
-	if (head == NULL) 
+	if (head == NULL)
 	{
-		head =(Node*)malloc(sizeof(Node));
+		head = (Node*)malloc(sizeof(Node));
 		returnValue = fread(head, sizeof(Node), 1, srcFile);
 		head->next = NULL;
 	}
-	else 
+	else
 	{
-		Node *indexDoc = head;
+		Node *currentDoc = head;
 		Node *newDoc = (Node*)malloc(sizeof(Node));
-		while (indexDoc->next != NULL) 
+		while (currentDoc->next != NULL)
 		{
-			indexDoc = indexDoc->next;
+			currentDoc = currentDoc->next;
 		}
 		returnValue = fread(newDoc, sizeof(Node), 1, srcFile);
-		indexDoc->next = newDoc;
+		currentDoc->next = newDoc;
 		newDoc->next = NULL;
 	}
 	return head;
 }
 
-Node *ReadListFromFile() 
+Node *ReadListFromBinFile()
 {
 	Node *head = NULL;
-	Node *newNode = NULL;
 	FILE *srcFile = NULL;
 
 	char fileName[NAME];
 	char mode[4];
-	size_t readBites = 1;
 
 	printf("Enter mode (rt or rb): ");
 	scanf("%s", mode);
 
-	srcFile = GetFileName(fileName, mode, "за четене");
+	srcFile = GetFileName(fileName, "rb", "за четене");
 
 	head = DeleteList(head);
 
@@ -383,6 +379,83 @@ Node *ReadListFromFile()
 	{
 		fseek(srcFile, (sizeof(Node)* loop), SEEK_SET);
 		head = ReadNextFromFile(head, srcFile);
+	}
+
+	if (srcFile)
+		fclose(srcFile);
+
+	return head;
+}
+
+void WriteListToTxtFile(Node *head)
+{
+	char fileName[NAME];
+	FILE *destFile = NULL;
+
+	if ((destFile = GetFileName(fileName, "wt", "за записване")) == NULL)
+	{
+		return;
+	}
+
+	while (head != NULL)
+	{
+		fprintf(destFile, "%s", head->data.Id);
+		fprintf(destFile, ", %s", head->data.documentName);
+		fprintf(destFile, ", %u", head->data.date.day);
+		fprintf(destFile, ", %u", head->data.date.month);
+		fprintf(destFile, ", %u", head->data.date.year);
+		fprintf(destFile, ", %s", head->data.author.firstName);
+		fprintf(destFile, ", %s", head->data.author.surname);
+		fprintf(destFile, ", %s\n", head->data.author.lastName);
+
+		head = head->next;
+	}
+
+	if (destFile)
+		fclose(destFile);
+}
+
+Node *ReadListFromTxtFile(Node *head)
+{
+	FILE *srcFile = NULL;
+	char fileName[NAME];
+	char line[256];
+
+	int err = 1;
+	srcFile = GetFileName(fileName, "rt", "за четене");
+
+	head = DeleteList(head);
+
+	while (fgets(line, sizeof(line), srcFile) != NULL)
+	{
+		if (head == NULL)
+		{
+			head = (Node*)malloc(sizeof(Node));
+			if (8 != sscanf(line, "%6[^,], %[^,], %u, %u, %u, %[^,], %[^,], %[^,]",
+				head->data.Id, head->data.documentName, &head->data.date.day, &head->data.date.month,
+				&head->data.date.year, head->data.author.firstName, head->data.author.surname, head->data.author.lastName))
+			{
+				fprintf(stderr, "Invalid data\n");
+			}
+			head->next = NULL;
+		}
+		else
+		{
+			Node *currentDoc = head;
+			Node *newDoc = (Node*)malloc(sizeof(Node));
+			while (currentDoc->next != NULL)
+			{
+				currentDoc = currentDoc->next;
+			}
+			if (8 != sscanf(line, "%6[^,], %[^,], %u, %u, %u, %[^,], %[^,], %[^,]",
+				newDoc->data.Id, newDoc->data.documentName, &newDoc->data.date.day, &newDoc->data.date.month,
+				&newDoc->data.date.year, newDoc->data.author.firstName, newDoc->data.author.surname, newDoc->data.author.lastName))
+			{
+				fprintf(stderr, "Invalid data\n");
+			}
+			currentDoc->next = newDoc;
+			newDoc->next = NULL;
+		}
 	}
 
 	if (srcFile)
