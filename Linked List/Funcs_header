@@ -46,7 +46,10 @@ Node *DeleteElement(Node *currP, char *value);
 Node *DeleteList(Node *head);
 
 FILE *GetFileName(char *name_file, char *mode, char *text);
-void WriteListInFile(Node *head);
-Node *ReadListFromFile();
+void WriteListToBinFile(Node *head);
+Node *ReadListFromBinFile();
 Node *ReadNextFromFile(Node *head, FILE *srcFile);
+
+void WriteListToTxtFile(Node *head); //working
+Node *ReadListFromTxtFile(Node *head);//working, need better idea
 
