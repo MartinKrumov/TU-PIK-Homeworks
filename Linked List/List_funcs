@@ -2,9 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <wctype.h>
+#include <errno.h>
 #include "funcs.h"
-
 
 int CheckForOverflow(size_t max, char *arr)
 {
@@ -12,12 +11,11 @@ int CheckForOverflow(size_t max, char *arr)
 	if (size >= max)
 	{
 		fprintf(stderr, "--Overflow!.Too much symbols entered.--\n");
-		//system("pause");
-		return 0;
+		return 1;
 	}
 
 	fflush(stdin);
-	return 1;
+	return 0;
 }
 
 int CheckForValidId(char *arr)
@@ -26,10 +24,10 @@ int CheckForValidId(char *arr)
 	{
 		if ((i >= 0 && i < 2) || i == 5)
 		{
-			if ((int)arr[i] < 'A' || (int)arr[i] > 'Z')
+			if (arr[i] < 'A' || arr[i] > 'Z')
 			{
 				fprintf(stderr, "--Invalid Id.--\n");
-				return 0;
+				return 1;
 			}
 		}
 		else
@@ -37,11 +35,11 @@ int CheckForValidId(char *arr)
 			if (!isdigit(arr[i]))
 			{
 				fprintf(stderr, "--Invalid Id.--\n");
-				return 0;
+				return 1;
 			}
 		}
 	}
-	return 1;
+	return 0;
 }
 
 int CheckForUniqueId(Node *head, char *id)
@@ -64,76 +62,130 @@ int CheckForUniqueId(Node *head, char *id)
 	return 1;
 }
 
+int CheckForValidDay(size_t day)
+{
+	fflush(stdin);
+	if (day < 1 || day > 31)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+int CheckForValidMonth(size_t month)
+{
+	fflush(stdin);
+	if (month < 1 || month > 12)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+int CheckName(size_t max ,char *arr)
+{
+	if (arr[0] >= 65 && arr[0] <= 90)
+	{
+		return CheckForOverflow(max, arr);
+	}
+
+	return 1;
+}
+
 Node *AddElement(Node *head)
 {
-	int flag = 0;
+	int flag;
 	int unique = 0;
 	Node *temp = (Node*)malloc(sizeof(Node));
+
+	if (temp == NULL)
+	{
+		fprintf(stderr, "Unable to allocate memory for new node\n");
+		return;
+	}
 
 	do
 	{
 		printf("Id: ");
-		scanf("%s", &temp->data.Id);
+		scanf("%s", temp->data.Id);
 
-		flag = CheckForOverflow(7, temp->data.Id); //tuka
-		flag = CheckForValidId(temp->data.Id); //tuka
-		unique = CheckForUniqueId(head, temp->data.Id); // tuka
+		flag = CheckForOverflow(7, temp->data.Id);
+		flag = CheckForValidId(temp->data.Id);
+		unique = CheckForUniqueId(head, temp->data.Id);
 
-	} while (flag != 1 || unique != 1); //tuk duni!!!!!!!!!!!!!!!!!!!!!!
-	flag = 0;
+	} while (flag != 0 || unique != 1);
 
 	do
 	{
 		printf("Document Name: ");
-		scanf("%s", &temp->data.documentName);
-		flag = CheckForOverflow(30, temp->data.documentName);
-	} while (flag != 1);
-	flag = 0;
+		scanf("%s", temp->data.documentName);
+		flag = CheckName(30, temp->data.documentName);
+	} while (flag != 0);
 
-	//do
-	//{
-	//	printf("Name: ");
-	//	scanf("%s", &temp->data.author.firstName);
-	//	flag = CheckForOverflow(20, temp->data.author.firstName);
-	//} while (flag != 1);
-	//flag = 0;
+	do
+	{
+		printf("Day: ");
+		scanf("%u", &temp->data.date.day);
+		flag = CheckForValidDay(temp->data.date.day);
+	} while (flag != 0);
 
-	//do
-	//{
-	//	printf("Surname: ");
-	//	scanf("%s", &temp->data.author.surname);
-	//	flag = CheckForOverflow(20, temp->data.author.surname);
-	//} while (flag != 1);
-	//flag = 0;
+	do
+	{
+		printf("Month: ");
+		scanf("%u", &temp->data.date.month);
+		flag = CheckForValidMonth(temp->data.date.month);
+	} while (flag != 0);
 
-	//do
-	//{
-	//	printf("Last Name: ");
-	//	scanf("%s", &temp->data.author.lastName);
-	//	flag = CheckForOverflow(20, temp->data.author.lastName);
-	//} while (flag != 1);
-	//flag = 0;
 
-	//printf("Day: ");
-	//scanf("%u", &temp->data.date.day);
+	printf("Year: ");
+	scanf("%u", &temp->data.date.year);
 
-	//printf("Month: ");
-	//scanf("%u", &temp->data.date.month);
+	do
+	{
+		printf("Name: ");
+		scanf("%s", temp->data.author.firstName);
+		flag = CheckForOverflow(20, temp->data.author.firstName);
+	} while (flag != 0);
 
-	//printf("Year: ");
-	//scanf("%u", &temp->data.date.year);
+	do
+	{
+		printf("Surname: ");
+		scanf("%s", temp->data.author.surname);
+		flag = CheckForOverflow(20, temp->data.author.surname);
+	} while (flag != 0);
+
+	do
+	{
+		printf("Last Name: ");
+		scanf("%s", temp->data.author.lastName);
+		flag = CheckForOverflow(20, temp->data.author.lastName);
+	} while (flag != 0);
+
+
 
 	printf("-----------------\n");
 
 	temp->next = NULL;
 
-	if (head != NULL)
-		temp->next = head;
-
-	head = temp;
+	if (head == NULL)
+	{
+		head = temp;
+		//printf("added at beginning\n");
+	}
+	else
+	{
+		Node *current = head;
+		while (current->next != NULL)
+		{
+			current = current->next;
+		}
+		current->next = temp;
+		//printf("added later\n");
+	}
 
 	return head;
 }
+
 
 void PrintAllElements(Node *head)
 {
@@ -147,59 +199,10 @@ void PrintAllElements(Node *head)
 		printf("+++++++++++++++++++\n");
 		printf("ID       : %s\n", head->data.Id);
 		printf("Doc Name : %s\n", head->data.documentName);
-		//printf("Name     : %s\n", head->data.author.firstName);
-		//printf("Surname  : %s\n", head->data.author.surname);
-		//printf("Last name: %s\n", head->data.author.lastName);
-		//printf("Day      : %u\n", head->data.date.day);
-		//printf("Month    : %u\n", head->data.date.month);
-		//printf("Year     : %u\n", head->data.date.year);
+		printf("Date     : %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
+		printf("Author   : %s %s %s\n", head->data.author.firstName, head->data.author.surname, head->data.author.lastName);
 		head = head->next;
 	}
-}
-
-Node *DeleteElement(Node *currP, char *value)
-{
-	/* See if we are at end of list. */
-	if (currP == NULL)
-		return NULL;
-
-	/*
-	* Check to see if current node is one
-	* to be deleted.
-	*/
-	if (strcmp(value, currP->data.Id) == 0)
-	{
-		Node *tempNextP;
-
-		/* Save the next pointer in the node. */
-		tempNextP = currP->next;
-
-		/* Deallocate the node. */
-		free(currP);
-
-		/*
-		* Return the NEW pointer to where we
-		* were called from.  I.e., the pointer
-		* the previous call will use to "skip
-		* over" the removed node.
-		*/
-		return tempNextP;
-	}
-
-	/*
-	* Check the rest of the list, fixing the next
-	* pointer in case the next node is the one
-	* removed.
-	*/
-	currP->next = DeleteElement(currP->next, value);
-
-
-	/*
-	* Return the pointer to where we were called
-	* from.  Since we did not remove this node it
-	* will be the same.
-	*/
-	return currP;
 }
 
 void PrintElement(Node *head, char *key)
@@ -216,7 +219,450 @@ void PrintElement(Node *head, char *key)
 		{
 			printf("ID       :: %s\n", head->data.Id);
 			printf("Doc Name :: %s\n", head->data.documentName);
+			printf("Date     :: %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
+			printf("Author   :: %s %s %s\n", head->data.author.firstName, head->data.author.surname, head->data.author.lastName);
 		}
 		head = head->next;
 	}
+}
+
+Node *DeleteElement(Node *currP, char *value)
+{
+	if (currP == NULL) // See if we are at end of list.
+		return NULL;
+
+
+	// Check to see if current node is one to be deleted.
+	if (strcmp(value, currP->data.Id) == 0)
+	{
+		Node *tempNextP;
+
+		tempNextP = currP->next; //Save the next pointer in the node. 
+
+		free(currP); //Deallocate the node. 
+
+		/* Return the NEW pointer to where we
+		* were called from.  I.e., the pointer
+		* the previous call will use to "skip
+		* over" the removed node.*/
+		return tempNextP;
+	}
+
+	/*Check the rest of the list, fixing the next
+	  pointer in case the next node is the one removed.*/
+	currP->next = DeleteElement(currP->next, value);
+
+
+	/*Return the pointer to where we were called from.
+	Since we did not remove this node it will be the same.*/
+	return currP;
+}
+
+Node *DeleteList(Node *head)
+{
+	Node *temp;
+	while (head != NULL)
+	{
+		temp = head;
+		head = head->next;
+		free(temp);
+	}
+	return head;
+}
+
+FILE *GetFileName(char *name_file, char *mode, char *text) //Мода да се въвежда в функцията :)
+{
+	FILE *fp;
+	int err;
+	errno = 0;
+
+	do
+	{
+		printf("Въведете име на файла %s: ", text);
+		err = scanf("%s", name_file);
+	} while (err != 1);
+
+	if ((fp = fopen(name_file, mode)) == NULL)
+	{
+		printf("\nФайлът <%s> Не може да се отвори - error No % d !!!\n", name_file, errno);
+		printf("ГРЕШКА No %d %s\n", errno, strerror(errno));
+		system("pause");
+	}
+	else
+	{
+		printf("\nФайлът <%s> е отворен успешно за обработка !\n\n", name_file);
+		system("pause");
+	}
+	return fp;
+}
+
+void WriteListToBinFile(Node *head)
+{
+	char fileName[NAME];
+	FILE *destFile = NULL;
+
+	if ((destFile = GetFileName(fileName, "wb", "за записване")) == NULL)
+	{
+		return;
+	}
+
+	Node *currentDoc = head;
+
+	Node *holdNext = NULL;
+
+	while (currentDoc != NULL)
+	{
+		holdNext = currentDoc->next;
+		currentDoc->next = NULL;
+
+		fseek(destFile, 0, SEEK_END);
+		fwrite(currentDoc, sizeof(Node), 1, destFile);
+
+		printf("Wrriting: %s to file\n", currentDoc->data.Id);
+		printf("Wrriting: %s to file\n", currentDoc->data.documentName);
+
+		currentDoc->next = holdNext;
+		holdNext = NULL;
+
+		currentDoc = currentDoc->next;
+	}
+
+	if (destFile)
+		fclose(destFile);
+}
+
+Node *ReadNextFromFile(Node *head, FILE *srcFile)
+{
+	size_t returnValue;
+	if (head == NULL)
+	{
+		head = (Node*)malloc(sizeof(Node));
+		returnValue = fread(head, sizeof(Node), 1, srcFile);
+		head->next = NULL;
+	}
+	else
+	{
+		Node *currentDoc = head;
+		Node *newDoc = (Node*)malloc(sizeof(Node));
+		while (currentDoc->next != NULL)
+		{
+			currentDoc = currentDoc->next;
+		}
+		returnValue = fread(newDoc, sizeof(Node), 1, srcFile);
+		currentDoc->next = newDoc;
+		newDoc->next = NULL;
+	}
+	return head;
+}
+
+Node *ReadListFromBinFile()
+{
+	Node *head = NULL;
+	FILE *srcFile = NULL;
+	char fileName[NAME];
+
+	if ((srcFile = GetFileName(fileName, "rb", "за четене")) == NULL)
+	{
+		return;
+	}
+
+	head = DeleteList(head);
+
+	fseek(srcFile, 0, SEEK_END);
+	long fileSize = ftell(srcFile);
+	rewind(srcFile);
+
+	int numEntries = (int)(fileSize / (sizeof(Node)));
+	printf("numEntries:%d\n", numEntries);
+
+	for (size_t loop = 0; loop < numEntries; ++loop)
+	{
+		fseek(srcFile, (sizeof(Node)* loop), SEEK_SET);
+		head = ReadNextFromFile(head, srcFile);
+	}
+
+	if (srcFile)
+		fclose(srcFile);
+
+	return head;
+}
+
+void WriteListToTxtFile(Node *head)
+{
+	char fileName[NAME];
+	FILE *destFile = NULL;
+
+	if ((destFile = GetFileName(fileName, "wt", "за записване")) == NULL)
+	{
+		return;
+	}
+
+	while (head != NULL)
+	{
+		fprintf(destFile, "%s", head->data.Id);
+		fprintf(destFile, ", %s", head->data.documentName);
+		fprintf(destFile, ", %u", head->data.date.day);
+		fprintf(destFile, ", %u", head->data.date.month);
+		fprintf(destFile, ", %u", head->data.date.year);
+		fprintf(destFile, ", %s", head->data.author.firstName);
+		fprintf(destFile, ", %s", head->data.author.surname);
+		fprintf(destFile, ", %s\n", head->data.author.lastName);
+
+		head = head->next;
+	}
+
+	if (destFile)
+		fclose(destFile);
+}
+
+Node *ReadListFromTxtFile(Node *head)
+{
+	FILE *srcFile = NULL;
+	char fileName[NAME];
+	char line[256];
+
+	int err = 1;
+
+	if ((srcFile = GetFileName(fileName, "rt", "за четене")) == NULL)
+	{
+		return;
+	}
+
+	head = DeleteList(head);
+
+	while (fgets(line, sizeof(line), srcFile) != NULL)
+	{
+		if (head == NULL)
+		{
+			head = (Node*)malloc(sizeof(Node));
+			if (8 != sscanf(line, "%6[^,], %[^,], %u, %u, %u, %[^,], %[^,], %[^,]",
+				head->data.Id, head->data.documentName, &head->data.date.day, &head->data.date.month,
+				&head->data.date.year, head->data.author.firstName, head->data.author.surname, head->data.author.lastName))
+			{
+				fprintf(stderr, "Invalid data\n");
+			}
+			head->next = NULL;
+		}
+		else
+		{
+			Node *currentDoc = head;
+			Node *newDoc = (Node*)malloc(sizeof(Node));
+			while (currentDoc->next != NULL)
+			{
+				currentDoc = currentDoc->next;
+			}
+			if (8 != sscanf(line, "%6[^,], %[^,], %u, %u, %u, %[^,], %[^,], %[^,]",
+				newDoc->data.Id, newDoc->data.documentName, &newDoc->data.date.day, &newDoc->data.date.month,
+				&newDoc->data.date.year, newDoc->data.author.firstName, newDoc->data.author.surname, newDoc->data.author.lastName))
+			{
+				fprintf(stderr, "Invalid data\n");
+			}
+			currentDoc->next = newDoc;
+			newDoc->next = NULL;
+		}
+	}
+
+	if (srcFile)
+		fclose(srcFile);
+
+	return head;
+}
+
+int CompareDates(Date date1, Date date2)
+{
+	if (date1.year < date2.year)
+	{
+		return -1;
+	}
+	else if (date1.year > date2.year)
+	{
+		return 1;
+	}
+	else
+	{
+		if (date1.month < date2.month)
+		{
+			return -1;
+		}
+		else if (date1.month > date2.month)
+		{
+			return 1;
+		}
+		else if (date1.day < date2.day)
+		{
+			return -1;
+		}
+		else if (date1.day > date2.day)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+}
+
+int CompareNames(Document d1, Document d2)
+{
+	if (strcmp(d1.documentName, d2.documentName) > 0)
+	{
+		return 1;
+	}
+	else if (strcmp(d1.documentName, d2.documentName) == 0)
+	{
+		return 0;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+int CompareId(Document d1, Document d2)
+{
+	if (strcmp(d1.Id, d2.Id) > 0)
+	{
+		return 1;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+//Node *GetPrevNode(Node *head, Node *a)
+//{
+//	if (head == a) // node[a] is first node 
+//	{
+//		return NULL;
+//	}
+//	Node *currentNode = head;
+//	Node *prevA = NULL;
+//
+//	while (currentNode && currentNode != a)//search while not reach to end or the node
+//	{
+//		prevA = currentNode;          // find previous node   
+//		currentNode = currentNode->next;
+//	}
+//	if (currentNode != a)
+//	{
+//		fprintf(stderr, "\n error: node not found!\n"); // node[a] not present in list
+//		exit(1);
+//	}
+//	return prevA;
+//}
+//
+//void SwapNodes(Node **head, Node **a, Node **b)
+//{
+//	if ((*head) == NULL || (*a) == NULL || (*b) == NULL) // Empty list or one node is null  
+//	{
+//		printf("\nNothing to swap, just return.\n");
+//		return;
+//	}
+//
+//	// find previos nodes
+//	Node *prevA = GetPrevNode(*head, *a);
+//	Node *prevB = GetPrevNode(*head, *b);
+//
+//	//Now swap next fiels of candidate nodes  
+//	Node *temp = NULL;
+//	temp = (*a)->next;
+//	(*a)->next = (*b)->next;
+//	(*b)->next = temp;
+//
+//	//Change head: if any node was a head 
+//	if ((*head) == (*a))
+//	{
+//		*head = *b;
+//	}
+//	else
+//	{
+//		if ((*head) == (*b))
+//			*head = *a;
+//	}
+//}
+
+size_t CountNodes(Node *head) //Count all Nodes in the linked list
+{
+	Node *temp = head;
+	size_t count = 0;
+	while (temp)
+	{
+		count++;
+		temp = temp->next;
+	}
+	return count;
+}
+
+void Found(Node **current, Node **next, Node **previous, Node **head)
+{
+	if (*current == *head)
+	{
+		*head = *next;
+	}
+	else
+	{
+		(*previous)->next = *next;
+	}
+	(*current)->next = (*next)->next;
+	(*next)->next = *current;
+
+	*previous = *next;
+	*next = (*current)->next;
+}
+
+void NotFound(Node **current, Node **next, Node **previous)
+{
+	*previous = *current;
+	*current = (*current)->next;
+	*next = (*current)->next;
+}
+
+Node *SortList(Node *head)
+{
+	int num_nodes = CountNodes(head);
+
+	for (int counter = 0; counter < num_nodes; counter++) {
+		Node* current = head;
+		Node* next = current->next;
+		Node* previous = NULL;
+
+		while (next != NULL)
+		{
+			if (CompareDates(current->data.date, next->data.date) == 1)
+			{
+				Found(&current, &next, &previous, &head);
+			}
+			else if (CompareDates(current->data.date, next->data.date) == 0)
+			{
+				if (CompareNames(current->data, next->data) == 1)
+				{
+					Found(&current, &next, &previous, &head);
+				}
+				else if (CompareNames(current->data, next->data) == 0)
+				{
+					if (CompareId(current->data, next->data) == 1)
+					{
+						Found(&current, &next, &previous, &head);
+					}
+					else
+					{
+						NotFound(&current, &next, &previous);
+					}
+				}
+				else
+				{
+					NotFound(&current, &next, &previous);
+				}
+			}
+			else
+			{
+				NotFound(&current, &next, &previous);
+			}
+		}
+	}
+
+	printf("Sort completely done\n");
+	return head;
 }
