@@ -10,45 +10,105 @@ char *mainMenu[] =
 {
 	"Обработка и Съхранение на Документи",
 
-	"+Въвеждане на нов документ към списъка.",
-	"+Изтриване на документ.",
-	"+Изписване на информацията на документа.",
-	"Записване на документите от текстов или двоичен файл.", //TODO:
-	"Прочитане на документите от текстов или двоичен файл.", //TODO:
-	"+Изписване последователно на данните на всички документи.",
-	"**Сортиране на документите по дата на създаване.",
-	"**И една шитня с дати :("
+	"Въвеждане на нов документ към списъка.",
+	"Изтриване на документ.",
+	"Изписване на информацията на документа.",
+	"Записване на документите от текстов или двоичен файл.",
+	"Прочитане на документите от текстов или двоичен файл.",
+	"Изписване последователно на данните на всички документи.",
+	"**Търсене на дума в документа",
+	"Сортиране на документите по дата на създаване.",
+	"**И една шитня с дати :(",
+	"Изход.",
+	NULL
 };
 
 char *fileMenu[] =
 {
 	"Изберете вида на файла:",
-
 	"Текстови файл (.txt)",
-	"Двоичен файл (.dat)"
+	"Двоичен файл (.dat)",
+	"Назад.",
+	NULL
 };
 
-int main() 
+int main()
 {
 	Node *head = NULL;
-	char find[7];
+	int mode, submenu;
+	int countOfDocs;
+	char findId[7];
 
-	for (size_t i = 0; i < 3; i++)
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+
+	do
 	{
-		head = AddElement(head);
-	}
+		system("cls");
+		mode = menu(mainMenu);
+		switch (mode)
+		{
+		case 1:
+			printf("Колко документа искате да създадете: ");
+			scanf("%d", &countOfDocs);
+			for (size_t i = 0; i < countOfDocs; i++)
+			{
+				head = AddElement(head);
+			}
+			break;
 
-	PrintAllElements(head);
+		case 2:
+			printf("\nEnter ID: ");
+			scanf("%s", &findId);
+			head = DeleteElement(head, findId);
+			break;
 
-	printf("\nEnter ID: ");
-	scanf("%s", &find);
+		case 3:
+			printf("\nEnter ID: ");
+			scanf("%s", &findId);
+			PrintElement(head, findId);
+			system("pause");
+			break;
 
-	PrintElement(head, find); 
+		case 4:
+			submenu = menu(fileMenu);
+			switch (submenu)
+			{
+			case 1:
+				WriteListToTxtFile(head);
+				system("pause");
+				break;
 
-	printf("\n");
-	head = DeleteElement(head, find);
-	PrintAllElements(head);
+			case 2:
+				WriteListToBinFile(head);
+				system("pause");
+				break;
+			}
+			break;
 
-	system("pause");
-	return 0;
+		case 5:
+			submenu = menu(fileMenu);
+			switch (submenu)
+			{
+			case 1:
+				head = ReadListFromTxtFile(head);
+				break;
+
+			case 2:
+				head = ReadListFromBinFile();
+				break;
+			}
+			break;
+
+		case 6:
+			PrintAllElements(head);
+			system("pause");
+			break;
+		case 8:
+			head = SortList(head);
+			system("pause");
+			break;
+		}
+	} while (mode != 0);
+	_fcloseall();
 }
