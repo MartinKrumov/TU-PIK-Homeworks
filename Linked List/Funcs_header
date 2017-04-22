@@ -53,3 +53,12 @@ Node *ReadNextFromFile(Node *head, FILE *srcFile);
 void WriteListToTxtFile(Node *head); //working
 Node *ReadListFromTxtFile(Node *head);//working, need better idea
 
+//----------------------------------------------------------------------
+Node *SortList(Node *head);
+void Found(Node **current, Node **next, Node **previous, Node **head);
+void NotFound(Node **current, Node **next, Node **previous);
+size_t CountNodes(Node *head);
+int CompareDates(Date date1, Date date2);
+int CompareNames(Document d1, Document d2);
+int CompareId(Document d1, Document d2);
+//---------------------------------------------------------------------
