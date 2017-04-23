@@ -16,9 +16,9 @@ char *mainMenu[] =
 	"Записване на документите от текстов или двоичен файл.",
 	"Прочитане на документите от текстов или двоичен файл.",
 	"Изписване последователно на данните на всички документи.",
-	"**Търсене на дума в документа",
+	"Търсене на дума в документа",
 	"Сортиране на документите по дата на създаване.",
-	"**И една шитня с дати :(",
+	"Изписване на документите м/у днешна и предишна дата.",
 	"Изход.",
 	NULL
 };
@@ -27,7 +27,7 @@ char *fileMenu[] =
 {
 	"Изберете вида на файла:",
 	"Текстови файл (.txt)",
-	"Двоичен файл (.dat)",
+	"Двоичен файл (.bin/.dat)",
 	"Назад.",
 	NULL
 };
@@ -61,6 +61,7 @@ int main()
 			printf("\nEnter ID: ");
 			scanf("%s", &findId);
 			head = DeleteElement(head, findId);
+			system("pause");
 			break;
 
 		case 3:
@@ -76,12 +77,10 @@ int main()
 			{
 			case 1:
 				WriteListToTxtFile(head);
-				system("pause");
 				break;
 
 			case 2:
 				WriteListToBinFile(head);
-				system("pause");
 				break;
 			}
 			break;
@@ -104,11 +103,23 @@ int main()
 			PrintAllElements(head);
 			system("pause");
 			break;
+
+		case 7:
+			printf("\nВъвдете ID на документа, в който ще търсим: ");
+			scanf("%s", &findId);
+			SearchWordInDoc(head, findId);
+			system("pause");
+			break;
+
 		case 8:
 			head = SortList(head);
 			system("pause");
 			break;
+		case 9:
+			PrintElementsInRange(head);
+			system("pause");
+			break;
 		}
-	} while (mode != 0);
+	} while (1);
 	_fcloseall();
 }
