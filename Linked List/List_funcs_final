@@ -5,93 +5,6 @@
 #include <errno.h>
 #include "funcs.h"
 
-int CheckForOverflow(size_t max, char *arr)
-{
-	size_t size = strlen(arr);
-	if (size >= max)
-	{
-		fprintf(stderr, "--Overflow!.Too much symbols entered.--\n");
-		return 1;
-	}
-
-	fflush(stdin);
-	return 0;
-}
-
-int CheckForValidId(char *arr)
-{
-	for (size_t i = 0; i < 6; i++)
-	{
-		if ((i >= 0 && i < 2) || i == 5)
-		{
-			if (arr[i] < 'A' || arr[i] > 'Z')
-			{
-				fprintf(stderr, "--Invalid Id.--\n");
-				return 1;
-			}
-		}
-		else
-		{
-			if (!isdigit(arr[i]))
-			{
-				fprintf(stderr, "--Invalid Id.--\n");
-				return 1;
-			}
-		}
-	}
-	return 0;
-}
-
-int CheckForUniqueId(Node *head, char *id)
-{
-	if (head == NULL)
-	{
-		return 1;
-	}
-
-	while (head != NULL)
-	{
-		if (strcmp(id, head->data.Id) == 0)
-		{
-			fprintf(stderr, "--The ID already exist.Please enter new ID.--\n");
-			return 0;
-		}
-		head = head->next;
-	}
-
-	return 1;
-}
-
-int CheckForValidDay(size_t day)
-{
-	fflush(stdin);
-	if (day < 1 || day > 31)
-	{
-		return 1;
-	}
-	return 0;
-}
-
-int CheckForValidMonth(size_t month)
-{
-	fflush(stdin);
-	if (month < 1 || month > 12)
-	{
-		return 1;
-	}
-	return 0;
-}
-
-int CheckName(size_t max ,char *arr)
-{
-	if (arr[0] >= 65 && arr[0] <= 90)
-	{
-		return CheckForOverflow(max, arr);
-	}
-
-	return 1;
-}
-
 Node *AddElement(Node *head)
 {
 	int flag;
@@ -167,11 +80,9 @@ Node *AddElement(Node *head)
 		scanf("%[^\n]", temp->data.info);
 		flag = CheckForOverflow(63, temp->data.info);
 	} while (flag != 0);
-
 	printf("-----------------\n");
 
 	temp->next = NULL;
-
 	if (head == NULL)
 	{
 		head = temp;
@@ -195,11 +106,13 @@ void PrintAllElements(Node *head)
 	if (head == NULL)
 	{
 		fprintf(stderr, "The list is empty!\n");
+		return;
 	}
+	size_t countOfDocuments = CountNodes(head);
 
 	while (head != NULL)
 	{
-		printf("+++++++++++++++++++\n");
+		printf("+------------------------+\n");
 		printf("ID       : %s\n", head->data.Id);
 		printf("Doc Name : %s\n", head->data.documentName);
 		printf("Date     : %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
@@ -207,9 +120,11 @@ void PrintAllElements(Node *head)
 		printf("Info     : %s\n", head->data.info);
 		head = head->next;
 	}
+	printf("+------------------------+\n");
+	printf("Броят на документите: %u\n", countOfDocuments);
 }
 
-void PrintElement(Node *head, char *key)
+void PrintElement(Node *head, char *Id)
 {
 	if (head == NULL)
 	{
@@ -219,13 +134,17 @@ void PrintElement(Node *head, char *key)
 
 	while (head != NULL)
 	{
-		if (strcmp(key, head->data.Id) == 0)
+		if (strcmp(Id, head->data.Id) == 0)
 		{
 			printf("ID       :: %s\n", head->data.Id);
 			printf("Doc Name :: %s\n", head->data.documentName);
 			printf("Date     :: %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
 			printf("Author   :: %s %s %s\n", head->data.author.firstName, head->data.author.surname, head->data.author.lastName);
 			printf("Info     :: %s\n", head->data.info);
+		}
+		else
+		{
+			printf("\nДокументът с ID \"%s\" не намерен.\n");
 		}
 		head = head->next;
 	}
@@ -334,30 +253,6 @@ void WriteListToBinFile(Node *head)
 		fclose(destFile);
 }
 
-Node *ReadNextFromFile(Node *head, FILE *srcFile)
-{
-	size_t returnValue;
-	if (head == NULL)
-	{
-		head = (Node*)malloc(sizeof(Node));
-		returnValue = fread(head, sizeof(Node), 1, srcFile);
-		head->next = NULL;
-	}
-	else
-	{
-		Node *currentDoc = head;
-		Node *newDoc = (Node*)malloc(sizeof(Node));
-		while (currentDoc->next != NULL)
-		{
-			currentDoc = currentDoc->next;
-		}
-		returnValue = fread(newDoc, sizeof(Node), 1, srcFile);
-		currentDoc->next = newDoc;
-		newDoc->next = NULL;
-	}
-	return head;
-}
-
 Node *ReadListFromBinFile()
 {
 	Node *head = NULL;
@@ -387,6 +282,30 @@ Node *ReadListFromBinFile()
 	if (srcFile)
 		fclose(srcFile);
 
+	return head;
+}
+
+Node *ReadNextFromFile(Node *head, FILE *srcFile)
+{
+	size_t returnValue;
+	if (head == NULL)
+	{
+		head = (Node*)malloc(sizeof(Node));
+		returnValue = fread(head, sizeof(Node), 1, srcFile);
+		head->next = NULL;
+	}
+	else
+	{
+		Node *currentDoc = head;
+		Node *newDoc = (Node*)malloc(sizeof(Node));
+		while (currentDoc->next != NULL)
+		{
+			currentDoc = currentDoc->next;
+		}
+		returnValue = fread(newDoc, sizeof(Node), 1, srcFile);
+		currentDoc->next = newDoc;
+		newDoc->next = NULL;
+	}
 	return head;
 }
 
@@ -439,11 +358,14 @@ Node *ReadListFromTxtFile(Node *head)
 		if (head == NULL)
 		{
 			head = (Node*)malloc(sizeof(Node));
-			if (8 != sscanf(line, "%6[^,], %[^,], %u, %u, %u, %[^,], %[^,], %[^,], %[^\n]",
+			if (9 != sscanf(line, "%6[^,], %30[^,], %u, %u, %u, %20[^,], %20[^,], %20[^,], %63[^\n]",
 				head->data.Id, head->data.documentName, &head->data.date.day, &head->data.date.month,
 				&head->data.date.year, head->data.author.firstName, head->data.author.surname, head->data.author.lastName, head->data.info))
 			{
 				fprintf(stderr, "Invalid data\n");
+				printf("Please fix the data in the file you're reading from.\n");
+				system("pause");
+				return;
 			}
 			head->next = NULL;
 		}
@@ -455,12 +377,15 @@ Node *ReadListFromTxtFile(Node *head)
 			{
 				currentDoc = currentDoc->next;
 			}
-			if (8 != sscanf(line, "%6[^,], %[^,], %u, %u, %u, %[^,], %[^,], %[^,], %[^\n]",
+			if (9 != sscanf(line, "%6[^,], %30[^,], %u, %u, %u, %20[^,], %20[^,], %20[^,], %63[^\n]",
 				newDoc->data.Id, newDoc->data.documentName, &newDoc->data.date.day, &newDoc->data.date.month,
 				&newDoc->data.date.year, newDoc->data.author.firstName, newDoc->data.author.surname, newDoc->data.author.lastName,
 				newDoc->data.info))
 			{
 				fprintf(stderr, "Invalid data\n");
+				printf("Please fix the data in the file you're reading from.\n");
+				system("pause");
+				return;
 			}
 			currentDoc->next = newDoc;
 			newDoc->next = NULL;
@@ -471,6 +396,176 @@ Node *ReadListFromTxtFile(Node *head)
 		fclose(srcFile);
 
 	return head;
+}
+
+void SearchWordInDoc(Node* head, char *Id)
+{
+	if (head == NULL)
+	{
+		fprintf(stderr, "The list is empty!\n");
+		return;
+	}
+
+	char word[16];
+	char *found = NULL;
+
+	printf("Въведете думата за търсене: ");
+	scanf("%s", word);
+
+	while (head != NULL)
+	{
+		if (strcmp(Id, head->data.Id) == 0)
+		{
+			found = strstr(head->data.info, word);
+		}
+
+		head = head->next;
+	}
+
+	if (found)
+		printf("Думата \"%s\" е намерена в документа.\n", word);
+	else
+		printf("Думата \"%s\" не е намерена в документа.\n", word);
+}
+
+size_t CountNodes(Node *head) //Count all Nodes in the linked list
+{
+	Node *temp = head;
+	size_t count = 0;
+	while (temp)
+	{
+		count++;
+		temp = temp->next;
+	}
+	return count;
+}
+
+void Swap(Node **current, Node **next, Node **previous, Node **head)
+{
+	if (*current == *head)
+	{
+		*head = *next;
+	}
+	else
+	{
+		(*previous)->next = *next;
+	}
+	(*current)->next = (*next)->next;
+	(*next)->next = *current;
+
+	*previous = *next;
+	*next = (*current)->next;
+}
+
+void MoveOn(Node **current, Node **next, Node **previous)
+{
+	*previous = *current;
+	*current = (*current)->next;
+	*next = (*current)->next;
+}
+
+Node *SortList(Node *head)
+{
+	int num_nodes = CountNodes(head);
+
+	for (int counter = 0; counter < num_nodes; counter++) {
+		Node* current = head;
+		Node* next = current->next;
+		Node* previous = NULL;
+
+		while (next != NULL)
+		{
+			if (CompareDates(current->data.date, next->data.date) == 1)
+			{
+				Swap(&current, &next, &previous, &head);
+			}
+			else if (CompareDates(current->data.date, next->data.date) == 0)
+			{
+				if (CompareNames(current->data, next->data) == 1)
+				{
+					Swap(&current, &next, &previous, &head);
+				}
+				else if (CompareNames(current->data, next->data) == 0)
+				{
+					if (CompareId(current->data, next->data) == 1)
+					{
+						Swap(&current, &next, &previous, &head);
+					}
+					else
+					{
+						MoveOn(&current, &next, &previous);
+					}
+				}
+				else
+				{
+					MoveOn(&current, &next, &previous);
+				}
+			}
+			else
+			{
+				MoveOn(&current, &next, &previous);
+			}
+		}
+	}
+
+	printf("Sort completely done\n");
+	return head;
+}
+
+void PrintElementsInRange(Node *head)
+{
+	if (head == NULL)
+	{
+		fprintf(stderr, "The list is empty!\n");
+		return;
+	}
+
+	Date currentDate;
+	Date previousDate;
+
+	printf("Въвдете начална дата:\n");
+	EnterDates(&previousDate);
+
+	printf("Въведете крайна дата:\n");
+	EnterDates(&currentDate);
+
+	while (head != NULL)
+	{
+		int curr = CompareDates(head->data.date, currentDate); //връща -1 ако първата дата 1 по-малка от 2рата
+		int prev = CompareDates(head->data.date, previousDate); //връща 1 ако първата дата 1 по-голяма от 2рата
+
+		if (curr == -1 && prev == 1)
+		{
+			printf("+---------------------+\n");
+			printf("ID       : %s\n", head->data.Id);
+			printf("Doc Name : %s\n", head->data.documentName);
+			printf("Date     : %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
+			printf("Author   : %s %s %s\n", head->data.author.firstName, head->data.author.surname, head->data.author.lastName);
+		}
+
+		head = head->next;
+	}
+}
+
+void EnterDates(Date *d1)
+{
+	int flag;
+	do
+	{
+		printf("Day: ");
+		scanf("%u", &d1->day);
+		flag = CheckForValidDay(d1-> day);
+	} while (flag != 0);
+
+	do
+	{
+		printf("Месец: ");
+		scanf("%u", &d1->month);
+		flag = CheckForValidMonth(d1->month);
+	} while (flag != 0);
+
+	printf("Година: ");
+	scanf("%u", &d1->year);
 }
 
 int CompareDates(Date date1, Date date2)
@@ -535,220 +630,3 @@ int CompareId(Document d1, Document d2)
 		return -1;
 	}
 }
-
-
-
-size_t CountNodes(Node *head) //Count all Nodes in the linked list
-{
-	Node *temp = head;
-	size_t count = 0;
-	while (temp)
-	{
-		count++;
-		temp = temp->next;
-	}
-	return count;
-}
-
-void Found(Node **current, Node **next, Node **previous, Node **head)
-{
-	if (*current == *head)
-	{
-		*head = *next;
-	}
-	else
-	{
-		(*previous)->next = *next;
-	}
-	(*current)->next = (*next)->next;
-	(*next)->next = *current;
-
-	*previous = *next;
-	*next = (*current)->next;
-}
-
-void MoveOn(Node **current, Node **next, Node **previous)
-{
-	*previous = *current;
-	*current = (*current)->next;
-	*next = (*current)->next;
-}
-
-Node *SortList(Node *head)
-{
-	int num_nodes = CountNodes(head);
-
-	for (int counter = 0; counter < num_nodes; counter++) {
-		Node* current = head;
-		Node* next = current->next;
-		Node* previous = NULL;
-
-		while (next != NULL)
-		{
-			if (CompareDates(current->data.date, next->data.date) == 1)
-			{
-				Found(&current, &next, &previous, &head);
-			}
-			else if (CompareDates(current->data.date, next->data.date) == 0)
-			{
-				if (CompareNames(current->data, next->data) == 1)
-				{
-					Found(&current, &next, &previous, &head);
-				}
-				else if (CompareNames(current->data, next->data) == 0)
-				{
-					if (CompareId(current->data, next->data) == 1)
-					{
-						Found(&current, &next, &previous, &head);
-					}
-					else
-					{
-						MoveOn(&current, &next, &previous);
-					}
-				}
-				else
-				{
-					MoveOn(&current, &next, &previous);
-				}
-			}
-			else
-			{
-				MoveOn(&current, &next, &previous);
-			}
-		}
-	}
-
-	printf("Sort completely done\n");
-	return head;
-}
-
-void PrintElementsInRange(Node *head)
-{
-	if (head == NULL)
-	{
-		fprintf(stderr, "The list is empty!\n");
-		return;
-	}
-
-	Date currentDate;
-	Date previousDate;
-
-	printf("Въвдете текущата дата:\n");
-	printf("Ден: ");
-	scanf("%u", &currentDate.day);
-	
-	printf("Месец: ");
-	scanf("%u", &currentDate.month);
-
-	printf("Година: ");
-	scanf("%u", &currentDate.year); 
-
-	printf("Въведете предишна дата:\n");
-	printf("Ден: ");
-	scanf("%u", &previousDate.day);
-
-	printf("Месец: ");
-	scanf("%u", &previousDate.month);
-
-	printf("Година: ");
-	scanf("%u", &previousDate.year);
-
-
-	while (head != NULL)
-	{
-		int curr = CompareDates(head->data.date, currentDate); //връща -1 ако първата дата 1 по-малка от 2рата
-		int prev = CompareDates(head->data.date, previousDate); //връща 1 ако първата дата 1 по-голяма от 2рата
-
-		if (curr == -1 && prev == 1)
-		{
-			printf("+---------------------+\n");
-			printf("ID       :: %s\n", head->data.Id);
-			printf("Doc Name :: %s\n", head->data.documentName);
-			printf("Date     :: %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
-			printf("Author   :: %s %s %s\n", head->data.author.firstName, head->data.author.surname, head->data.author.lastName);
-		}
-		head = head->next;
-	}
-}
-
-void SearchWordInDoc(Node* head, char *key)
-{
-	if (head == NULL)
-	{
-		fprintf(stderr, "The list is empty!\n");
-		return;
-	}
-
-	char word[16];
-	char *found = NULL;
-
-	printf("Въведете думата за търсене: ");
-	scanf("%s", word);
-
-	while (head != NULL)
-	{
-		if (strcmp(key, head->data.Id) == 0)
-		{
-			found = strstr(head->data.info, word);
-		}
-		head = head->next;
-	}
-
-	if (found)
-		printf("Думата \"%s\" е намерена в документа.\n", word);
-	else
-		printf("Думата \"%s\" не е намерена в документа.\n", word);
-
-}
-
-//Node *GetPrevNode(Node *head, Node *a)
-//{
-//	if (head == a) // node[a] is first node 
-//	{
-//		return NULL;
-//	}
-//	Node *currentNode = head;
-//	Node *prevA = NULL;
-//
-//	while (currentNode && currentNode != a)//search while not reach to end or the node
-//	{
-//		prevA = currentNode;          // find previous node   
-//		currentNode = currentNode->next;
-//	}
-//	if (currentNode != a)
-//	{
-//		fprintf(stderr, "\n error: node not found!\n"); // node[a] not present in list
-//		exit(1);
-//	}
-//	return prevA;
-//}
-//
-//void SwapNodes(Node **head, Node **a, Node **b)
-//{
-//	if ((*head) == NULL || (*a) == NULL || (*b) == NULL) // Empty list or one node is null  
-//	{
-//		printf("\nNothing to swap, just return.\n");
-//		return;
-//	}
-//
-//	// find previos nodes
-//	Node *prevA = GetPrevNode(*head, *a);
-//	Node *prevB = GetPrevNode(*head, *b);
-//
-//	//Now swap next fiels of candidate nodes  
-//	Node *temp = NULL;
-//	temp = (*a)->next;
-//	(*a)->next = (*b)->next;
-//	(*b)->next = temp;
-//
-//	//Change head: if any node was a head 
-//	if ((*head) == (*a))
-//	{
-//		*head = *b;
-//	}
-//	else
-//	{
-//		if ((*head) == (*b))
-//			*head = *a;
-//	}
-//}
