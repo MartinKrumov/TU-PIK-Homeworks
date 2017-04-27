@@ -92,6 +92,7 @@ int CheckForValidMonth(size_t month)
 
 int CheckName(size_t max, char *arr)
 {
+	fflush(stdin);
 	if (arr[0] >= 65 && arr[0] <= 90)
 	{
 		return CheckForOverflow(max, arr);
@@ -137,7 +138,7 @@ Node *AddElement(Node *head)
 		printf("Име на книгата: ");
 		scanf("%80[^\n]", temp->data.bookName);
 
-		flag = CheckForOverflow(81, temp->data.bookName);
+		flag = CheckName(81, temp->data.bookName);
 	} while (flag != 0);
 
 	do
@@ -145,7 +146,7 @@ Node *AddElement(Node *head)
 		printf("Издател: ");
 		scanf("%s", temp->data.publisherName);
 
-		flag = CheckForOverflow(51, temp->data.publisherName);
+		flag = CheckName(51, temp->data.publisherName); /*CheckForOverflow(51, temp->data.publisherName);*/
 	} while (flag != 0);
 
 	do
@@ -473,16 +474,124 @@ void EnterNames(Author *a1) //Въвеждаме имената на автор�
 
 int CompareNames(Author author1, Author author2) //Сряваняваме имената на авторите
 {
-	if ((strcmp(author1.firstName, author2.firstName) == 0)) //ако 1вите имена са еднакви
+	if (strcmp(author1.firstName, author2.firstName) == 1)
 	{
-		if (strcmp(author1.surname, author2.surname) == 0) //проверяваме 2рите им имена дали са еднакви 
+		return 1;
+	}
+	else if ((strcmp(author1.firstName, author2.firstName) == 0)) //ако 1вите имена са еднакви
+	{
+		if (strcmp(author1.surname, author2.surname) == 1)
 		{
-			if (strcmp(author1.lastName, author2.lastName) == 0) //ако strcmp върне 0, значи фамилиите им са еднкави
+			return 1;
+		}
+		else if (strcmp(author1.surname, author2.surname) == 0) //проверяваме 2рите им имена дали са еднакви 
+		{
+			if (strcmp(author1.lastName, author2.lastName) == 1)
+			{
+				return 1;
+			}
+			else if (strcmp(author1.lastName, author2.lastName) == 0) //ако strcmp върне 0, значи фамилиите им са еднкави
 			{
 				return 0; //ако и трите имена са еднакви връщаме 0
 			}
 		}			
 	}
 
-	return 1; //ако трите име на авторите не са еднакви връщаме 1
+	return -1; //ако трите име на авторите не са еднакви връщаме 1
+}
+
+size_t CountNodes(Node *head) //Count all Nodes in the linked list
+{
+	Node *temp = head;
+	size_t count = 0;
+	while (temp != NULL) //обхождаме списъка
+	{
+		count++;
+		temp = temp->next; //преминаваме към следващият елемент
+	}
+	return count; //връщаме броя на node-овете.
+}
+
+int CompareDates(Date date1, Date date2)
+{
+	if (date1.year < date2.year)
+	{
+		return -1;
+	}
+	else if (date1.year > date2.year)
+	{
+		return 1;
+	}
+	else
+	{
+		if (date1.month < date2.month)
+		{
+			return -1;
+		}
+		else if (date1.month > date2.month)
+		{
+			return 1;
+		}
+		else if (date1.day < date2.day)
+		{
+			return -1;
+		}
+		else if (date1.day > date2.day)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+}
+
+Node *SortList(Node *head) 
+{
+	if (head == NULL)
+	{
+		printf("Списъка е празен!Няма елементи за сортиране.\n");
+		return;
+	}
+
+	Node **buf = NULL, *temp = head, *change;
+	size_t countOfNodes = CountNodes(head);
+
+	buf = (Node**)malloc(countOfNodes*sizeof(Node*));
+	for (size_t i = 0; i < countOfNodes; i++, temp = temp->next)
+	{
+		buf[i] = temp;
+	}
+
+	for (size_t i = 0; i < countOfNodes - 1; i++)
+	{
+		for (size_t j = 0; j < countOfNodes - 1; j++)
+		{
+			if (CompareNames(buf[j]->data.author, buf[j + 1]->data.author) == 1)
+			{
+				change = buf[j];
+				buf[j] = buf[j + 1];
+				buf[j + 1] = change;
+			}
+			else if (CompareNames(buf[j]->data.author, buf[j + 1]->data.author) == 0)
+			{
+				if (CompareDates(buf[j]->data.date, buf[j+1]->data.date) == 1)
+				{
+					change = buf[j];
+					buf[j] = buf[j + 1];
+					buf[j + 1] = change;
+				}
+			}
+		}
+	}
+	head = buf[0];
+	for (size_t i = 0; i < countOfNodes - 1; i++)
+	{
+		buf[i]->next = buf[i + 1];
+	}
+	buf[countOfNodes - 1]->next = NULL;
+
+	printf("Сортирането е успешно\n");
+	return head;
 }
