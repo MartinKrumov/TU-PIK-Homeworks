@@ -1,0 +1,565 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include "funcs.h"
+
+int CheckForOverflow(size_t max, char *arr)
+{
+	size_t size = strlen(arr);
+	if (size >= max)
+	{
+		printf("--Overflow!.Too much symbols entered.--\n");
+		return 1;
+	}
+
+	fflush(stdin);
+	return 0;
+}
+
+int CheckForValidId(char *arr)
+{
+	for (size_t i = 0; i < 8; i++)
+	{
+		if (i == 0 || i == 6)
+		{
+			if (arr[i] < 'A' || arr[i] > 'Z') //проверява дали е различно от главна буква
+			{
+				printf("--Invalid Id.--\n"); // ако е икарва на екрана невалидно ИД
+				return 1;
+			}
+		}
+		else
+		{
+			if (!isdigit(arr[i])) //проверява дали е различно от цифра
+			{
+				printf("--Invalid Id.--\n");
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+int CheckForUniqueId(Node *head, char *id)
+{
+	if (head == NULL)
+	{
+		return 1;
+	}
+
+	while (head != NULL)
+	{
+		if (strcmp(id, head->data.Id) == 0)
+		{
+			printf("--The ID already exist.Please enter new ID.--\n");
+			return 0;
+		}
+		head = head->next;
+	}
+
+	return 1;
+}
+
+int CheckForValidDay(size_t day)
+{
+	fflush(stdin);
+	if (day < 1 || day > 31)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+int CheckForValidMonth(size_t month)
+{
+	fflush(stdin);
+	if (month < 1 || month > 12)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+int CheckName(size_t max, char *arr)
+{
+	fflush(stdin);
+	if (arr[0] >= 65 && arr[0] <= 90)
+	{
+		return CheckForOverflow(max, arr);
+	}
+
+	return 1;
+}
+
+Node *AddElement(Node *head)
+{
+	int flag;
+	int unique = 0;
+	Node *temp = (Node*)malloc(sizeof(Node));//заделяме памет за новия възел
+
+	if (temp == NULL) //ако заделянето на памет е неуспешно
+	{
+		printf("Unable to allocate memory for new node\n");
+		return;
+	}
+
+	do
+	{
+		printf("Рег. нормер: ");
+		scanf("%s", temp->data.Id);
+
+		flag = CheckForOverflow(11, temp->data.Id); //връща 0 ако няма препълване
+		flag = CheckForValidId(temp->data.Id);
+		unique = CheckForUniqueId(head, temp->data.Id); //връща 1 ако номера не се среща вече
+
+	} while (flag != 0 || unique != 1);
+
+	do
+	{
+		printf("Име на фирмата: ");
+		scanf("%s", temp->data.comapnyName);
+
+		flag = CheckName(21, temp->data.comapnyName);
+	} while (flag != 0); //ако флаг == 0 илизаме от цикъла
+
+	printf("Приход за последната година: ");
+	scanf("%f", &temp->data.income);
+
+	printf("Разход за последната година: ");
+	scanf("%f", &temp->data.outcome);
+
+	do
+	{
+		printf("Ден: ");
+		scanf("%u", &temp->data.date.day);
+		flag = CheckForValidDay(temp->data.date.day);
+	} while (flag != 0);
+
+	do
+	{
+		printf("Месец: ");
+		scanf("%u", &temp->data.date.month);
+		flag = CheckForValidMonth(temp->data.date.month);
+	} while (flag != 0);
+
+	printf("Година: ");
+	scanf("%u", &temp->data.date.year);
+
+	do
+	{
+		printf("Име: ");
+		scanf("%s", temp->data.owner.firstName);
+		flag = CheckForOverflow(20, temp->data.owner.firstName);
+	} while (flag != 0);
+
+	do
+	{
+		printf("Презиме: ");
+		scanf("%s", temp->data.owner.surname);
+		flag = CheckForOverflow(20, temp->data.owner.surname);
+	} while (flag != 0);
+
+	do
+	{
+		printf("Фамилия: ");
+		scanf("%s", temp->data.owner.lastName);
+		flag = CheckForOverflow(20, temp->data.owner.lastName);
+	} while (flag != 0);
+	printf("-----------------\n");
+
+	temp->next = NULL;
+	if (head != NULL)
+	{
+		temp->next = head;
+	}
+	head = temp;
+
+	//новият елемент отива пред предишния
+
+	return head;
+}
+
+void PrintAllElements(Node *head) //Принтира целия списък на екрана
+{
+	if (head == NULL) //Проверява дали списъка не е празен
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+
+	while (head != NULL)
+	{
+		printf("+------------------------+\n");
+		printf("Номер         : %s\n", head->data.Id);
+		printf("Име на фирмата: %s\n", head->data.comapnyName);
+		printf("Приход        : %.2f\n", head->data.income);
+		printf("Разход        : %.2f\n", head->data.outcome);
+		printf("Дата          : %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
+		printf("Собственик    : %s %s %s\n", head->data.owner.firstName, head->data.owner.surname, head->data.owner.lastName);
+		head = head->next;
+	}
+	printf("+------------------------+\n");
+}
+
+void PrintElement(Node *head, char *Id) //Принтира избран елемент от списъка
+{
+	if (head == NULL)
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+
+	while (head != NULL)
+	{
+		if (strcmp(Id, head->data.Id) == 0) // сравнява търсенето ID с това на елентите
+		{
+			printf("Номер         : %s\n", head->data.Id);
+			printf("Име на фирмата: %s\n", head->data.comapnyName);
+			printf("Приход        : %.2f\n", head->data.income);
+			printf("Разход        : %.2f\n", head->data.outcome);
+			printf("Дата          : %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
+			printf("Собственик    : %s %s %s\n", head->data.owner.firstName, head->data.owner.surname, head->data.owner.lastName);
+		}
+
+		head = head->next; //преминаваме към следващият елемент
+	}
+}
+
+void DeleteElement(Node **head, char *Id) //Изтрива избран елемент от списъка
+{
+	if (*head == NULL)
+	{
+		fprintf(stderr, "The list is empty!\n");
+		return;
+	}
+
+	Node *current = *head;
+	Node *previous = NULL; //For 1st node, indicate there is no previous.
+
+	while (current != NULL)
+	{
+		if (strcmp(Id, current->data.Id) == 0) // Ако намери съвпадение
+		{
+			if (previous == NULL)
+			{
+				*head = current->next; //Ако е първи елемент
+			}
+			else
+			{
+				previous->next = current->next; //Предишния възел прескача следващия и сочи към другия елемнт
+			}
+
+			free(current); //Освобождава памета на елемнта
+
+			return;
+		}
+		previous = current;
+		current = current->next;
+	}
+}
+
+Node *DeleteList(Node *head) //изтрива елементите от списъка
+{
+	Node *temp;
+	while (head != NULL)
+	{
+		temp = head;
+		head = head->next;
+		free(temp); //освобождаваме паметта
+	}
+	return head;
+}
+
+FILE *GetFileName(char *name_file, char *mode, char *text)
+{
+	FILE *fp;
+	int err;
+	errno = 0;
+
+	do
+	{
+		printf("Въведете име на файла %s: ", text);
+		err = scanf("%s", name_file);
+	} while (err != 1);
+
+	if ((fp = fopen(name_file, mode)) == NULL)
+	{
+		printf("\nФайлът <%s> Не може да се отвори - error No % d !!!\n", name_file, errno);
+		printf("ГРЕШКА No %d %s\n", errno, strerror(errno));
+		system("pause");
+	}
+	else
+	{
+		printf("\nФайлът <%s> е отворен успешно за обработка !\n\n", name_file);
+		system("pause");
+	}
+	return fp;
+}
+
+void WriteListToBinFile(Node *head)
+{
+	char fileName[128];
+	FILE *destFile = NULL;
+
+	if ((destFile = GetFileName(fileName, "wb", "за записване")) == NULL)
+	{
+		return;
+	}
+
+	Node *currentNode = head;
+	Node *holdNext = NULL;
+
+	while (currentNode != NULL)
+	{
+		holdNext = currentNode->next;
+		currentNode->next = NULL;
+
+		fseek(destFile, 0, SEEK_END);
+		fwrite(currentNode, sizeof(Node), 1, destFile);
+
+		currentNode->next = holdNext;
+		holdNext = NULL;
+
+		currentNode = currentNode->next;
+	}
+
+	if (destFile)
+		fclose(destFile);
+}
+
+Node *ReadListFromBinFile()
+{
+	Node *head = NULL;
+	FILE *srcFile = NULL;
+	char fileName[128];
+
+	if ((srcFile = GetFileName(fileName, "rb", "за четене")) == NULL)
+	{
+		return;
+	}
+
+	head = DeleteList(head);
+
+	fseek(srcFile, 0, SEEK_END);
+	long fileSize = ftell(srcFile);
+	rewind(srcFile);
+
+	int numEntries = (int)(fileSize / (sizeof(Node)));
+	printf("numEntries:%d\n", numEntries);
+
+	for (size_t loop = 0; loop < numEntries; ++loop)
+	{
+		fseek(srcFile, (sizeof(Node)* loop), SEEK_SET);
+		head = ReadNextFromFile(head, srcFile);
+	}
+
+	if (srcFile)
+		fclose(srcFile);
+
+	return head;
+}
+
+Node *ReadNextFromFile(Node *head, FILE *srcFile)
+{
+	size_t returnValue;
+	if (head == NULL)
+	{
+		head = (Node*)malloc(sizeof(Node));
+		returnValue = fread(head, sizeof(Node), 1, srcFile);
+		head->next = NULL;
+	}
+	else
+	{
+		Node *currentNode = head;
+		Node *newNode = (Node*)malloc(sizeof(Node));
+		while (currentNode->next != NULL)
+		{
+			currentNode = currentNode->next;
+		}
+		returnValue = fread(newNode, sizeof(Node), 1, srcFile);
+		currentNode->next = newNode;
+		newNode->next = NULL;
+	}
+	return head;
+}
+
+void WriteListToTxtFile(Node *head)
+{
+	char fileName[128];
+	FILE *destFile = NULL;
+
+	if ((destFile = GetFileName(fileName, "wt", "за записване")) == NULL)
+	{
+		return;
+	}
+
+	while (head != NULL) //записва във файла инфото за книгата
+	{
+		fprintf(destFile, "%s", head->data.Id);
+		fprintf(destFile, ", %s", head->data.comapnyName);
+		fprintf(destFile, ", %.2f", head->data.income);
+		fprintf(destFile, ", %.2f", head->data.outcome);
+		fprintf(destFile, ", %u", head->data.date.day);
+		fprintf(destFile, ". %u", head->data.date.month);
+		fprintf(destFile, ". %u", head->data.date.year);
+		fprintf(destFile, ", %s", head->data.owner.firstName);
+		fprintf(destFile, ", %s", head->data.owner.surname);
+		fprintf(destFile, ", %s\n", head->data.owner.lastName);
+
+		head = head->next; //преминаваме към следващият елемент(книга)
+	}
+
+	if (destFile)
+		fclose(destFile); //затваряме файла
+}
+
+Node *ReadListFromTxtFile(Node *head)
+{
+	FILE *srcFile = NULL;
+	char fileName[128];
+	char line[256]; //ще записваме прочетеният ред в масива
+
+	int fields = 10; //броят на полета, които трябва да бъдат прочетени
+
+	if ((srcFile = GetFileName(fileName, "rt", "за четене")) == NULL)
+	{
+		return;
+	}
+
+	head = DeleteList(head);
+
+	while (fgets(line, sizeof(line), srcFile) != NULL) //четем ред по ред от файла
+	{
+		if (head == NULL) //ако листа е празен
+		{
+			head = (Node*)malloc(sizeof(Node)); //заделяме динамично памет
+			//чрез sscanf преместваме информацията от масива line в полетата на новия елемент от списъка
+			//sscanf - връща броят на успешно прочетените параметри.Чрез %[^,] четем докато не стигнем запетая.
+			if (fields != sscanf(line, "%[^,], %[^,], %f, %f, %u.%u.%u, %[^,], %[^,], %[^\n]",
+				head->data.Id, head->data.comapnyName, &head->data.income, &head->data.outcome, &head->data.date.day, &head->data.date.month,
+				&head->data.date.year, head->data.owner.firstName, head->data.owner.surname, head->data.owner.lastName))
+			{
+				printf("Невалидна информация.\n");
+				printf("Моля оправете информацията във файла, от който четем.\n");
+				system("pause");
+				return;
+			}
+			head->next = NULL;
+		}
+		else
+		{
+			Node *currenNode = head;
+			Node *newNode = (Node*)malloc(sizeof(Node));
+			while (currenNode->next != NULL) //обхождаме списъка докато не стигнем края
+			{
+				currenNode = currenNode->next;
+			}
+			//чрез sscanf преместваме информацията от масива line в полетата на новия елемент от списъка
+			//sscanf - връща броят на успешно прочетените параметри.Чрез %[^,] четем докато не стигнем запетая.
+			if (fields != sscanf(line, "%[^,], %[^,], %f, %f, %u.%u.%u, %[^,], %[^,], %[^\n]",
+				newNode->data.Id, newNode->data.comapnyName, &newNode->data.income, &newNode->data.outcome, 
+				&newNode->data.date.day, &newNode->data.date.month,&newNode->data.date.year, 
+				newNode->data.owner.firstName, newNode->data.owner.surname, newNode->data.owner.lastName))
+			{
+				printf("Невалидна информация.\n"); //ако има грешка/проблем при преместването на информацията 
+				printf("Моля оправете информацията във файла, от който четем.\n");
+				system("pause");
+				return;
+			}
+			currenNode->next = newNode; //записваме новият елемент след предходният
+			newNode->next = NULL;
+		}
+	}
+
+	if (srcFile)
+		fclose(srcFile); //затваряме отвореният файл
+
+	return head;
+}
+
+void GetCompanies(Node *head)
+{
+	if (head == NULL)
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+	int compare;
+	Owner wantedOwner;
+
+	printf("Въвдете имената на желаният собственик:\n");
+	EnterNames(&wantedOwner); //извикваме функцията, с която въвеждаме имената на търсеният собственик
+
+	while (head != NULL)
+	{
+		compare = CompareNames(head->data.owner, wantedOwner); //CompareNames връща 0 ако имената са еднакви
+
+		if (compare == 0 ) 
+		{
+			printf("Номер         : %s\n", head->data.Id);
+			printf("Име на фирмата: %s\n", head->data.comapnyName);
+			printf("Приход        : %.2f\n", head->data.income);
+			printf("Разход        : %.2f\n", head->data.outcome);
+			printf("Дата          : %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
+			printf("Собственик    : %s %s %s\n", head->data.owner.firstName, head->data.owner.surname, head->data.owner.lastName);
+			printf("---------------------------\n");
+		}
+
+		head = head->next; //преминаваме към следващият елемент
+	}
+}
+void EnterNames(Owner *a1) //Въвеждаме имената на собствениците
+{
+	int flag; //флаг с който ще проверяваме за препълване на масивите
+	do
+	{
+		printf("Име: ");
+		scanf("%s", a1->firstName);
+		flag = CheckForOverflow(20, a1->firstName); //извикваме CheckForOverFlow и подаваме максималният размер на масива
+	} while (flag != 0);
+
+	do
+	{
+		printf("Презиме: ");
+		scanf("%s", a1->surname);
+		flag = CheckForOverflow(20, a1->surname); //извикваме функцията CheckForOverFlow , ако върне 1 значи има препълване
+	} while (flag != 0);
+
+	do
+	{
+		printf("Фамилия: ");
+		scanf("%s", a1->lastName);
+		flag = CheckForOverflow(20, a1->lastName);
+	} while (flag != 0);
+	printf("-----------------\n");
+}
+
+int CompareNames(Owner a, Owner b) //Сряваняваме имената на авторите
+{
+	if (strcmp(a.firstName, b.firstName) == 1)
+	{
+		return 1;
+	}
+	else if ((strcmp(a.firstName, b.firstName) == 0)) //ако 1вите имена на авторите са еднакви
+	{
+		if (strcmp(a.surname, b.surname) == 1)
+		{
+			return 1;
+		}
+		else if (strcmp(a.surname, b.surname) == 0) //проверяваме 2рите им имена дали са еднакви 
+		{
+			if (strcmp(a.lastName, b.lastName) == 1)
+			{
+				return 1;
+			}
+			else if (strcmp(a.lastName, b.lastName) == 0) //ако strcmp върне 0, значи фамилиите им са еднкави
+			{
+				return 0; //ако и трите имена са еднакви връщаме 0
+			}
+		}
+	}
+
+	return -1; //ако имената на 2рия автор са по-големи връщаме -1
+}
