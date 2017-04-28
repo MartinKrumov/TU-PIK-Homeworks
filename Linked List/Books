@@ -439,12 +439,12 @@ void PrintAvalibleBooks(Node *head) //принтира всички наличн
 
 		if (compare == 0 && head->data.stock == 'n') //n - за налична
 		{
-			printf("ID        : %s\n", head->data.Id);
-			printf("Book Name : %s\n", head->data.bookName);
-			printf("Publisher : %s\n", head->data.publisherName);
-			printf("Stock     : %c\n", head->data.stock);
-			printf("Date      : %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
-			printf("Author    : %s %s %s\n", head->data.author.firstName, head->data.author.surname, head->data.author.lastName);
+			printf("Номер         : %s\n", head->data.Id);
+			printf("Име на книгата: %s\n", head->data.bookName);
+			printf("Издателство   : %s\n", head->data.publisherName);
+			printf("Наличност     : %c\n", head->data.stock);
+			printf("Дата          : %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
+			printf("Автор         : %s %s %s\n", head->data.author.firstName, head->data.author.surname, head->data.author.lastName);
 			printf("---------------------------\n");
 		}
 
