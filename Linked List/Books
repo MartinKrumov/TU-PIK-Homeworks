@@ -20,7 +20,7 @@ int CheckForOverflow(size_t max, char *arr)
 
 int CheckForValidId(char *arr)
 {
-	for (size_t i = 0; i < 6; i++)
+	for (size_t i = 0; i < 10; i++)
 	{
 		if (i == 0 || i == 6 || i == 8 || i == 9) 
 		{
@@ -199,12 +199,13 @@ Node *AddElement(Node *head)
 	printf("-----------------\n");
 
 	temp->next = NULL;
+	
 	if (head != NULL)
 	{
-		temp->next = head; //вкарваме новия елемент пред предишния
+		temp->next = head; 
 	}
 	head = temp;
-
+	//новият елемент отива пред предишния
 	return head; 
 }
 
