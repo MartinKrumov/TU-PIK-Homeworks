@@ -510,6 +510,31 @@ void GetCompanies(Node *head)
 		head = head->next; //преминаваме към следващият елемент
 	}
 }
+
+void GetCompaniesByOwner(Node *head, char *wantedOwner)
+{
+	if (head == NULL)
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+
+	while (head != NULL)
+	{
+		if (strcmp(head->data.owner.lastName, wantedOwner) == 0)
+		{
+			printf("Номер         : %s\n", head->data.Id);
+			printf("Име на фирмата: %s\n", head->data.comapnyName);
+			printf("Приход        : %.2f\n", head->data.income);
+			printf("Разход        : %.2f\n", head->data.outcome);
+			printf("Дата          : %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
+			printf("Собственик    : %s %s %s\n", head->data.owner.firstName, head->data.owner.surname, head->data.owner.lastName);
+			printf("---------------------------\n");
+		}
+
+		head = head->next; //преминаваме към следващият елемент
+	}
+}
 void EnterNames(Owner *a1) //Въвеждаме имената на собствениците
 {
 	int flag; //флаг с който ще проверяваме за препълване на масивите
