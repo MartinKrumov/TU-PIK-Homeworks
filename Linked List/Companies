@@ -42,7 +42,7 @@ int CheckForValidId(char *arr)
 	return 0;
 }
 
-int CheckForUniqueId(Node *head, char *id)
+int CheckForUniqueId(Node *head, char *id) //Проверява дали ID-to вечне не се среща
 {
 	if (head == NULL)
 	{
@@ -111,7 +111,7 @@ Node *AddElement(Node *head)
 		scanf("%s", temp->data.Id);
 
 		flag = CheckForOverflow(11, temp->data.Id); //връща 0 ако няма препълване
-		flag = CheckForValidId(temp->data.Id);
+		flag = CheckForValidId(temp->data.Id); 
 		unique = CheckForUniqueId(head, temp->data.Id); //връща 1 ако номера не се среща вече
 
 	} while (flag != 0 || unique != 1);
@@ -130,43 +130,9 @@ Node *AddElement(Node *head)
 	printf("Разход за последната година: ");
 	scanf("%f", &temp->data.outcome);
 
-	do
-	{
-		printf("Ден: ");
-		scanf("%u", &temp->data.date.day);
-		flag = CheckForValidDay(temp->data.date.day);
-	} while (flag != 0);
-
-	do
-	{
-		printf("Месец: ");
-		scanf("%u", &temp->data.date.month);
-		flag = CheckForValidMonth(temp->data.date.month);
-	} while (flag != 0);
-
-	printf("Година: ");
-	scanf("%u", &temp->data.date.year);
-
-	do
-	{
-		printf("Име: ");
-		scanf("%s", temp->data.owner.firstName);
-		flag = CheckForOverflow(20, temp->data.owner.firstName);
-	} while (flag != 0);
-
-	do
-	{
-		printf("Презиме: ");
-		scanf("%s", temp->data.owner.surname);
-		flag = CheckForOverflow(20, temp->data.owner.surname);
-	} while (flag != 0);
-
-	do
-	{
-		printf("Фамилия: ");
-		scanf("%s", temp->data.owner.lastName);
-		flag = CheckForOverflow(20, temp->data.owner.lastName);
-	} while (flag != 0);
+	EnterDates(&temp->data.date); //въвеждаме дата на създаване на фирмата
+	EnterNames(&temp->data.owner); //въвеждаме имената на собственика на фирмата
+	
 	printf("-----------------\n");
 
 	temp->next = NULL;
@@ -387,7 +353,7 @@ Node *ReadNextFromFile(Node *head, FILE *srcFile)
 
 void WriteListToTxtFile(Node *head)
 {
-	char fileName[128];
+	char fileName[128]; //масив за името на файла
 	FILE *destFile = NULL;
 
 	if ((destFile = GetFileName(fileName, "wt", "за записване")) == NULL)
@@ -395,7 +361,7 @@ void WriteListToTxtFile(Node *head)
 		return;
 	}
 
-	while (head != NULL) //записва във файла инфото за книгата
+	while (head != NULL) //записва във файла инфото на елемента
 	{
 		fprintf(destFile, "%s", head->data.Id);
 		fprintf(destFile, ", %s", head->data.comapnyName);
@@ -408,7 +374,7 @@ void WriteListToTxtFile(Node *head)
 		fprintf(destFile, ", %s", head->data.owner.surname);
 		fprintf(destFile, ", %s\n", head->data.owner.lastName);
 
-		head = head->next; //преминаваме към следващият елемент(книга)
+		head = head->next; //преминаваме към следващият елемент
 	}
 
 	if (destFile)
@@ -535,6 +501,62 @@ void GetCompaniesByOwner(Node *head, char *wantedOwner)
 		head = head->next; //преминаваме към следващият елемент
 	}
 }
+
+void GetNumberOfCompanies(Node *head)
+{
+	if (head == NULL)
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+
+	int count = 0;
+
+	Date currentDate;
+	Date newDate;
+
+	EnterDates(&currentDate);
+
+	newDate = SubstractMonths(&currentDate);
+
+	while (head != NULL)
+	{
+		int curr = CompareDates(head->data.date, currentDate); //връща -1 ако първата дата е по-малка от 2рата
+		int prev = CompareDates(head->data.date, newDate); //връща 1 ако първата дата е по-голяма от 2рата
+
+		if (curr == -1 && prev == 1)
+		{
+			count++;
+		}
+
+		head = head->next;
+	}
+
+	printf("Броят на фирмите: %d\n", count);
+}
+
+Date SubstractMonths(Date *date)
+{
+	Date tempDate = *date;
+
+	int months;
+	printf("Въведете месеци: ");
+	scanf("%d", &months);
+
+	if ((tempDate.month - months) < 0)
+	{
+		tempDate.month - months;
+	}
+	else
+	{
+		int temp = months / 12;
+		tempDate.year -= temp;
+		tempDate.month += (temp * 12);
+		tempDate.month -= months;
+	}
+	return tempDate;
+}
+
 void EnterNames(Owner *a1) //Въвеждаме имената на собствениците
 {
 	int flag; //флаг с който ще проверяваме за препълване на масивите
@@ -561,13 +583,34 @@ void EnterNames(Owner *a1) //Въвеждаме имената на собств
 	printf("-----------------\n");
 }
 
-int CompareNames(Owner a, Owner b) //Сряваняваме имената на авторите
+void EnterDates(Date *d1)
+{
+	int flag;
+	do
+	{
+		printf("Ден: ");
+		scanf("%u", &d1->day);
+		flag = CheckForValidDay(d1->day);
+	} while (flag != 0);
+
+	do
+	{
+		printf("Месец: ");
+		scanf("%u", &d1->month);
+		flag = CheckForValidMonth(d1->month);
+	} while (flag != 0);
+
+	printf("Година: ");
+	scanf("%u", &d1->year);
+}
+
+int CompareNames(Owner a, Owner b) //Сряваняваме имената на собствениците
 {
 	if (strcmp(a.firstName, b.firstName) == 1)
 	{
 		return 1;
 	}
-	else if ((strcmp(a.firstName, b.firstName) == 0)) //ако 1вите имена на авторите са еднакви
+	else if ((strcmp(a.firstName, b.firstName) == 0)) //ако 1вите имена на собствениците са еднакви
 	{
 		if (strcmp(a.surname, b.surname) == 1)
 		{
@@ -586,5 +629,33 @@ int CompareNames(Owner a, Owner b) //Сряваняваме имената на 
 		}
 	}
 
-	return -1; //ако имената на 2рия автор са по-големи връщаме -1
+	return -1; //ако имената на 2рия собственик са по-големи връщаме -1
+}
+
+int CompareNames(Owner a, Owner b) //Сряваняваме имената на собствениците
+{
+	if (strcmp(a.firstName, b.firstName) == 1)
+	{
+		return 1;
+	}
+	else if ((strcmp(a.firstName, b.firstName) == 0)) //ако 1вите имена на собствениците са еднакви
+	{
+		if (strcmp(a.surname, b.surname) == 1)
+		{
+			return 1;
+		}
+		else if (strcmp(a.surname, b.surname) == 0) //проверяваме 2рите им имена дали са еднакви 
+		{
+			if (strcmp(a.lastName, b.lastName) == 1)
+			{
+				return 1;
+			}
+			else if (strcmp(a.lastName, b.lastName) == 0) //ако strcmp върне 0, значи фамилиите им са еднкави
+			{
+				return 0; //ако и трите имена са еднакви връщаме 0
+			}
+		}
+	}
+
+	return -1; //ако имената на 2рия собственик са по-големи връщаме -1
 }
