@@ -462,7 +462,7 @@ void GetCompanies(Node *head)
 	{
 		compare = CompareNames(head->data.owner, wantedOwner); //CompareNames връща 0 ако имената са еднакви
 
-		if (compare == 0 ) 
+		if (compare == 0) 
 		{
 			printf("Номер         : %s\n", head->data.Id);
 			printf("Име на фирмата: %s\n", head->data.comapnyName);
@@ -517,7 +517,7 @@ void GetNumberOfCompanies(Node *head)
 
 	EnterDates(&currentDate);
 
-	newDate = SubstractMonths(&currentDate);
+	newDate = SubstractMonths(&currentDate); //подаваме текущата дата 
 
 	while (head != NULL)
 	{
@@ -535,9 +535,9 @@ void GetNumberOfCompanies(Node *head)
 	printf("Броят на фирмите: %d\n", count);
 }
 
-Date SubstractMonths(Date *date)
+Date SubstractMonths(Date *date) //вади последните К-месеци от текущата дата
 {
-	Date tempDate = *date;
+	Date tempDate = *date; 
 
 	int months;
 	printf("Въведете месеци: ");
@@ -554,7 +554,7 @@ Date SubstractMonths(Date *date)
 		tempDate.month += (temp * 12);
 		tempDate.month -= months;
 	}
-	return tempDate;
+	return tempDate; //връщаме новата дата
 }
 
 void EnterNames(Owner *a1) //Въвеждаме имената на собствениците
