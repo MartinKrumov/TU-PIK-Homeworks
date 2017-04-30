@@ -10,7 +10,7 @@ int CheckForOverflow(size_t max, char *arr)
 	size_t size = strlen(arr);
 	if (size >= max)
 	{
-		fprintf(stderr, "--Overflow!.Too much symbols entered.--\n");
+		printf("--Overflow!.Too much symbols entered.--\n");
 		return 1;
 	}
 
@@ -24,9 +24,9 @@ int CheckForValidId(char *arr)
 	{
 		if ((i >= 0 && i < 2) || i == 5)
 		{
-			if (arr[i] < 'A' || arr[i] > 'Z')
+			if (arr[i] < 'A' || arr[i] > 'Z') //проверява дали е различно от главна буква
 			{
-				fprintf(stderr, "--Invalid Id.--\n");
+				printf("--Invalid Id.--\n"); // ако е икарва на екрана невалидно ИД
 				return 1;
 			}
 		}
@@ -34,7 +34,7 @@ int CheckForValidId(char *arr)
 		{
 			if (!isdigit(arr[i]))
 			{
-				fprintf(stderr, "--Invalid Id.--\n");
+				printf("--Invalid Id.--\n");
 				return 1;
 			}
 		}
@@ -42,7 +42,7 @@ int CheckForValidId(char *arr)
 	return 0;
 }
 
-int CheckForUniqueId(Node *head, char *id)
+int CheckForUniqueId(Node *head, char *id) //Проверява дали ID-to вечне не се среща
 {
 	if (head == NULL)
 	{
@@ -53,7 +53,7 @@ int CheckForUniqueId(Node *head, char *id)
 	{
 		if (strcmp(id, head->data.Id) == 0)
 		{
-			fprintf(stderr, "--The ID already exist.Please enter new ID.--\n");
+			printf("--The ID already exist.Please enter new ID.--\n");
 			return 0;
 		}
 		head = head->next;
@@ -82,7 +82,7 @@ int CheckForValidMonth(size_t month)
 	return 0;
 }
 
-int CheckName(size_t max ,char *arr)
+int CheckName(size_t max, char *arr)
 {
 	if (arr[0] >= 65 && arr[0] <= 90)
 	{
@@ -96,9 +96,9 @@ Node *AddElement(Node *head)
 {
 	int flag;
 	int unique = 0;
-	Node *temp = (Node*)malloc(sizeof(Node));
+	Node *temp = (Node*)malloc(sizeof(Node)); //заделяме памет за новия възел
 
-	if (temp == NULL)
+	if (temp == NULL) //ако заделянето на памет е неуспешно
 	{
 		fprintf(stderr, "Unable to allocate memory for new node\n");
 		return;
@@ -109,174 +109,152 @@ Node *AddElement(Node *head)
 		printf("Id: ");
 		scanf("%s", temp->data.Id);
 
-		flag = CheckForOverflow(7, temp->data.Id);
+		flag = CheckForOverflow(7, temp->data.Id); //връща 0 ако няма препълване
 		flag = CheckForValidId(temp->data.Id);
-		unique = CheckForUniqueId(head, temp->data.Id);
+		unique = CheckForUniqueId(head, temp->data.Id); //връща 1 ако номера не се среща вече
 
 	} while (flag != 0 || unique != 1);
 
 	do
 	{
-		printf("Document Name: ");
+		printf("Име на документа: ");
 		scanf("%s", temp->data.documentName);
 		flag = CheckName(30, temp->data.documentName);
-	} while (flag != 0);
+	} while (flag != 0); //ако флаг == 0 илизаме от цикъла
+
+	EnterDates(&temp->data.date); //въвеждаме дата на създаване
 
 	do
 	{
-		printf("Day: ");
-		scanf("%u", &temp->data.date.day);
-		flag = CheckForValidDay(temp->data.date.day);
-	} while (flag != 0);
-
-	do
-	{
-		printf("Month: ");
-		scanf("%u", &temp->data.date.month);
-		flag = CheckForValidMonth(temp->data.date.month);
-	} while (flag != 0);
-
-
-	printf("Year: ");
-	scanf("%u", &temp->data.date.year);
-
-	do
-	{
-		printf("Name: ");
+		printf("Име: ");
 		scanf("%s", temp->data.author.firstName);
 		flag = CheckForOverflow(20, temp->data.author.firstName);
 	} while (flag != 0);
 
 	do
 	{
-		printf("Surname: ");
+		printf("Презиме: ");
 		scanf("%s", temp->data.author.surname);
 		flag = CheckForOverflow(20, temp->data.author.surname);
 	} while (flag != 0);
 
 	do
 	{
-		printf("Last Name: ");
+		printf("Фамилия: ");
 		scanf("%s", temp->data.author.lastName);
 		flag = CheckForOverflow(20, temp->data.author.lastName);
 	} while (flag != 0);
 
 	do
 	{
-		printf("Information: ");
+		printf("Информация: ");
 		scanf("%[^\n]", temp->data.info);
 		flag = CheckForOverflow(63, temp->data.info);
 	} while (flag != 0);
-
 	printf("-----------------\n");
 
 	temp->next = NULL;
 
-	if (head == NULL)
+	if (head != NULL)
 	{
-		head = temp;
+		temp->next = head;
 	}
-	else
-	{
-		Node *current = head;
-		while (current->next != NULL)
-		{
-			current = current->next;
-		}
-		current->next = temp;
-	}
+	head = temp;
+	//новият елемент отива пред предишния
 
 	return head;
 }
 
 
-void PrintAllElements(Node *head)
+void PrintAllElements(Node *head) //Принтира целия списък на екрана
 {
-	if (head == NULL)
+	if (head == NULL) //Проверява дали списъка не е празен
 	{
-		fprintf(stderr, "The list is empty!\n");
+		printf("The list is empty!\n");
+		return;
 	}
+	size_t countOfDocuments = CountNodes(head);
 
 	while (head != NULL)
 	{
 		printf("+------------------------+\n");
-		printf("ID       : %s\n", head->data.Id);
-		printf("Doc Name : %s\n", head->data.documentName);
-		printf("Date     : %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
-		printf("Author   : %s %s %s\n", head->data.author.firstName, head->data.author.surname, head->data.author.lastName);
-		printf("Info     : %s\n", head->data.info);
-		head = head->next;
+		printf("ID        : %s\n", head->data.Id);
+		printf("Doc Name  : %s\n", head->data.documentName);
+		printf("Дата      : %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
+		printf("Автор     : %s %s %s\n", head->data.author.firstName, head->data.author.surname, head->data.author.lastName);
+		printf("Информация: %s\n", head->data.info);
+
+		head = head->next; //преминаваме към следващия елемент от списъка
 	}
+	printf("+------------------------+\n");
+	printf("Броят на документите: %u\n", countOfDocuments);
 }
 
-void PrintElement(Node *head, char *Id)
+void PrintElement(Node *head, char *Id) //Принтира избран елемент от списъка
 {
 	if (head == NULL)
 	{
-		fprintf(stderr, "The list is empty!\n");
+		printf("The list is empty!\n");
 		return;
 	}
 
 	while (head != NULL)
 	{
-		if (strcmp(Id, head->data.Id) == 0)
+		if (strcmp(Id, head->data.Id) == 0) // сравнява търсенето ID с това на елементите
 		{
-			printf("ID       :: %s\n", head->data.Id);
-			printf("Doc Name :: %s\n", head->data.documentName);
-			printf("Date     :: %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
-			printf("Author   :: %s %s %s\n", head->data.author.firstName, head->data.author.surname, head->data.author.lastName);
-			printf("Info     :: %s\n", head->data.info);
+			printf("+------------------------+\n");
+			printf("ID        : %s\n", head->data.Id);
+			printf("Doc Name  : %s\n", head->data.documentName);
+			printf("Дата      : %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
+			printf("Автор     : %s %s %s\n", head->data.author.firstName, head->data.author.surname, head->data.author.lastName);
+			printf("Информация: %s\n", head->data.info);
 		}
-		else
-		{
-			printf("\nДокументът с ID \"%s\" не намерен.\n");
-		}
-		head = head->next;
+
+		head = head->next; //преминаваме към следващия елемент от списъка
 	}
 }
 
-Node *DeleteElement(Node *head, char *Id)
+void DeleteElement(Node **head, char *Id) //Изтрива избран елемент от списъка
 {
-	if (head == NULL)
+	if (*head == NULL)
 	{
-		fprintf(stderr, "The list is empty!\n");
+		printf("The list is empty!\n");
 		return;
 	}
 
-	// Check to see if current node is one to be deleted.
-	if (strcmp(Id, head->data.Id) == 0)
+	Node *current = *head;
+	Node *previous = NULL; //For 1st node, indicate there is no previous.
+
+	while (current != NULL)
 	{
-		Node *tempNextP;
+		if (strcmp(Id, current->data.Id) == 0) // Ако намери съвпадение
+		{
+			if (previous == NULL)
+			{
+				*head = current->next; //Ако е първи елемент
+			}
+			else
+			{
+				previous->next = current->next; //Предишния възел прескача следващия и сочи към другия елемнт
+			}
 
-		tempNextP = head->next; //Save the next pointer in the node. 
+			free(current); //Освобождава памета на елемнта
 
-		free(head); //Deallocate the node. 
-
-		/* Return the NEW pointer to where we
-		* were called from.  I.e., the pointer
-		* the previous call will use to "skip
-		* over" the removed node.*/
-		return tempNextP;
+			return;
+		}
+		previous = current;
+		current = current->next;
 	}
-
-	/*Check the rest of the list, fixing the next
-	  pointer in case the next node is the one removed.*/
-	head->next = DeleteElement(head->next, Id);
-
-	
-	/*Return the pointer to where we were called from.
-	Since we did not remove this node it will be the same.*/
-	return head;
 }
 
-Node *DeleteList(Node *head)
+Node *DeleteList(Node *head) //изтрива елементите от списъка
 {
 	Node *temp;
 	while (head != NULL)
 	{
 		temp = head;
 		head = head->next;
-		free(temp);
+		free(temp); //освобождаваме паметта
 	}
 	return head;
 }
@@ -318,11 +296,11 @@ void WriteListToBinFile(Node *head)
 	}
 
 	Node *currentDoc = head;
-	Node *holdNext = NULL;
+	Node *holdNext = NULL; //ще съдържа адреса на следващият елемент от списъка
 
-	while (currentDoc != NULL)
+	while (currentDoc != NULL) //докато не стигнем края на списъка
 	{
-		holdNext = currentDoc->next;
+		holdNext = currentDoc->next; 
 		currentDoc->next = NULL;
 
 		fseek(destFile, 0, SEEK_END);
@@ -336,30 +314,6 @@ void WriteListToBinFile(Node *head)
 
 	if (destFile)
 		fclose(destFile);
-}
-
-Node *ReadNextFromFile(Node *head, FILE *srcFile)
-{
-	size_t returnValue;
-	if (head == NULL)
-	{
-		head = (Node*)malloc(sizeof(Node));
-		returnValue = fread(head, sizeof(Node), 1, srcFile);
-		head->next = NULL;
-	}
-	else
-	{
-		Node *currentDoc = head;
-		Node *newDoc = (Node*)malloc(sizeof(Node));
-		while (currentDoc->next != NULL)
-		{
-			currentDoc = currentDoc->next;
-		}
-		returnValue = fread(newDoc, sizeof(Node), 1, srcFile);
-		currentDoc->next = newDoc;
-		newDoc->next = NULL;
-	}
-	return head;
 }
 
 Node *ReadListFromBinFile()
@@ -394,6 +348,30 @@ Node *ReadListFromBinFile()
 	return head;
 }
 
+Node *ReadNextFromFile(Node *head, FILE *srcFile)
+{
+	size_t returnValue;
+	if (head == NULL)
+	{
+		head = (Node*)malloc(sizeof(Node));
+		returnValue = fread(head, sizeof(Node), 1, srcFile);
+		head->next = NULL;
+	}
+	else
+	{
+		Node *currentDoc = head;
+		Node *newDoc = (Node*)malloc(sizeof(Node));
+		while (currentDoc->next != NULL)
+		{
+			currentDoc = currentDoc->next;
+		}
+		returnValue = fread(newDoc, sizeof(Node), 1, srcFile);
+		currentDoc->next = newDoc;
+		newDoc->next = NULL;
+	}
+	return head;
+}
+
 void WriteListToTxtFile(Node *head)
 {
 	char fileName[NAME];
@@ -404,7 +382,7 @@ void WriteListToTxtFile(Node *head)
 		return;
 	}
 
-	while (head != NULL)
+	while (head != NULL) //записва във файла инфото на елемента
 	{
 		fprintf(destFile, "%s", head->data.Id);
 		fprintf(destFile, ", %s", head->data.documentName);
@@ -416,18 +394,18 @@ void WriteListToTxtFile(Node *head)
 		fprintf(destFile, ", %s", head->data.author.lastName);
 		fprintf(destFile, ", %s\n", head->data.info);
 
-		head = head->next;
+		head = head->next; //преминаваме към следващият елемент
 	}
 
-	if (destFile)
-		fclose(destFile);
+	if (destFile) 
+		fclose(destFile); //затваряме файла
 }
 
 Node *ReadListFromTxtFile(Node *head)
 {
 	FILE *srcFile = NULL;
 	char fileName[NAME];
-	char line[256];
+	char line[256]; //ще записваме прочетеният ред в масива
 
 	int err = 1;
 
@@ -435,20 +413,23 @@ Node *ReadListFromTxtFile(Node *head)
 	{
 		return;
 	}
+	int fields = 9; //броят на полета, които трябва да бъдат прочетени
 
-	head = DeleteList(head);
+	head = DeleteList(head); 
 
-	while (fgets(line, sizeof(line), srcFile) != NULL)
+	while (fgets(line, sizeof(line), srcFile) != NULL) //четем ред по ред от файла
 	{
 		if (head == NULL)
 		{
 			head = (Node*)malloc(sizeof(Node));
-			if (9 != sscanf(line, "%6[^,], %30[^,], %u, %u, %u, %20[^,], %20[^,], %20[^,], %63[^\n]",
+			//чрез sscanf преместваме информацията от масива line в полетата на новия елемент от списъка
+			//sscanf - връща броят на успешно прочетените параметри.Чрез %[^,] четем докато не стигнем запетая.
+			if (fields != sscanf(line, "%6[^,], %30[^,], %u, %u, %u, %20[^,], %20[^,], %20[^,], %63[^\n]",
 				head->data.Id, head->data.documentName, &head->data.date.day, &head->data.date.month,
 				&head->data.date.year, head->data.author.firstName, head->data.author.surname, head->data.author.lastName, head->data.info))
 			{
-				fprintf(stderr, "Invalid data\n");
-				printf("Please fix the data in the file you're reading from.\n");
+				printf("Невалидна информация.\n"); //ако има грешка/проблем при преместването на информацията 
+				printf("Моля оправете информацията във файла, от който четем.\n");
 				system("pause");
 				return;
 			}
@@ -462,234 +443,34 @@ Node *ReadListFromTxtFile(Node *head)
 			{
 				currentDoc = currentDoc->next;
 			}
-			if (9 != sscanf(line, "%6[^,], %30[^,], %u, %u, %u, %20[^,], %20[^,], %20[^,], %63[^\n]",
+			//чрез sscanf преместваме информацията от масива line в полетата на новия елемент от списъка
+			//sscanf - връща броят на успешно прочетените параметри.Чрез %[^,] четем докато не стигнем запетая.
+			if (fields != sscanf(line, "%6[^,], %30[^,], %u, %u, %u, %20[^,], %20[^,], %20[^,], %63[^\n]",
 				newDoc->data.Id, newDoc->data.documentName, &newDoc->data.date.day, &newDoc->data.date.month,
 				&newDoc->data.date.year, newDoc->data.author.firstName, newDoc->data.author.surname, newDoc->data.author.lastName,
 				newDoc->data.info))
 			{
-				fprintf(stderr, "Invalid data\n");
-				printf("Please fix the data in the file you're reading from.\n");
+				printf("Невалидна информация.\n"); //ако има грешка/проблем при преместването на информацията 
+				printf("Моля оправете информацията във файла, от който четем.\n");
 				system("pause");
 				return;
 			}
-			currentDoc->next = newDoc;
+			currentDoc->next = newDoc; //записваме новият елемент след предходният
 			newDoc->next = NULL;
 		}
 	}
 
 	if (srcFile)
-		fclose(srcFile);
+		fclose(srcFile); //затваряме отвореният файл
 
 	return head;
-}
-
-int CompareDates(Date date1, Date date2)
-{
-	if (date1.year < date2.year)
-	{
-		return -1;
-	}
-	else if (date1.year > date2.year)
-	{
-		return 1;
-	}
-	else
-	{
-		if (date1.month < date2.month)
-		{
-			return -1;
-		}
-		else if (date1.month > date2.month)
-		{
-			return 1;
-		}
-		else if (date1.day < date2.day)
-		{
-			return -1;
-		}
-		else if (date1.day > date2.day)
-		{
-			return 1;
-		}
-		else
-		{
-			return 0;
-		}
-	}
-}
-
-int CompareNames(Document d1, Document d2)
-{
-	if (strcmp(d1.documentName, d2.documentName) > 0)
-	{
-		return 1;
-	}
-	else if (strcmp(d1.documentName, d2.documentName) == 0)
-	{
-		return 0;
-	}
-	else
-	{
-		return -1;
-	}
-}
-
-int CompareId(Document d1, Document d2)
-{
-	if (strcmp(d1.Id, d2.Id) > 0)
-	{
-		return 1;
-	}
-	else
-	{
-		return -1;
-	}
-}
-
-
-
-size_t CountNodes(Node *head) //Count all Nodes in the linked list
-{
-	Node *temp = head;
-	size_t count = 0;
-	while (temp)
-	{
-		count++;
-		temp = temp->next;
-	}
-	return count;
-}
-
-void Found(Node **current, Node **next, Node **previous, Node **head)
-{
-	if (*current == *head)
-	{
-		*head = *next;
-	}
-	else
-	{
-		(*previous)->next = *next;
-	}
-	(*current)->next = (*next)->next;
-	(*next)->next = *current;
-
-	*previous = *next;
-	*next = (*current)->next;
-}
-
-void MoveOn(Node **current, Node **next, Node **previous)
-{
-	*previous = *current;
-	*current = (*current)->next;
-	*next = (*current)->next;
-}
-
-Node *SortList(Node *head)
-{
-	int num_nodes = CountNodes(head);
-
-	for (int counter = 0; counter < num_nodes; counter++) {
-		Node* current = head;
-		Node* next = current->next;
-		Node* previous = NULL;
-
-		while (next != NULL)
-		{
-			if (CompareDates(current->data.date, next->data.date) == 1)
-			{
-				Found(&current, &next, &previous, &head);
-			}
-			else if (CompareDates(current->data.date, next->data.date) == 0)
-			{
-				if (CompareNames(current->data, next->data) == 1)
-				{
-					Found(&current, &next, &previous, &head);
-				}
-				else if (CompareNames(current->data, next->data) == 0)
-				{
-					if (CompareId(current->data, next->data) == 1)
-					{
-						Found(&current, &next, &previous, &head);
-					}
-					else
-					{
-						MoveOn(&current, &next, &previous);
-					}
-				}
-				else
-				{
-					MoveOn(&current, &next, &previous);
-				}
-			}
-			else
-			{
-				MoveOn(&current, &next, &previous);
-			}
-		}
-	}
-
-	printf("Sort completely done\n");
-	return head;
-}
-
-void PrintElementsInRange(Node *head)
-{
-	if (head == NULL)
-	{
-		fprintf(stderr, "The list is empty!\n");
-		return;
-	}
-
-	Date currentDate;
-	Date previousDate;
-
-	printf("Въвдете текущата дата:\n");
-	printf("Ден: ");
-	scanf("%u", &currentDate.day);
-	
-	printf("Месец: ");
-	scanf("%u", &currentDate.month);
-
-	printf("Година: ");
-	scanf("%u", &currentDate.year); 
-
-	printf("Въведете предишна дата:\n");
-	printf("Ден: ");
-	scanf("%u", &previousDate.day);
-
-	printf("Месец: ");
-	scanf("%u", &previousDate.month);
-
-	printf("Година: ");
-	scanf("%u", &previousDate.year);
-
-
-	while (head != NULL)
-	{
-		int curr = CompareDates(head->data.date, currentDate); //връща -1 ако първата дата 1 по-малка от 2рата
-		int prev = CompareDates(head->data.date, previousDate); //връща 1 ако първата дата 1 по-голяма от 2рата
-
-		if (curr == -1 && prev == 1)
-		{
-			printf("+---------------------+\n");
-			printf("ID       :: %s\n", head->data.Id);
-			printf("Doc Name :: %s\n", head->data.documentName);
-			printf("Date     :: %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
-			printf("Author   :: %s %s %s\n", head->data.author.firstName, head->data.author.surname, head->data.author.lastName);
-		}
-		else
-		{
-			printf("\nНяма документи в задения интервал от дати\n");
-		}
-		head = head->next;
-	}
 }
 
 void SearchWordInDoc(Node* head, char *Id)
 {
 	if (head == NULL)
 	{
-		fprintf(stderr, "The list is empty!\n");
+		printf("The list is empty!\n");
 		return;
 	}
 
@@ -706,64 +487,193 @@ void SearchWordInDoc(Node* head, char *Id)
 			found = strstr(head->data.info, word);
 		}
 
-		head = head->next;
+		head = head->next; //преминаваме към следващия елемент от списъка
 	}
 
 	if (found)
 		printf("Думата \"%s\" е намерена в документа.\n", word);
 	else
 		printf("Думата \"%s\" не е намерена в документа.\n", word);
-
 }
 
-//Node *GetPrevNode(Node *head, Node *a)
-//{
-//	if (head == a) // node[a] is first node 
-//	{
-//		return NULL;
-//	}
-//	Node *currentNode = head;
-//	Node *prevA = NULL;
-//
-//	while (currentNode && currentNode != a)//search while not reach to end or the node
-//	{
-//		prevA = currentNode;          // find previous node   
-//		currentNode = currentNode->next;
-//	}
-//	if (currentNode != a)
-//	{
-//		fprintf(stderr, "\n error: node not found!\n"); // node[a] not present in list
-//		exit(1);
-//	}
-//	return prevA;
-//}
-//
-//void SwapNodes(Node **head, Node **a, Node **b)
-//{
-//	if ((*head) == NULL || (*a) == NULL || (*b) == NULL) // Empty list or one node is null  
-//	{
-//		printf("\nNothing to swap, just return.\n");
-//		return;
-//	}
-//
-//	// find previos nodes
-//	Node *prevA = GetPrevNode(*head, *a);
-//	Node *prevB = GetPrevNode(*head, *b);
-//
-//	//Now swap next fiels of candidate nodes  
-//	Node *temp = NULL;
-//	temp = (*a)->next;
-//	(*a)->next = (*b)->next;
-//	(*b)->next = temp;
-//
-//	//Change head: if any node was a head 
-//	if ((*head) == (*a))
-//	{
-//		*head = *b;
-//	}
-//	else
-//	{
-//		if ((*head) == (*b))
-//			*head = *a;
-//	}
-//}
+size_t CountNodes(Node *head) //Count all Nodes in the linked list
+{
+	Node *temp = head;
+	size_t count = 0;
+	while (temp != NULL) //обхождаме списъка
+	{
+		count++;
+		temp = temp->next; //преминаваме към следващият елемент
+	}
+	return count; //връщаме броя на node-овете.
+}
+
+void PrintElementsInRange(Node *head)
+{
+	if (head == NULL)
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+
+	Date currentDate; //променлива от тип Date (структурна променлива)
+	Date previousDate;
+
+	printf("Въвдете начална дата:\n");
+	EnterDates(&previousDate); //извикваме функцията, с която въвеждаме дата(ден,месец,година)
+
+	printf("Въведете крайна дата:\n");
+	EnterDates(&currentDate); //извикваме функцията, с която въвеждаме дата(ден,месец,година)
+
+	while (head != NULL)
+	{
+		int curr = CompareDates(head->data.date, currentDate); //връща -1 ако първата дата 1 по-малка от 2рата
+		int prev = CompareDates(head->data.date, previousDate); //връща 1 ако първата дата 1 по-голяма от 2рата
+
+		if (curr == -1 && prev == 1) //ако се намира в интервала от дати 
+		{
+			printf("+---------------------+\n");
+			printf("ID       : %s\n", head->data.Id);
+			printf("Doc Name : %s\n", head->data.documentName);
+			printf("Date     : %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
+			printf("Author   : %s %s %s\n", head->data.author.firstName, head->data.author.surname, head->data.author.lastName);
+		}
+
+		head = head->next; //преминаваме към следващия елемент от списъка
+	}
+}
+
+void EnterDates(Date *d1)
+{
+	int flag;
+	do
+	{
+		printf("Ден: ");
+		scanf("%u", &d1->day);
+		flag = CheckForValidDay(d1->day);
+	} while (flag != 0);
+
+	do
+	{
+		printf("Месец: ");
+		scanf("%u", &d1->month);
+		flag = CheckForValidMonth(d1->month);
+	} while (flag != 0);
+
+	printf("Година: ");
+	scanf("%u", &d1->year);
+}
+
+Node *SortList(Node *head) //сортиране на списъка чрез масив от указатели
+{
+	if (head == NULL)
+	{
+		printf("Списъка е празен!Няма елементи за сортиране.\n");
+		return;
+	}
+
+	Node **buf = NULL;  //създаваме масивът от указатели
+	Node *temp = head, *change; //change ще използваме за да разменяме местата на 2 елемнта
+
+	size_t countOfNodes = CountNodes(head); //борят на възлите в списъка
+
+	buf = (Node**)malloc(countOfNodes*sizeof(Node*)); //динамично заделяне на памет за масива
+
+	for (size_t i = 0; i < countOfNodes; i++, temp = temp->next) //записваме елемнтите от списъка в масива
+	{
+		buf[i] = temp;
+	}
+
+	for (size_t i = 0; i < countOfNodes - 1; i++)
+	{
+		for (size_t j = 0; j < countOfNodes - 1; j++)
+		{
+			if (CompareDates(buf[j]->data.date, buf[j + 1]->data.date) == 1)
+			{
+				change = buf[j];
+				buf[j] = buf[j + 1];
+				buf[j + 1] = change;
+			}
+			else if (CompareDates(buf[j]->data.date, buf[j + 1]->data.date) == 0)
+			{
+				if (CompareDates(buf[j]->data.date, buf[j + 1]->data.date) == 1)
+				{
+					change = buf[j];
+					buf[j] = buf[j + 1];
+					buf[j + 1] = change;
+				}
+				else if (CompareDates(buf[j]->data.date, buf[j + 1]->data.date) == 0)
+				{
+					if (CompareId(buf[j]->data, buf[j + 1]->data) == 1)
+					{
+						change = buf[j];
+						buf[j] = buf[j + 1];
+						buf[j + 1] = change;
+					}
+				}
+			}
+		}
+	}
+	head = buf[0]; //head сочи към 1вия елемент от масива
+	for (size_t i = 0; i < countOfNodes - 1; i++) //създаваме възлите м/у елемнтите
+	{
+		buf[i]->next = buf[i + 1];
+	}
+	buf[countOfNodes - 1]->next = NULL;
+
+	printf("Сортирането е успешно\n");
+	return head;
+}
+
+int CompareDates(Date date1, Date date2)
+{
+	if (date1.year > date2.year)
+	{
+		return 1;
+	}
+	else if (date1.year == date2.year)
+	{
+		if (date1.month > date2.month)
+		{
+			return 1;
+		}
+		else if (date1.month == date2.month)
+		{
+			if (date1.day > date2.day)
+			{
+				return 1;
+			}
+			else if (date1.day == date2.day)
+			{
+				return 0;
+			}
+		}
+	}
+
+	return -1; //ако 2рата дата е > от първата
+}
+
+int CompareNames(Document d1, Document d2)//Сравняваме имената на документите 
+{
+	if (strcmp(d1.documentName, d2.documentName) > 0) //връща 1 ако името на 1вия документ е по-голямо
+	{
+		return 1;
+	}
+	else if (strcmp(d1.documentName, d2.documentName) == 0) 
+	{
+		return 0; // връща 0 ако са еднакви
+	}
+	return -1; //-1 ако името на 2рия док. е по-голямо
+}
+
+int CompareId(Document d1, Document d2)
+{
+	if (strcmp(d1.Id, d2.Id) > 0)
+	{
+		return 1;
+	}
+	else
+	{
+		return -1;
+	}
+}
