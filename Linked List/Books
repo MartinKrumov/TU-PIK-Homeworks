@@ -115,7 +115,7 @@ Node *AddElement(Node *head)
 {
 	int flag;
 	int unique = 0;
-	Node *temp = (Node*)malloc(sizeof(Node));//заделяме памет за новия възел
+	Node *temp = (Node*)malloc(sizeof(Node)); //заделяме памет за новия възел
 
 	if (temp == NULL) //ако заделянето на памет е неуспешно
 	{
@@ -408,7 +408,7 @@ void PrintAvalibleBooks(Node *head) //принтира всички наличн
 		return;
 	}
 	int compare;
-	Author names;
+	Author names; //променлива от тип Author (структурна променлива)
 
 	printf("Въвдете имената на желаният автор:\n");
 	EnterNames(&names); //извикваме функцията, с която въвеждаме имената на желания(търсеният) автор
@@ -417,7 +417,7 @@ void PrintAvalibleBooks(Node *head) //принтира всички наличн
 	{
 		compare = CompareNames(head->data.author, names); //CompareNames връща 0 ако имената са еднакви
 
-		if (compare == 0 && head->data.stock == 'n') //n - за налична
+		if (compare == 0 && head->data.stock == 'n') //n - за налична; ако се намира в интервала от дати принтираме информацията
 		{
 			printf("Номер         : %s\n", head->data.Id);
 			printf("Име на книгата: %s\n", head->data.bookName);
