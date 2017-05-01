@@ -586,23 +586,23 @@ Node *SortList(Node *head) //сортиране на списъка чрез м�
 	{
 		for (size_t j = 0; j < countOfNodes - 1; j++)
 		{
-			if (CompareDates(buf[j]->data.date, buf[j + 1]->data.date) == 1)
+			if (CompareDates(buf[j]->data.date, buf[j + 1]->data.date) == 1) //ако функцията върне 1 разменяме местата на елемнтите
 			{
 				change = buf[j];
 				buf[j] = buf[j + 1];
 				buf[j + 1] = change;
 			}
-			else if (CompareDates(buf[j]->data.date, buf[j + 1]->data.date) == 0)
+			else if (CompareDates(buf[j]->data.date, buf[j + 1]->data.date) == 0) //ако датите са еднакви, сравняваме по име
 			{
-				if (CompareDates(buf[j]->data.date, buf[j + 1]->data.date) == 1)
+				if (CompareNames(buf[j]->data, buf[j + 1]->data) == 1) //ако функцията върне 1 разменяме местата на елемнтите
 				{
 					change = buf[j];
 					buf[j] = buf[j + 1];
 					buf[j + 1] = change;
 				}
-				else if (CompareDates(buf[j]->data.date, buf[j + 1]->data.date) == 0)
+				else if (CompareNames(buf[j]->data, buf[j + 1]->data) == 0) //ако имента са еднакви, сравняваме по ID
 				{
-					if (CompareId(buf[j]->data, buf[j + 1]->data) == 1)
+					if (CompareId(buf[j]->data, buf[j + 1]->data) == 1) //ако функцията върне 1 разменяме местата на елемнтите
 					{
 						change = buf[j];
 						buf[j] = buf[j + 1];
