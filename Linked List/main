@@ -2,23 +2,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <Windows.h>
+#include <Windows.h> 
 #include "funcs.h"
 #include "menu.h"
 
 char *mainMenu[] =
 {
-	"Обработка и Съхранение на Документи",
+	"Обработка и Съхранение на данни за фирма",
 
-	"Въвеждане на нов документ към списъка.",
-	"Изтриване на документ.",
-	"Изписване на информацията на документа.",
-	"Записване на документите от текстов или двоичен файл.",
-	"Прочитане на документите от текстов или двоичен файл.",
-	"Изписване последователно на данните на всички документи.",
-	"Търсене на дума в документа",
-	"Сортиране на документите по дата на създаване.",
-	"Изписване на документите м/у днешна и предишна дата.",
+	"Въвеждане на нова фирма към списъка.",
+	"Изтриване на фирма по номер.",
+	"Изписване на информацията за фирма - по номер.",
+	"Записване на фирмите от текстов или двоичен файл.",
+	"Прочитане на фирмите от текстов или двоичен файл.",
+	"Изписване последователно на данните на всички фирми.",
+	"Изписване на фирми от даден собственик.",
+	"Определяне на броя на фирмите създадени м/у определени дати.",
 	"Изход.",
 	NULL
 };
@@ -32,12 +31,22 @@ char *fileMenu[] =
 	NULL
 };
 
+char *names[] =
+{
+	"Избор на търсена на фирма:",
+	"По пълно име.",
+	"По фамилия.",
+	"Назад.",
+	NULL
+};
+
 int main()
 {
 	Node *head = NULL;
 	int mode, submenu;
-	int countOfDocs;
+	int countOfCompanies;
 	char findId[7];
+	char wantedOwner[21];
 
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
@@ -49,23 +58,23 @@ int main()
 		switch (mode)
 		{
 		case 1:
-			printf("Колко документа искате да създадете: ");
-			scanf("%d", &countOfDocs);
-			for (size_t i = 0; i < countOfDocs; i++)
+			printf("Колко фирми искате да създадете: ");
+			scanf("%d", &countOfCompanies);
+			for (size_t i = 0; i < countOfCompanies; i++)
 			{
 				head = AddElement(head);
 			}
 			break;
 
 		case 2:
-			printf("\nEnter ID: ");
+			printf("\nВъведете ID: ");
 			scanf("%s", &findId);
-			head = DeleteElement(head, findId);
+			DeleteElement(&head, findId);
 			system("pause");
 			break;
 
 		case 3:
-			printf("\nEnter ID: ");
+			printf("\nВъведете ID: ");
 			scanf("%s", &findId);
 			PrintElement(head, findId);
 			system("pause");
@@ -94,7 +103,7 @@ int main()
 				break;
 
 			case 2:
-				head = ReadListFromBinFile();
+				head = ReadListFromBinFile(head);
 				break;
 			}
 			break;
@@ -105,21 +114,29 @@ int main()
 			break;
 
 		case 7:
-			printf("\nВъвдете ID на документа, в който ще търсим: ");
-			scanf("%s", &findId);
-			SearchWordInDoc(head, findId);
-			system("pause");
+			submenu = menu(names);
+			switch (submenu)
+			{
+			case 1:
+				GetCompanies(head);
+				system("pause");
+				break;
+
+			case 2:
+				printf("Въвдете имената на желаният собственик: ");
+				scanf("%20s", wantedOwner);
+				GetCompaniesByOwner(head, wantedOwner);
+				system("pause");
+				break;
+			}
 			break;
 
 		case 8:
-			head = SortList(head);
+			GetNumberOfCompanies(head);
 			system("pause");
 			break;
-		case 9:
-			PrintElementsInRange(head);
-			system("pause");
-			break;
+
 		}
-	} while (1);
+	} while (mode != 9);
 	_fcloseall();
 }
