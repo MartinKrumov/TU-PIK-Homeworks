@@ -400,6 +400,92 @@ Node *ReadListFromTxtFile(Node *head)
 	return head;
 }
 
+void WriteListToBinFile(Node *head)
+{
+	char fileName[128];
+	FILE *destFile = NULL;
+
+	if ((destFile = GetFileName(fileName, "wb", "за записване")) == NULL) //отваряме файла в режим писане(в бинарен файл)
+	{
+		return;
+	}
+
+	Node *currentDoc = head;
+	Node *holdNext = NULL; //ще съдържа адреса на следващият елемент от списъка
+
+	while (currentDoc != NULL) //докато не стигнем края на списъка
+	{
+		holdNext = currentDoc->next;
+		currentDoc->next = NULL;
+
+		fwrite(currentDoc, sizeof(Node), 1, destFile); //записва съдържанието на елемента в бинарния файл
+
+		currentDoc->next = holdNext;
+		holdNext = NULL;
+
+		currentDoc = currentDoc->next; //преминаваме към следващият елемент
+	}
+
+	if (destFile)
+		fclose(destFile); //затваряме файлът
+}
+
+Node *ReadListFromBinFile(Node *head)
+{
+	FILE *srcFile = NULL;
+	char fileName[128];
+
+	if ((srcFile = GetFileName(fileName, "rb", "за четене")) == NULL)
+	{
+		return;
+	}
+
+	head = DeleteList(head);
+	head = NULL;
+
+	fseek(srcFile, 0, SEEK_END); //премества курсора в края на файлът
+	long fileSize = ftell(srcFile); //за да разберем колко голям е файлът
+	rewind(srcFile); //връщаме файловият указател в началото на файла
+
+	int numEntries = (int)(fileSize / (sizeof(Node))); //изчислява колко елемента имаме записани във файла
+
+	for (size_t loop = 0; loop < numEntries; loop++) //Обхождаме структурите
+	{
+		fseek(srcFile, (sizeof(Node)* loop), SEEK_SET); //отиваме в началото на структурата, която искаме да прочетем
+		head = ReadNextFromFile(head, srcFile);
+	}
+
+	if (srcFile)
+		fclose(srcFile);
+
+	return head;
+}
+
+Node *ReadNextFromFile(Node *head, FILE *srcFile)
+{
+	size_t returnValue;
+	if (head == NULL) //ако нямаме елементи в списъка
+	{
+		head = (Node*)malloc(sizeof(Node)); //заделяме памет за 1 елемент
+		returnValue = fread(head, sizeof(Node), 1, srcFile); //четем информацията от бинарният файл
+		head->next = NULL;
+	}
+	else //ако листа не е празен, ще слагаме следващият елемент най-отзад
+	{
+		Node *currentNode = head;
+		Node *newNode = (Node*)malloc(sizeof(Node)); //заделяме памет за новия елемент
+		while (currentNode->next != NULL) //обхождаме листа докато стигнем последният елемент
+		{
+			currentNode = currentNode->next;
+		}
+		returnValue = fread(newNode, sizeof(Node), 1, srcFile); //като по-горе, freed връща бр. на успешно прочетените символи
+		currentNode->next = newNode; //добавяме новият елемент в списъка
+		newNode->next = NULL;
+	}
+	return head;
+}
+
+
 void PrintAvalibleBooks(Node *head) //принтира всички налични книги от избрания автор
 {
 	if (head == NULL)
