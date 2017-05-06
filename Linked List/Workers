@@ -615,3 +615,59 @@ Node *SortList(Node *head) //сортиране на списъка чрез м�
 	printf("Сортирането е успешно\n");
 	return head;
 }
+
+void WorkersForRetirement(Node *head)
+{
+	if (head == NULL)
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+
+	int count = 0;
+
+	Date currentDate; //променлива от тип Date (структурна променлива)
+	int yearOfBirth; //променлива от тип Date (структурна променлива)
+
+	EnterDates(&currentDate); //извикваме функцията, с която въвеждаме дата(ден,месец,година)
+
+	while (head != NULL) // neraboti
+	{
+		yearOfBirth = FindBirthDate(head->data.egn);
+		int compare = GetInterval(currentDate.year, yearOfBirth);
+
+		if (compare == 62 || compare == 63 || compare == 64)
+		{
+			count++;
+		}
+		head = head->next;
+	}
+	printf("Броят на работниците: %d\n", count);
+}
+
+int FindBirthDate(char *egn)
+{
+	int firstDigit = egn[0] - '0';
+	int secondDigit = egn[1] - '0';
+	int year = firstDigit * 10 + secondDigit;
+
+	return year;
+}
+
+int GetInterval(size_t currentYear, int birth)
+{
+	int interval;
+	int temp1 = currentYear % 10;
+	int temp2 = (currentYear / 10) % 10;
+	int tempYear = temp2 * 10 + temp1;
+
+	if (birth > tempYear)
+	{
+		tempYear += 100;
+		interval = tempYear - birth;
+	}
+	else 
+		interval = tempYear - birth;
+
+	return interval;
+}
