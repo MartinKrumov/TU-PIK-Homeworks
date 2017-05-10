@@ -391,3 +391,96 @@ Node *ReadNextFromFile(Node *head, FILE *srcFile)
 	}
 	return head;
 }
+
+void WriteListToTxtFile(Node *head)
+{
+	char fileName[128]; //масив за името на файла
+	FILE *destFile = NULL;
+
+	if ((destFile = GetFileName(fileName, "wt", "за записване")) == NULL)
+	{
+		return;
+	}
+
+	while (head != NULL) //записва във файла инфото на елемента
+	{
+		fprintf(destFile, "%s", head->data.Id);
+		fprintf(destFile, ", %s", head->data.nameOfStock);
+		fprintf(destFile, ", %d", head->data.availability);
+		fprintf(destFile, ", %.2f", head->data.price);
+		fprintf(destFile, ", %d", head->data.deadline);
+		fprintf(destFile, ", %u", head->data.delivery.day);
+		fprintf(destFile, ". %u", head->data.delivery.month);
+		fprintf(destFile, ". %u", head->data.delivery.year);
+		fprintf(destFile, ", %s\n", head->data.producer);
+
+		head = head->next; //преминаваме към следващият елемент
+	}
+
+	if (destFile)
+		fclose(destFile); //затваряме файла
+}
+
+Node *ReadListFromTxtFile(Node *head)
+{
+	FILE *srcFile = NULL;
+	char fileName[128];
+	char line[256]; //ще записваме прочетеният ред в масива
+
+	int fields = 9; //броят на полета, които трябва да бъдат прочетени
+
+	if ((srcFile = GetFileName(fileName, "rt", "за четене")) == NULL)
+	{
+		return;
+	}
+
+	head = DeleteList(head);
+
+	while (fgets(line, sizeof(line), srcFile) != NULL) //четем ред по ред от файла
+	{
+		if (head == NULL) //ако листа е празен
+		{
+			head = (Node*)malloc(sizeof(Node)); //заделяме динамично памет
+			//чрез sscanf преместваме информацията от масива line в полетата на новия елемент от списъка
+			//sscanf - връща броят на успешно прочетените параметри.Чрез %[^,] четем докато не стигнем запетая.
+			if (fields != sscanf(line, "%[^,], %[^,], %d, %f, %d, %u.%u.%u, %[^\n]",
+				head->data.Id, head->data.nameOfStock, &head->data.availability, &head->data.price, &head->data.deadline,
+				&head->data.delivery.day, &head->data.delivery.month, &head->data.delivery.year, head->data.producer))
+			{
+				printf("Невалидна информация.\n");
+				printf("Моля оправете информацията във файла, от който четем.\n");
+				system("pause");
+				return;
+			}
+			head->next = NULL;
+		}
+		else
+		{
+			Node *currenNode = head;
+			Node *newNode = (Node*)malloc(sizeof(Node));
+			while (currenNode->next != NULL) //обхождаме списъка докато не стигнем края
+			{
+				currenNode = currenNode->next;
+			}
+			//чрез sscanf преместваме информацията от масива line в полетата на новия елемент от списъка
+			//sscanf - връща броят на успешно прочетените параметри.Чрез %[^,] четем докато не стигнем запетая.
+			if (fields != sscanf(line, "%[^,], %[^,], %d, %f, %d, %u.%u.%u, %[^\n]",
+				head->data.Id, head->data.nameOfStock, &head->data.availability, &head->data.price, &head->data.deadline,
+				&head->data.delivery.day, &head->data.delivery.month, &head->data.delivery.year, head->data.producer))
+			{
+				printf("Невалидна информация.\n"); //ако има грешка/проблем при преместването на информацията 
+				printf("Моля оправете информацията във файла, от който четем.\n");
+				system("pause");
+				return;
+			}
+			currenNode->next = newNode; //записваме новият елемент след предходният
+			newNode->next = NULL;
+		}
+	}
+
+	if (srcFile)
+		fclose(srcFile); //затваряме отвореният файл
+
+	return head;
+}
+
