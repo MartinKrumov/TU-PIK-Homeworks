@@ -82,6 +82,17 @@ int CheckForValidMonth(size_t month)
 	return 0;
 }
 
+int CheckName(size_t max, char *arr)
+{
+	fflush(stdin);
+	if (arr[0] >= 65 && arr[0] <= 90)
+	{
+		return CheckForOverflow(max, arr);
+	}
+
+	return 1;
+}
+
 Node *AddElement(Node *head)
 {
 	int flag;
@@ -102,7 +113,6 @@ Node *AddElement(Node *head)
 		flag = CheckForOverflow(8, temp->data.Id);
 		flag = CheckForValidId(temp->data.Id);
 		unique = CheckForUniqueId(head, temp->data.Id); //връща 1 ако номера не се среща вече
-
 	} while (flag != 0 || unique != 1);
 
 	do
@@ -118,7 +128,7 @@ Node *AddElement(Node *head)
 	printf("Цена: ");
 	scanf("%f", &temp->data.price);
 
-	printf("Срок на годност (дни): ");
+	printf("Срок на годност(дни): ");
 	scanf("%d", &temp->data.deadline);
 
 	EnterDates(&temp->data.delivery); //въвеждаме дата на доствака
@@ -129,6 +139,8 @@ Node *AddElement(Node *head)
 		scanf("%s", temp->data.producer);
 		flag = CheckName(51, temp->data.producer);
 	} while (flag != 0); //ако флаг == 0 илизаме от цикъла
+
+	printf("----------------------\n");
 
 	temp->next = NULL;
 	if (head != NULL)
@@ -142,7 +154,7 @@ Node *AddElement(Node *head)
 
 void EnterDates(Date *d1)
 {
-	int flag;
+	int flag; //флаг с който ще проверяваме за препълване на масивите
 	do
 	{
 		printf("Ден: ");
@@ -176,7 +188,7 @@ void PrintAllElements(Node *head) //Принтира целия списък н�
 		printf("Име на стоката  : %s\n", head->data.nameOfStock);
 		printf("Наличност       : %d\n", head->data.availability);
 		printf("Цена            : %.2f\n", head->data.price);
-		printf("Срок на годност : %d\n", head->data.deadline);
+		printf("Срок на годност : %d дни\n", head->data.deadline);
 		printf("Дата на доставка: %u.%u.%u\n", head->data.delivery.day, head->data.delivery.month, head->data.delivery.year);
 		printf("Произведител    : %s\n", head->data.producer);
 
@@ -215,7 +227,7 @@ void DeleteElementById(Node **head, char *Id) //Изтрива избран ел
 {
 	if (*head == NULL)
 	{
-		fprintf(stderr, "The list is empty!\n");
+		printf("The list is empty!\n");
 		return;
 	}
 
@@ -237,7 +249,7 @@ void DeleteElementById(Node **head, char *Id) //Изтрива избран ел
 
 			free(current); //Освобождава памета на елемнта
 
-			printf("Успешно\n");
+			printf("Елемента е изтрит успешно.\n");
 			return;
 		}
 		previous = current;
@@ -245,40 +257,65 @@ void DeleteElementById(Node **head, char *Id) //Изтрива избран ел
 	}
 }
 
+
+
 void DeleteElementByName(Node **head)
 {
 	if (*head == NULL)
 	{
-		fprintf(stderr, "The list is empty!\n");
+		printf("The list is empty!\n");
 		return;
 	}
 	char name[51]; //името на стоката която ще изтриваме
+	int n;
+
 	Node *current = *head;
 	Node *previous = NULL; //For 1st node, indicate there is no previous.
 
+	printf("Въведете име на стоката: ");
 	scanf("%s", name);
 
 	while (current != NULL)
 	{
-		if (strcmp(name, current->data.Id) == 0) // Ако намери съвпадение
+		if (strcmp(name, current->data.nameOfStock) == 0) // Ако намери съвпадение
 		{
-			if (previous == NULL)
-			{
-				*head = current->next; //Ако е първи елемент
-			}
-			else
-			{
-				previous->next = current->next; //Предишния възел прескача следващия и сочи към другия елемнт
-			}
+			PrintInfo(current); //принтира информацията за стоката
 
-			free(current); //Освобождава памета на елемнта
+			printf("\nВъведте 1 за да изтриете стоката: ");
+			scanf("%d", &n);
 
-			printf("Успешно\n");
+			if (n == 1)
+			{
+				if (previous == NULL)
+				{
+					*head = current->next; //Ако е първи елемент
+				}
+				else
+				{
+					previous->next = current->next; //Предишния възел прескача следващия и сочи към другия елемнт
+				}
+
+				free(current); //Освобождава памета на елемнта
+
+				printf("Елемента е изтрит успешно.\n");
+			}
 			return;
 		}
 		previous = current;
 		current = current->next;
 	}
+}
+
+void PrintInfo(Node *current)
+{
+	printf("+------------------------+\n");
+	printf("ID              : %s\n", current->data.Id);
+	printf("Име на стоката  : %s\n", current->data.nameOfStock);
+	printf("Наличност       : %d\n", current->data.availability);
+	printf("Цена            : %.2f\n", current->data.price);
+	printf("Срок на годност : %d\n", current->data.deadline);
+	printf("Дата на доставка: %u.%u.%u\n", current->data.delivery.day, current->data.delivery.month, current->data.delivery.year);
+	printf("Произведител    : %s\n", current->data.producer);
 }
 
 FILE *GetFileName(char *name_file, char *mode, char *text)
@@ -307,6 +344,18 @@ FILE *GetFileName(char *name_file, char *mode, char *text)
 	return fp;
 }
 
+Node *DeleteList(Node *head) //изтрива елементите от списъка
+{
+	Node *temp;
+	while (head != NULL)
+	{
+		temp = head;
+		head = head->next;
+		free(temp); //освобождаваме паметта
+	}
+	return head;
+}
+
 void WriteListToBinFile(Node *head)
 {
 	char fileName[128];
@@ -317,20 +366,20 @@ void WriteListToBinFile(Node *head)
 		return;
 	}
 
-	Node *currentDoc = head;
+	Node *current = head;
 	Node *holdNext = NULL; //ще съдържа адреса на следващият елемент от списъка
 
-	while (currentDoc != NULL) //докато не стигнем края на списъка
+	while (current != NULL) //докато не стигнем края на списъка
 	{
-		holdNext = currentDoc->next;
-		currentDoc->next = NULL;
+		holdNext = current->next;
+		current->next = NULL;
 
-		fwrite(currentDoc, sizeof(Node), 1, destFile); //записва съдържанието на елемента в бинарния файл
+		fwrite(current, sizeof(Node), 1, destFile); //записва съдържанието на елемента в бинарния файл
 
-		currentDoc->next = holdNext;
+		current->next = holdNext;
 		holdNext = NULL;
 
-		currentDoc = currentDoc->next; //преминаваме към следващият елемент
+		current = current->next; //преминаваме към следващият елемент
 	}
 
 	if (destFile)
@@ -465,8 +514,8 @@ Node *ReadListFromTxtFile(Node *head)
 			//чрез sscanf преместваме информацията от масива line в полетата на новия елемент от списъка
 			//sscanf - връща броят на успешно прочетените параметри.Чрез %[^,] четем докато не стигнем запетая.
 			if (fields != sscanf(line, "%[^,], %[^,], %d, %f, %d, %u.%u.%u, %[^\n]",
-				head->data.Id, head->data.nameOfStock, &head->data.availability, &head->data.price, &head->data.deadline,
-				&head->data.delivery.day, &head->data.delivery.month, &head->data.delivery.year, head->data.producer))
+				newNode->data.Id, newNode->data.nameOfStock, &newNode->data.availability, &newNode->data.price, &newNode->data.deadline,
+				&newNode->data.delivery.day, &newNode->data.delivery.month, &newNode->data.delivery.year, newNode->data.producer))
 			{
 				printf("Невалидна информация.\n"); //ако има грешка/проблем при преместването на информацията 
 				printf("Моля оправете информацията във файла, от който четем.\n");
@@ -484,3 +533,61 @@ Node *ReadListFromTxtFile(Node *head)
 	return head;
 }
 
+size_t CountNodes(Node *head) //Count all Nodes in the linked list
+{
+	Node *temp = head;
+	size_t count = 0;
+	while (temp != NULL) //обхождаме списъка
+	{
+		count++;
+		temp = temp->next; //преминаваме към следващият елемент
+	}
+	return count; //връщаме броя на node-овете.
+}
+
+Node *SortList(Node *head) //сортиране на списъка чрез масив от указатели
+{
+	if (head == NULL)
+	{
+		printf("Списъка е празен!Няма елементи за сортиране.\n");
+		return;
+	}
+
+	Node **buf = NULL;  //създаваме масивът от указатели
+	Node *temp = head, *change; //change ще използваме за да разменяме местата на 2 елемнта
+
+	size_t countOfNodes = CountNodes(head); //борят на възлите в списъка
+
+	buf = (Node**)malloc(countOfNodes*sizeof(Node*)); //динамично заделяне на памет за масива
+
+	for (size_t i = 0; i < countOfNodes; i++, temp = temp->next) //записваме елемнтите от списъка в масива
+	{
+		buf[i] = temp;
+	}
+
+	int swap = 1;
+	while (swap)
+	{
+		swap = 0;
+		for (size_t i = 0; i < countOfNodes - 1; i++)
+		{
+			if (buf[i]->data.deadline > buf[i + 1]->data.deadline)
+			{
+				change = buf[i];
+				buf[i] = buf[i + 1];
+				buf[i + 1] = change;
+				swap = 1;
+			}
+		}
+	}
+
+	head = buf[0]; //head сочи към 1вия елемент от масива
+	for (size_t i = 0; i < countOfNodes - 1; i++) //създаваме възлите м/у елемнтите
+	{
+		buf[i]->next = buf[i + 1];
+	}
+	buf[countOfNodes - 1]->next = NULL;
+
+	printf("Сортирането е успешно.\n");
+	return head;
+}
