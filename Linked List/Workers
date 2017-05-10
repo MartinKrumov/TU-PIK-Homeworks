@@ -22,7 +22,7 @@ int CheckForValidId(char *arr)
 {
 	for (size_t i = 0; i < 10; i++)
 	{
-		if (!isdigit(arr[i])) //проверява дали е различно от цифра
+		if (arr[i] < '0' || arr[i] > '9') //проверява дали е различно от цифра
 		{
 			printf("--Невалидно ЕГН.--\n");
 			return 1;
