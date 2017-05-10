@@ -215,6 +215,7 @@ void DeleteElement(Node **head, char *Id) //Изтрива избран елем
 
 			free(current); //Освобождава памета на елемнта
 
+			printf("Елемента е изтрит успешно.\n");
 			return;
 		}
 		previous = current;
@@ -270,20 +271,20 @@ void WriteListToBinFile(Node *head)
 		return;
 	}
 
-	Node *currentDoc = head;
+	Node *current = head;
 	Node *holdNext = NULL; //ще съдържа адреса на следващият елемент от списъка
 
-	while (currentDoc != NULL) //докато не стигнем края на списъка
+	while (current != NULL) //докато не стигнем края на списъка
 	{
-		holdNext = currentDoc->next;
-		currentDoc->next = NULL;
+		holdNext = current->next;
+		current->next = NULL;
 
-		fwrite(currentDoc, sizeof(Node), 1, destFile); //записва съдържанието на елемента в бинарния файл
+		fwrite(current, sizeof(Node), 1, destFile); //записва съдържанието на елемента в бинарния файл
 
-		currentDoc->next = holdNext;
+		current->next = holdNext;
 		holdNext = NULL;
 
-		currentDoc = currentDoc->next; //преминаваме към следващият елемент
+		current = current->next; //преминаваме към следващият елемент
 	}
 
 	if (destFile)
