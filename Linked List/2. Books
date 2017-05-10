@@ -260,7 +260,8 @@ void DeleteElement(Node **head, char *Id) //Изтрива избран елем
 			}
 
 			free(current); //Освобождава памета на елемнта
-
+			
+			printf("Елемента е изтрит успешно.\n");
 			return;
 		}
 		previous = current;
