@@ -1,0 +1,393 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include "funcs.h"
+
+int CheckForOverflow(size_t max, char *arr)
+{
+	size_t size = strlen(arr);
+	if (size >= max)
+	{
+		printf("--Препълване.Прекалено много въведени символи.--\n");
+		return 1;
+	}
+
+	fflush(stdin);
+	return 0;
+}
+
+int CheckForValidId(char *arr)
+{
+	for (size_t i = 0; i < 7; i++)
+	{
+		if (i == 4 || i == 5)
+		{
+			if (arr[i] < 'A' || arr[i] > 'Z') //проверява дали е различно от главна буква
+			{
+				printf("--Invalid Id.--\n"); // ако е икарва на екрана невалидно ИД
+				return 1;
+			}
+		}
+		else
+		{
+			if (arr[i] < '0' || arr[i] > '9') //проверява дали е различно от цифра
+			{
+				printf("--Invalid Id.--\n");
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+int CheckForUniqueId(Node *head, char *id) //Проверява дали ID-to вечне не се среща
+{
+	if (head == NULL)
+	{
+		return 1;
+	}
+
+	while (head != NULL)
+	{
+		if (strcmp(id, head->data.Id) == 0)
+		{
+			printf("--ЕГН-то съществува.Моля въведете ново.--\n");
+			return 0;
+		}
+		head = head->next;
+	}
+
+	return 1;
+}
+
+int CheckForValidDay(size_t day)
+{
+	fflush(stdin);
+	if (day < 1 || day > 31)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+int CheckForValidMonth(size_t month)
+{
+	fflush(stdin);
+	if (month < 1 || month > 12)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+Node *AddElement(Node *head)
+{
+	int flag;
+	int unique = 0;
+	Node *temp = (Node*)malloc(sizeof(Node)); //заделяме памет за новия възел
+
+	if (temp == NULL) //ако заделянето на памет е неуспешно
+	{
+		printf("Unable to allocate memory for new node\n");
+		return;
+	}
+
+	do
+	{
+		printf("ID: ");
+		scanf("%s", temp->data.Id);
+
+		flag = CheckForOverflow(8, temp->data.Id);
+		flag = CheckForValidId(temp->data.Id);
+		unique = CheckForUniqueId(head, temp->data.Id); //връща 1 ако номера не се среща вече
+
+	} while (flag != 0 || unique != 1);
+
+	do
+	{
+		printf("Име на стоката: ");
+		scanf("%s", temp->data.nameOfStock);
+		flag = CheckName(51, temp->data.nameOfStock);
+	} while (flag != 0); //ако флаг == 0 илизаме от цикъла
+
+	printf("Наличност: ");
+	scanf("%d", &temp->data.availability);
+
+	printf("Цена: ");
+	scanf("%f", &temp->data.price);
+
+	printf("Срок на годност (дни): ");
+	scanf("%d", &temp->data.deadline);
+
+	EnterDates(&temp->data.delivery); //въвеждаме дата на доствака
+
+	do
+	{
+		printf("Производител: ");
+		scanf("%s", temp->data.producer);
+		flag = CheckName(51, temp->data.producer);
+	} while (flag != 0); //ако флаг == 0 илизаме от цикъла
+
+	temp->next = NULL;
+	if (head != NULL)
+	{
+		temp->next = head; //добавяме новият елемент пред предишния
+	}
+	head = temp;
+
+	return head;
+}
+
+void EnterDates(Date *d1)
+{
+	int flag;
+	do
+	{
+		printf("Ден: ");
+		scanf("%u", &d1->day);
+		flag = CheckForValidDay(d1->day);
+	} while (flag != 0);
+
+	do
+	{
+		printf("Месец: ");
+		scanf("%u", &d1->month);
+		flag = CheckForValidMonth(d1->month);
+	} while (flag != 0);
+
+	printf("Година: ");
+	scanf("%u", &d1->year);
+}
+
+void PrintAllElements(Node *head) //Принтира целия списък на екрана
+{
+	if (head == NULL) //Проверява дали списъка не е празен
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+
+	while (head != NULL)
+	{
+		printf("+------------------------+\n");
+		printf("ID              : %s\n", head->data.Id);
+		printf("Име на стоката  : %s\n", head->data.nameOfStock);
+		printf("Наличност       : %d\n", head->data.availability);
+		printf("Цена            : %.2f\n", head->data.price);
+		printf("Срок на годност : %d\n", head->data.deadline);
+		printf("Дата на доставка: %u.%u.%u\n", head->data.delivery.day, head->data.delivery.month, head->data.delivery.year);
+		printf("Произведител    : %s\n", head->data.producer);
+
+		head = head->next; //преминаваме към следващият елемент
+	}
+	printf("+------------------------+\n");
+}
+
+void PrintElement(Node *head, char *Id) //Принтира избран елемент от списъка
+{
+	if (head == NULL)
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+
+	while (head != NULL)
+	{
+		if (strcmp(Id, head->data.Id) == 0) // сравнява търсенето ID с това на елентите
+		{
+			printf("+------------------------+\n");
+			printf("ID              : %s\n", head->data.Id);
+			printf("Име на стоката  : %s\n", head->data.nameOfStock);
+			printf("Наличност       : %d\n", head->data.availability);
+			printf("Цена            : %.2f\n", head->data.price);
+			printf("Срок на годност : %d\n", head->data.deadline);
+			printf("Дата на доставка: %u.%u.%u\n", head->data.delivery.day, head->data.delivery.month, head->data.delivery.year);
+			printf("Произведител    : %s\n", head->data.producer);
+		}
+
+		head = head->next; //преминаваме към следващият елемент
+	}
+}
+
+void DeleteElementById(Node **head, char *Id) //Изтрива избран елемент от списъка
+{
+	if (*head == NULL)
+	{
+		fprintf(stderr, "The list is empty!\n");
+		return;
+	}
+
+	Node *current = *head;
+	Node *previous = NULL; //For 1st node, indicate there is no previous.
+
+	while (current != NULL)
+	{
+		if (strcmp(Id, current->data.Id) == 0) // Ако намери съвпадение
+		{
+			if (previous == NULL)
+			{
+				*head = current->next; //Ако е първи елемент
+			}
+			else
+			{
+				previous->next = current->next; //Предишния възел прескача следващия и сочи към другия елемнт
+			}
+
+			free(current); //Освобождава памета на елемнта
+
+			printf("Успешно\n");
+			return;
+		}
+		previous = current;
+		current = current->next;
+	}
+}
+
+void DeleteElementByName(Node **head)
+{
+	if (*head == NULL)
+	{
+		fprintf(stderr, "The list is empty!\n");
+		return;
+	}
+	char name[51]; //името на стоката която ще изтриваме
+	Node *current = *head;
+	Node *previous = NULL; //For 1st node, indicate there is no previous.
+
+	scanf("%s", name);
+
+	while (current != NULL)
+	{
+		if (strcmp(name, current->data.Id) == 0) // Ако намери съвпадение
+		{
+			if (previous == NULL)
+			{
+				*head = current->next; //Ако е първи елемент
+			}
+			else
+			{
+				previous->next = current->next; //Предишния възел прескача следващия и сочи към другия елемнт
+			}
+
+			free(current); //Освобождава памета на елемнта
+
+			printf("Успешно\n");
+			return;
+		}
+		previous = current;
+		current = current->next;
+	}
+}
+
+FILE *GetFileName(char *name_file, char *mode, char *text)
+{
+	FILE *fp;
+	int err;
+	errno = 0;
+
+	do
+	{
+		printf("Въведете име на файла %s: ", text);
+		err = scanf("%s", name_file);
+	} while (err != 1);
+
+	if ((fp = fopen(name_file, mode)) == NULL)
+	{
+		printf("\nФайлът <%s> Не може да се отвори - error No % d !!!\n", name_file, errno);
+		printf("ГРЕШКА No %d %s\n", errno, strerror(errno));
+		system("pause");
+	}
+	else
+	{
+		printf("\nФайлът <%s> е отворен успешно за обработка !\n\n", name_file);
+		system("pause");
+	}
+	return fp;
+}
+
+void WriteListToBinFile(Node *head)
+{
+	char fileName[128];
+	FILE *destFile = NULL;
+
+	if ((destFile = GetFileName(fileName, "wb", "за записване")) == NULL) //отваряме файла в режим писане(в бинарен файл)
+	{
+		return;
+	}
+
+	Node *currentDoc = head;
+	Node *holdNext = NULL; //ще съдържа адреса на следващият елемент от списъка
+
+	while (currentDoc != NULL) //докато не стигнем края на списъка
+	{
+		holdNext = currentDoc->next;
+		currentDoc->next = NULL;
+
+		fwrite(currentDoc, sizeof(Node), 1, destFile); //записва съдържанието на елемента в бинарния файл
+
+		currentDoc->next = holdNext;
+		holdNext = NULL;
+
+		currentDoc = currentDoc->next; //преминаваме към следващият елемент
+	}
+
+	if (destFile)
+		fclose(destFile); //затваряме файлът
+}
+
+Node *ReadListFromBinFile(Node *head)
+{
+	FILE *srcFile = NULL;
+	char fileName[128];
+
+	if ((srcFile = GetFileName(fileName, "rb", "за четене")) == NULL)
+	{
+		return;
+	}
+
+	head = DeleteList(head);
+	head = NULL;
+
+	fseek(srcFile, 0, SEEK_END); //премества курсора в края на файлът
+	long fileSize = ftell(srcFile); //за да разберем колко голям е файлът
+	rewind(srcFile); //връщаме файловият указател в началото на файла
+
+	int numEntries = (int)(fileSize / (sizeof(Node))); //изчислява колко елемента имаме записани във файла
+
+	for (size_t loop = 0; loop < numEntries; loop++) //Обхождаме структурите
+	{
+		fseek(srcFile, (sizeof(Node)* loop), SEEK_SET); //отиваме в началото на структурата, която искаме да прочетем
+		head = ReadNextFromFile(head, srcFile);
+	}
+
+	if (srcFile)
+		fclose(srcFile);
+
+	return head;
+}
+
+Node *ReadNextFromFile(Node *head, FILE *srcFile)
+{
+	size_t returnValue;
+	if (head == NULL) //ако нямаме елементи в списъка
+	{
+		head = (Node*)malloc(sizeof(Node)); //заделяме памет за 1 елемент
+		returnValue = fread(head, sizeof(Node), 1, srcFile); //четем информацията от бинарният файл
+		head->next = NULL;
+	}
+	else //ако листа не е празен, ще слагаме следващият елемент най-отзад
+	{
+		Node *currentNode = head;
+		Node *newNode = (Node*)malloc(sizeof(Node)); //заделяме памет за новия елемент
+		while (currentNode->next != NULL) //обхождаме листа докато стигнем последният елемент
+		{
+			currentNode = currentNode->next;
+		}
+		returnValue = fread(newNode, sizeof(Node), 1, srcFile); //като по-горе, freed връща бр. на успешно прочетените символи
+		currentNode->next = newNode; //добавяме новият елемент в списъка
+		newNode->next = NULL;
+	}
+	return head;
+}
