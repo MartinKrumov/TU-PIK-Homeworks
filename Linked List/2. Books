@@ -40,7 +40,7 @@ int CheckForValidId(char *arr)
 		}
 		else
 		{
-			if (!isdigit(arr[i])) //проверява дали е различно от цифра
+			if (arr[i] < '0' || arr[i] > '9') //проверява дали е различно от цифра
 			{
 				printf("--Invalid Id.--\n");
 				return 1;
