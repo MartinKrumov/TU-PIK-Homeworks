@@ -119,7 +119,7 @@ Node *AddElement(Node *head)
 	} while (flag != 0);
 
 	EnterDates(&temp->data.date); //въвеждаме дата на постъпване на работа
-	EnterNames(&temp->data.names); //въвеждаме имената на работника
+	EnterNames(&temp->data.names); //извикваме функцията, с която въвеждаме дата(ден,месец,година)
 
 	temp->next = NULL;
 
@@ -175,6 +175,7 @@ void PrintElementByEgn(Node *head, char *Egn) //Принтира избран е
 			printf("Заплата : %.2f\n", head->data.salary);
 			printf("Дата    : %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
 			printf("Автор   : %s %s %s\n", head->data.names.firstName, head->data.names.surname, head->data.names.lastName);
+			printf("+------------------------+\n");
 		}
 
 		head = head->next; //преминаваме към следващият елемент
@@ -201,6 +202,7 @@ void PrintElementByName(Node *head) //Принтира избран елемен
 			printf("Заплата : %.2f\n", head->data.salary);
 			printf("Дата    : %u.%u.%u\n", head->data.date.day, head->data.date.month, head->data.date.year);
 			printf("Автор   : %s %s %s\n", head->data.names.firstName, head->data.names.surname, head->data.names.lastName);
+			printf("+------------------------+\n");
 		}
 
 		head = head->next; //преминаваме към следващият елемент
@@ -275,6 +277,7 @@ void DeleteElement(Node **head, char *key) //Изтрива избран еле�
 
 			free(current); //Освобождава памета на елемнта
 
+			printf("Елемента е изтрит успешно.\n");
 			return;
 		}
 		previous = current;
@@ -612,7 +615,7 @@ Node *SortList(Node *head) //сортиране на списъка чрез м�
 	}
 	buf[countOfNodes - 1]->next = NULL;
 
-	printf("Сортирането е успешно\n");
+	printf("Сортирането е успешно.\n");
 	return head;
 }
 
@@ -627,14 +630,14 @@ void WorkersForRetirement(Node *head)
 	int count = 0;
 
 	Date currentDate; //променлива от тип Date (структурна променлива)
-	int yearOfBirth; //променлива от тип Date (структурна променлива)
+	int yearOfBirth; 
 
 	EnterDates(&currentDate); //извикваме функцията, с която въвеждаме дата(ден,месец,година)
 
-	while (head != NULL) // neraboti
+	while (head != NULL) 
 	{
 		yearOfBirth = FindBirthDate(head->data.egn);
-		int compare = GetInterval(currentDate.year, yearOfBirth);
+		int compare = GetAge(currentDate.year, yearOfBirth);
 
 		if (compare == 62 || compare == 63 || compare == 64)
 		{
@@ -647,27 +650,27 @@ void WorkersForRetirement(Node *head)
 
 int FindBirthDate(char *egn)
 {
-	int firstDigit = egn[0] - '0';
+	int firstDigit = egn[0] - '0'; //превръща char в int
 	int secondDigit = egn[1] - '0';
 	int year = firstDigit * 10 + secondDigit;
 
 	return year;
 }
 
-int GetInterval(size_t currentYear, int birth)
+int GetAge(size_t currentYear, int yearOfBirth)
 {
-	int interval;
+	int age;
 	int temp1 = currentYear % 10;
 	int temp2 = (currentYear / 10) % 10;
 	int tempYear = temp2 * 10 + temp1;
 
-	if (birth > tempYear)
+	if (yearOfBirth > tempYear)
 	{
 		tempYear += 100;
-		interval = tempYear - birth;
+		age = tempYear - yearOfBirth;
 	}
 	else 
-		interval = tempYear - birth;
+		age = tempYear - yearOfBirth;
 
-	return interval;
+	return age;
 }
