@@ -1,0 +1,275 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include "funcs.h"
+
+int CheckForOverflow(size_t max, char *arr)
+{
+	size_t size = strlen(arr);
+	if (size >= max)
+	{
+		printf("--Препълване.Прекалено много въведени символи.--\n");
+		return 1;
+	}
+
+	fflush(stdin);
+	return 0;
+}
+
+int CheckForUniqueId(Node *head, char *id) //Проверява дали ID-to вечне не се среща
+{
+	if (head == NULL)
+	{
+		return 1;
+	}
+
+	while (head != NULL)
+	{
+		if (strcmp(id, head->data.number) == 0)
+		{
+			printf("--Факултетният номер съществува.Моля въведете нов.--\n");
+			return 0;
+		}
+		head = head->next;
+	}
+
+	return 1;
+}
+
+int CheckForValidDay(size_t day)
+{
+	fflush(stdin);
+	if (day < 1 || day > 31)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+int CheckForValidMonth(size_t month)
+{
+	fflush(stdin);
+	if (month < 1 || month > 12)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+Node *AddElement(Node *head)
+{
+	int flag;
+	int unique = 0;
+	Node *temp = (Node*)malloc(sizeof(Node)); //заделяме памет за новия възел
+
+	if (temp == NULL) //ако заделянето на памет е неуспешно
+	{
+		printf("Unable to allocate memory for new node\n");
+		return;
+	}
+
+	do
+	{
+		printf("Фак. №: ");
+		scanf("%s", temp->data.number);
+
+		flag = CheckForOverflow(10, temp->data.number);
+		unique = CheckForUniqueId(head, temp->data.number); //връща 1 ако номера не се среща вече
+
+	} while (flag != 0 || unique != 1);
+
+	do
+	{
+		printf("Име: ");
+		scanf("%s", temp->data.student.firstName);
+		flag = CheckForOverflow(20, temp->data.student.firstName); //извикваме CheckForOverFlow и подаваме максималният размер на масива
+	} while (flag != 0);
+
+	do
+	{
+		printf("Презиме: ");
+		scanf("%s", temp->data.student.surname);
+		flag = CheckForOverflow(20, temp->data.student.surname); //извикваме функцията CheckForOverFlow , ако върне 1 значи има препълване
+	} while (flag != 0);
+
+	do
+	{
+		printf("Фамилия: ");
+		scanf("%s", temp->data.student.lastName);
+		flag = CheckForOverflow(20, temp->data.student.lastName);
+	} while (flag != 0);
+
+	do
+	{
+		printf("Факултет: ");
+		scanf("%s", temp->data.faculty);
+		flag = CheckForOverflow(7, temp->data.faculty);
+	} while (flag != 0);
+
+	do
+	{
+		printf("Специалност: ");
+		scanf("%s", temp->data.specialty);
+		flag = CheckForOverflow(16, temp->data.specialty);
+	} while (flag != 0);
+
+	printf("Група: ");
+	scanf("%s", temp->data.group);
+
+	printf("Курс: ");
+	scanf("%s", temp->data.course);
+	printf("---------------------\n");
+
+	temp->next = NULL;
+
+	if (head != NULL)//Проверяваме дали имаме елементи в списъка
+	{
+		temp->next = head; //добавяме новият елемент пред предишния
+	}
+	head = temp;
+
+	return head;
+}
+
+void PrintElementByName(Node *head) //Принтира избран елемент от списъка
+{
+	if (head == NULL)
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+
+	char searchedStudent[21];
+	printf("Въведете фамилията на търсеният студент: ");
+	scanf("%20s", searchedStudent);
+
+	while (head != NULL)
+	{
+		if (strcmp(head->data.student.lastName, searchedStudent) == 0) // сравнява търсенето име с това на елентите
+		{
+			printf("Фак. №     : %s\n", head->data.number);
+			printf("Студент    : %s %s %s\n", head->data.student.firstName, head->data.student.surname, head->data.student.lastName);
+			printf("Факултет   : %s\n", head->data.faculty);
+			printf("Специалност: %s\n", head->data.specialty);
+			printf("Група:  %d\n", head->data.group);
+			printf("Курс:  %d\n", head->data.course);
+
+			printf("+------------------------+\n");
+		}
+
+		head = head->next; //преминаваме към следващият елемент
+	}
+}
+
+void DeleteElement(Node **head, char *key) //Изтрива избран елемент от списъка
+{
+	if (*head == NULL)
+	{
+		fprintf(stderr, "The list is empty!\n");
+		return;
+	}
+
+	Node *current = *head;
+	Node *previous = NULL; //For 1st node, indicate there is no previous.
+
+	while (current != NULL)
+	{
+		if (strcmp(key, current->data.number) == 0) // Ако намери съвпадение
+		{
+			if (previous == NULL)
+			{
+				*head = current->next; //Ако е първи елемент
+			}
+			else
+			{
+				previous->next = current->next; //Предишния възел прескача следващия и сочи към другия елемнт
+			}
+
+			free(current); //Освобождава памета на елемнта
+
+			printf("Елемента е изтрит успешно.\n");
+			return;
+		}
+		previous = current;
+		current = current->next;
+	}
+}
+
+size_t CountNodes(Node *head, int group) //Преброяваме колко студента са от еднаква група
+{
+	Node *temp = head;
+	size_t count = 0;
+	while (temp != NULL) //обхождаме списъка
+	{
+		if (head->data.group == group)
+		{
+			count++;
+		}
+		temp = temp->next; //преминаваме към следващият елемент
+	}
+	return count; //връщаме броя на node-овете.
+}
+
+void PrintStudentsByGroup(Node *head, int group)
+{
+	if (head == NULL)
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+	size_t index = 0;
+	Node **students;
+
+	while (head != NULL)
+	{
+		if (head->data.group == group) // сравнява групите на елемнтите с желаната група
+		{
+			students[index++] = head;
+		}
+
+		head = head->next; //преминаваме към следващият елемент
+	}
+
+	SortArray(students, index);
+
+	for (size_t i = 0; i < index; i++)
+	{
+		for (size_t j = 0; j < 8; j++)
+		{
+			printf("Фак. №     : %s\n", students[i][j].data.number);
+			printf("Студент    : %s %s %s\n", 
+				students[i][j].data.student.firstName, students[i][j].data.student.surname, students[i][j].data.student.lastName);
+			printf("Факултет   : %s\n", students[i][j].data.faculty);
+			printf("Специалност: %s\n", students[i][j].data.specialty);
+			printf("Група:  %d\n", students[i][j].data.group);
+			printf("Курс:  %d\n", students[i][j].data.course);
+		}
+		printf("+------------------------+\n");
+	}
+
+	
+}
+
+void SortArray(Node **arr, size_t count)
+{
+	int swap = 1;
+	Node *change;
+
+	while (swap)
+	{
+		swap = 0;
+		for (size_t i = 0; i < count - 1; i++)
+		{
+			if (strcmp(arr[i]->data.student.lastName, arr[i + 1]->data.student.lastName) == 1) //Сравнява фамилните име на студентите
+			{
+				change = arr[i];
+				arr[i] = arr[i + 1];
+				arr[i + 1] = change;
+				swap = 1;
+			}
+		}
+	}
+}
+
