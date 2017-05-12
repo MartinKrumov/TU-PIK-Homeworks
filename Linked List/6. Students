@@ -18,7 +18,7 @@ int CheckForOverflow(size_t max, char *arr)
 	return 0;
 }
 
-int CheckForUniqueId(Node *head, char *id) //Проверява дали ID-to вечне не се среща
+int CheckForUniqueId(Node *head, char *id) //Проверява дали номера вечне не се среща
 {
 	if (head == NULL)
 	{
@@ -27,7 +27,7 @@ int CheckForUniqueId(Node *head, char *id) //Проверява дали ID-to �
 
 	while (head != NULL)
 	{
-		if (strcmp(id, head->data.number) == 0)
+		if (strcmp(id, head->data.number) == 0) //сравнява новия номер, с тези на предишните елементи
 		{
 			printf("--Факултетният номер съществува.Моля въведете нов.--\n");
 			return 0;
@@ -203,7 +203,7 @@ size_t CountNodes(Node *head, int group) //Преброяваме колко с�
 	size_t count = 0;
 	while (temp != NULL) //обхождаме списъка
 	{
-		if (head->data.group == group)
+		if (head->data.group == group) //сравняваме търсената група с тази на елементите(студентите)
 		{
 			count++;
 		}
