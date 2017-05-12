@@ -116,10 +116,10 @@ Node *AddElement(Node *head)
 	} while (flag != 0);
 
 	printf("Група: ");
-	scanf("%s", temp->data.group);
+	scanf("%d", &temp->data.group);
 
 	printf("Курс: ");
-	scanf("%s", temp->data.course);
+	scanf("%d", &temp->data.course);
 	printf("---------------------\n");
 
 	temp->next = NULL;
@@ -153,8 +153,8 @@ void PrintElementByName(Node *head) //Принтира избран елемен
 			printf("Студент    : %s %s %s\n", head->data.student.firstName, head->data.student.surname, head->data.student.lastName);
 			printf("Факултет   : %s\n", head->data.faculty);
 			printf("Специалност: %s\n", head->data.specialty);
-			printf("Група:  %d\n", head->data.group);
-			printf("Курс:  %d\n", head->data.course);
+			printf("Група      : %d\n", head->data.group);
+			printf("Курс       : %d\n", head->data.course);
 
 			printf("+------------------------+\n");
 		}
@@ -165,9 +165,9 @@ void PrintElementByName(Node *head) //Принтира избран елемен
 
 void DeleteElement(Node **head, char *key) //Изтрива избран елемент от списъка
 {
-	if (*head == NULL)
+	if (*head == NULL) //Проверяваме дали списъка е празен
 	{
-		fprintf(stderr, "The list is empty!\n");
+		printf("The list is empty!\n");
 		return;
 	}
 
@@ -212,48 +212,54 @@ size_t CountNodes(Node *head, int group) //Преброяваме колко с�
 	return count; //връщаме броя на node-овете.
 }
 
-void PrintStudentsByGroup(Node *head, int group)
+void PrintStudentsByGroup(Node *head, int group) 
 {
-	if (head == NULL)
+	if (head == NULL) //Проверяваме дали списъка е празен
 	{
 		printf("The list is empty!\n");
 		return;
 	}
-	size_t index = 0;
-	Node **students;
+	size_t index = 0; 
+	size_t countOfNodes = CountNodes(head, group); //борят на студентите от търсената група
 
-	while (head != NULL)
+	Node **students = (Node**)malloc(countOfNodes*sizeof(Node*)); //динамично заделяне на памет за масива
+	Node *current = head;
+
+	while (current != NULL)
 	{
-		if (head->data.group == group) // сравнява групите на елемнтите с желаната група
+		if (current->data.group == group) //сравнява групите на елемнтите с желаната група
 		{
-			students[index++] = head;
+			students[index++] = current;
 		}
 
-		head = head->next; //преминаваме към следващият елемент
+		current = current->next; //преминаваме към следващият елемент
 	}
 
 	SortArray(students, index);
 
 	for (size_t i = 0; i < index; i++)
 	{
-		for (size_t j = 0; j < 8; j++)
+		for (size_t j = 0; j < 1; j++)
 		{
+			printf("+------------------------+\n");
 			printf("Фак. №     : %s\n", students[i][j].data.number);
 			printf("Студент    : %s %s %s\n", 
 				students[i][j].data.student.firstName, students[i][j].data.student.surname, students[i][j].data.student.lastName);
 			printf("Факултет   : %s\n", students[i][j].data.faculty);
 			printf("Специалност: %s\n", students[i][j].data.specialty);
-			printf("Група:  %d\n", students[i][j].data.group);
-			printf("Курс:  %d\n", students[i][j].data.course);
-		}
-		printf("+------------------------+\n");
+			printf("Група      : %d\n", students[i][j].data.group);
+			printf("Курс       : %d\n", students[i][j].data.course);
+		}	
 	}
-
-	DeleteArray(students, index); //освобождава паметта на масива от студенти
 }
 
 void SortArray(Node **arr, size_t count)
 {
+	if (count == 0) //ако масивът е празен се връщаме обратно във функцията
+	{
+		return;
+	}
+
 	int swap = 1;
 	Node *change;
 
@@ -270,18 +276,5 @@ void SortArray(Node **arr, size_t count)
 				swap = 1;
 			}
 		}
-	}
-}
-
-void DeleteArray(Node **arr, size_t index)
-{
-	if (arr) //aко масива не е празен
-	{
-		for (size_t i = 0; i < index; i++)
-		{
-			free(arr[i]); //освобождаваме паметта на всеки 1 указател
-		}
-
-		free(arr); //освобождаваме паметта на на масива от указатели
 	}
 }
