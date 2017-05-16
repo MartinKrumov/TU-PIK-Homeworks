@@ -10,7 +10,7 @@ int CheckForOverflow(size_t max, char *arr)
 	size_t size = strlen(arr);
 	if (size >= max)
 	{
-		printf("--Overflow!.Too much symbols entered.--\n");
+		printf("--Препълване.Прекалено много въведени символи.--\n");
 		return 1;
 	}
 
@@ -26,7 +26,7 @@ int CheckForValidId(char *arr)
 		{
 			if (arr[i] < 'A' || arr[i] > 'Z') //проверява дали е различно от главна буква
 			{
-				printf("--Invalid Id.--\n"); // ако е икарва на екрана невалидно ИД
+				printf("--Невалидно Id.--\n"); // ако е икарва на екрана невалидно ИД
 				return 1;
 			}
 		}
@@ -34,7 +34,7 @@ int CheckForValidId(char *arr)
 		{
 			if (arr[i] < '0' || arr[i] > '9')
 			{
-				printf("--Invalid Id.--\n");
+				printf("--Невалидно Id.--\n");
 				return 1;
 			}
 		}
@@ -53,7 +53,7 @@ int CheckForUniqueId(Node *head, char *id) //Проверява дали ID-to �
 	{
 		if (strcmp(id, head->data.Id) == 0)
 		{
-			printf("--The ID already exist.Please enter new ID.--\n");
+			printf("--ID-то вече е заето.Моля въведете ново ID.--\n");
 			return 0;
 		}
 		head = head->next;
@@ -100,7 +100,7 @@ Node *AddElement(Node *head)
 
 	if (temp == NULL) //ако заделянето на памет е неуспешно
 	{
-		fprintf(stderr, "Unable to allocate memory for new node\n");
+		printf("Unable to allocate memory for new node\n");
 		return;
 	}
 
@@ -165,6 +165,26 @@ Node *AddElement(Node *head)
 	return head;
 }
 
+void EnterDates(Date *d1)
+{
+	int flag;
+	do
+	{
+		printf("Ден: ");
+		scanf("%u", &d1->day);
+		flag = CheckForValidDay(d1->day);
+	} while (flag != 0);
+
+	do
+	{
+		printf("Месец: ");
+		scanf("%u", &d1->month);
+		flag = CheckForValidMonth(d1->month);
+	} while (flag != 0);
+
+	printf("Година: ");
+	scanf("%u", &d1->year);
+}
 
 void PrintAllElements(Node *head) //Принтира целия списък на екрана
 {
@@ -173,7 +193,6 @@ void PrintAllElements(Node *head) //Принтира целия списък н�
 		printf("The list is empty!\n");
 		return;
 	}
-	size_t countOfDocuments = CountNodes(head);
 
 	while (head != NULL)
 	{
@@ -187,7 +206,6 @@ void PrintAllElements(Node *head) //Принтира целия списък н�
 		head = head->next; //преминаваме към следващия елемент от списъка
 	}
 	printf("+------------------------+\n");
-	printf("Броят на документите: %u\n", countOfDocuments);
 }
 
 void PrintElement(Node *head, char *Id) //Принтира избран елемент от списъка
@@ -239,7 +257,7 @@ void DeleteElement(Node **head, char *Id) //Изтрива избран елем
 			}
 
 			free(current); //Освобождава памета на елемнта
-			
+
 			printf("Елемента е изтрит успешно.\n");
 			return;
 		}
@@ -296,23 +314,23 @@ void WriteListToBinFile(Node *head)
 		return;
 	}
 
-	Node *currentDoc = head;
+	Node *current = head;
 	Node *holdNext = NULL; //ще съдържа адреса на следващият елемент от списъка
 
-	while (currentDoc != NULL) //докато не стигнем края на списъка
+	while (current != NULL) //докато не стигнем края на списъка
 	{
-		holdNext = currentDoc->next; 
-		currentDoc->next = NULL;
+		holdNext = current->next;
+		current->next = NULL;
 
-		fwrite(currentDoc, sizeof(Node), 1, destFile); //записва съдържанието на елемента в бинарния файл
+		fwrite(current, sizeof(Node), 1, destFile); //записва съдържанието на елемента в бинарния файл
 
-		currentDoc->next = holdNext;
+		current->next = holdNext;
 		holdNext = NULL;
 
-		currentDoc = currentDoc->next; //преминаваме към следващият елемент
+		current = current->next; //преминаваме към следващият елемент
 	}
 
-	if (destFile)//проверяваме дали файлът е отворен
+	if (destFile)
 		fclose(destFile); //затваряме файлът
 }
 
@@ -341,8 +359,8 @@ Node *ReadListFromBinFile(Node *head)
 		head = ReadNextFromFile(head, srcFile);
 	}
 
-	if (srcFile) //проверяваме дали файлът е отворен
-		fclose(srcFile); //затваряме файлът
+	if (srcFile)
+		fclose(srcFile);
 
 	return head;
 }
@@ -540,27 +558,6 @@ void PrintElementsInRange(Node *head)
 
 		head = head->next; //преминаваме към следващия елемент от списъка
 	}
-}
-
-void EnterDates(Date *d1)
-{
-	int flag;
-	do
-	{
-		printf("Ден: ");
-		scanf("%u", &d1->day);
-		flag = CheckForValidDay(d1->day);
-	} while (flag != 0);
-
-	do
-	{
-		printf("Месец: ");
-		scanf("%u", &d1->month);
-		flag = CheckForValidMonth(d1->month);
-	} while (flag != 0);
-
-	printf("Година: ");
-	scanf("%u", &d1->year);
 }
 
 Node *SortList(Node *head) //сортиране на списъка чрез масив от указатели
