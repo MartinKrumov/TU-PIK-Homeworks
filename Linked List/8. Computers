@@ -1,0 +1,224 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "funcs.h"
+
+int CheckForOverflow(size_t max, char *arr)
+{
+	size_t size = strlen(arr); //взима дължината на стринга
+	if (size >= max)
+	{
+		printf("--Препълване.Прекалено много въведени символи.--\n");
+		return 1;
+	}
+
+	fflush(stdin);
+	return 0;
+}
+
+int CheckForValidId(char *arr)
+{
+	for (size_t i = 0; i < 12; i++)
+	{
+		if (arr[i] < '0' || arr[i] > '9') //проверява дали е различно от цифра
+		{
+			printf("--Невалидно ID.--\n");
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int CheckForUniqueId(Node *head, char *id) //Проверява дали номера вечне не се среща
+{
+	if (head == NULL)
+	{
+		return 1;
+	}
+
+	while (head != NULL)
+	{
+		if (strcmp(id, head->data.Id) == 0) //сравнява новия номер, с тoзи на предишните елементи
+		{
+			printf("--Номера съществува.Моля въведете нов.--\n");
+			return 0;
+		}
+
+		head = head->next; //преминаваме към следващият елемент
+	}
+
+	return 1;
+}
+
+int CheckQunatity(int quantity)
+{
+	if (quantity <= 0)
+	{
+		printf("Моля въведете ново количесто по-голямо от 0 \n");
+		return 1;
+	}
+
+	return 0;
+}
+
+Node *AddElement(Node *head)
+{
+	int flag;
+	int unique = 0;
+	Node *temp = (Node*)malloc(sizeof(Node)); //заделяме памет за новия възел
+
+	if (temp == NULL) //ако заделянето на памет е неуспешно
+	{
+		printf("Unable to allocate memory for new node\n");
+		return;
+	}
+
+	do
+	{
+		printf("ID: ");
+		scanf("%s", temp->data.Id);
+
+		flag = CheckForOverflow(13, temp->data.Id);//извикваме функцията CheckForOverFlow , ако върне 1 значи има препълване
+		flag = CheckForValidId(temp->data.Id); //проверява дали номера е само от цифри, връща 0 ако е, ако не е 1
+		unique = CheckForUniqueId(head, temp->data.Id); //връща 1 ако номера не се среща вече
+
+	} while (flag != 0 || unique != 1);
+
+	do
+	{
+		printf("Модел на компютъра: ");
+		scanf("%s", temp->data.model);
+		flag = CheckForOverflow(51, temp->data.model); //извикваме CheckForOverFlow и подаваме максималният размер на масива
+	} while (flag != 0);
+
+	printf("Цена: ");
+	scanf("%f", &temp->data.price);
+
+	do
+	{
+		printf("Количество: ");
+		scanf("%d", &temp->data.quantity);
+		flag = CheckQunatity(temp->data.quantity);
+	} while (flag != 0);
+
+	printf("---------------------\n");
+
+	temp->next = NULL;
+
+	if (head != NULL)//Проверяваме дали имаме елементи в списъка
+	{
+		temp->next = head; //добавяме новият елемент пред предишния
+	}
+	head = temp;
+
+	return head;
+}
+
+void PrintElement(Node *head, char *Id) //Принтира избран елемент от списъка
+{
+	if (head == NULL)
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+
+	while (head != NULL)
+	{
+		if (strcmp(Id, head->data.Id) == 0) // сравнява търсенето ID с това на елементите
+		{
+			printf("+------------------------+\n");
+			printf("Номер      : %s\n", head->data.Id);
+			printf("Модел      : %s\n", head->data.model);
+			printf("Цена       : %.2f\n", head->data.price);
+			printf("Количество : %d\n", head->data.quantity);
+		}
+
+		head = head->next; //преминаваме към следващия елемент от списъка
+	}
+}
+
+float GetAveragePrice(Node *head)
+{
+	float sum = 0;
+	int count = 0;
+	float average;
+
+	Node *current = head;
+
+	while (current != NULL)
+	{
+		sum += current->data.price;
+		count++;
+
+		current = current->next; //преминаваме към следващия елемент от списъка
+	}
+
+	average = (float)sum / count;
+
+	return average;
+}
+
+void PrintComputers(Node *head)
+{
+	if (head == NULL)
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+
+	float averagePrice = GetAveragePrice(head);
+
+	while (head != NULL)
+	{
+		if (head->data.price > averagePrice)
+		{
+			printf("+------------------------+\n");
+			printf("Номер      : %s\n", head->data.Id);
+			printf("Модел      : %s\n", head->data.model);
+			printf("Цена       : %.2f\n", head->data.price);
+			printf("Количество : %d\n", head->data.quantity);
+		}
+
+		head = head->next; //преминаваме към следващия елемент от списъка
+	}
+}
+
+void WriteListToBinFile(Node *head)
+{
+	char fileName[128];
+	FILE *destFile = NULL;
+
+	printf("Въведете име на файла: ");
+	scanf("%s", fileName);
+
+	if ((destFile = fopen(fileName, "wb")) == NULL) //проверяваме дали файлът е успешно отворен
+	{
+		printf("\nФайлът <%s> Не може да се отвори\n", fileName);
+		return;
+	}
+	else
+	{
+		printf("\nФайлът <%s> е отворен успешно за обработка !\n\n", fileName);
+		system("pause");
+	}
+
+	Node *current = head;
+	Node *holdNext = NULL; //ще съдържа адреса на следващият елемент от списъка
+
+	while (current != NULL) //докато не стигнем края на списъка
+	{
+		holdNext = current->next;
+		current->next = NULL;
+
+		fwrite(current, sizeof(Node), 1, destFile); //записва съдържанието на елемента в бинарния файл
+
+		current->next = holdNext;
+		holdNext = NULL;
+
+		current = current->next; //преминаваме към следващият елемент
+	}
+
+	if (destFile)
+		fclose(destFile); //затваряме файлът
+}
