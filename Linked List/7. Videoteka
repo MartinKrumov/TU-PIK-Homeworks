@@ -1,0 +1,297 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "funcs.h"
+
+int CheckForOverflow(size_t max, char *arr)
+{
+	size_t size = strlen(arr); //взима дължината на стринга
+	if (size >= max)
+	{
+		printf("--Препълване.Прекалено много въведени символи.--\n");
+		return 1;
+	}
+
+	fflush(stdin);
+	return 0;
+}
+
+int CheckForValidId(char *arr)
+{
+	for (size_t i = 0; i < 12; i++)
+	{
+		if (arr[i] < '0' || arr[i] > '9') //проверява дали е различно от цифра
+		{
+			printf("--Невалидно ID.--\n");
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int CheckForUniqueId(Node *head, char *id) //Проверява дали номера вечне не се среща
+{
+	if (head == NULL)
+	{
+		return 1;
+	}
+
+	while (head != NULL)
+	{
+		if (strcmp(id, head->data.Id) == 0) //сравнява новия номер, с тoзи на предишните елементи
+		{
+			printf("--Факултетният номер съществува.Моля въведете нов.--\n");
+			return 0;
+		}
+
+		head = head->next; //преминаваме към следващият елемент
+	}
+
+	return 1;
+}
+
+Node *AddElement(Node *head)
+{
+	int flag;
+	int unique = 0;
+	Node *temp = (Node*)malloc(sizeof(Node)); //заделяме памет за новия възел
+
+	if (temp == NULL) //ако заделянето на памет е неуспешно
+	{
+		printf("Unable to allocate memory for new node\n");
+		return;
+	}
+
+	do
+	{
+		printf("ID: ");
+		scanf("%s", temp->data.Id);
+
+		flag = CheckForOverflow(13, temp->data.Id);
+		flag = CheckForValidId(temp->data.Id); //проверява дали номера е само от цифри, връща 0 ако е, ако не е 1
+		unique = CheckForUniqueId(head, temp->data.Id); //връща 1 ако номера не се среща вече
+
+	} while (flag != 0 || unique != 1);
+
+	do
+	{
+		printf("Име на филма: ");
+		scanf("%s", temp->data.movieName);
+		flag = CheckForOverflow(51, temp->data.movieName); //извикваме CheckForOverFlow и подаваме максималният размер на масива
+	} while (flag != 0);
+
+	do
+	{
+		printf("Режисьор: ");
+		scanf("%s", temp->data.producer);
+		flag = CheckForOverflow(20, temp->data.producer); //извикваме функцията CheckForOverFlow , ако върне 1 значи има препълване
+	} while (flag != 0);
+
+	printf("Продължителност: "); //минути.секунди --- нпр. 132.32
+	scanf("%f", &temp->data.duration);
+
+	printf("Година: ");
+	scanf("%d", &temp->data.year);
+	printf("---------------------\n");
+
+	temp->next = NULL;
+
+	if (head != NULL)//Проверяваме дали имаме елементи в списъка
+	{
+		temp->next = head; //добавяме новият елемент пред предишния
+	}
+	head = temp;
+
+	return head;
+}
+
+void DeleteElement(Node **head, char *director) //Изтрива избран елемент от списъка
+{
+	if (*head == NULL) //Проверяваме дали списъка е празен
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+
+	Node *current = *head;
+	Node *previous = NULL; //For 1st node, indicate there is no previous.
+
+	while (current != NULL)
+	{
+		if (strcmp(director, current->data.producer) == 0) // Ако намери съвпадение
+		{
+			if (previous == NULL)
+			{
+				*head = current->next; //Ако е първи елемент
+			}
+			else
+			{
+				previous->next = current->next; //Предишния възел прескача следващия и сочи към другия елемнт
+			}
+
+			free(current); //Освобождава памета на елемнта
+
+			printf("Елемента е изтрит успешно.\n");
+			//return;
+		}
+		previous = current;
+		current = current->next;
+	}
+}
+
+void FindLongestMovie(Node *head)
+{
+	if (head == NULL) //Проверяваме дали списъка е празен
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+
+	Node *currentNode = head;
+	float longestMovie = currentNode->data.duration; //записваме продълж. на 1вия филм от свързания списък
+
+	char movieId[13]; 
+	strcpy(movieId, currentNode->data.Id); //записваме ID-to на филма, в случай, че той е най-дългия
+
+	while (currentNode != NULL)
+	{
+		if (currentNode->data.duration > longestMovie) //сравняваме продължителността на филмите
+		{
+			longestMovie = currentNode->data.duration; //ако е открит филм с по-голяма продължителност, го записваме в longestMovie
+			strcpy(movieId, currentNode->data.Id); //записваме ID-to на филма
+		}
+
+		currentNode = currentNode->next; //преминаваме към следващият елемент
+	}
+
+	while (head != NULL)
+	{
+		if (strcmp(movieId, head->data.Id) == 0) //когато намери най-продълж. филм, изписва информацията за него на екрана
+		{
+			printf("+------------------------+\n");
+			printf("Номен. номер   : %s\n", head->data.Id);
+			printf("Име на филма   : %s\n", head->data.movieName);
+			printf("Режисьор       : %s\n", head->data.producer);
+			printf("Продължителност: %.2f\n", head->data.duration);
+			printf("Година         : %d\n", head->data.year);
+		}
+
+		head = head->next; //преминаваме към следващият елемент
+	}
+}
+
+size_t CountNodes(Node *head) //Преброява елементите в списъка
+{
+	Node *temp = head;
+	size_t count = 0;
+
+	while (temp != NULL) //обхождаме списъка
+	{
+		count++;
+		temp = temp->next; //преминаваме към следващият елемент
+	}
+
+	return count; //връщаме броя на node-овете.
+}
+
+void PrintElements(Node *head) 
+{
+	if (head == NULL) //Проверяваме дали списъка е празен
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+	
+	size_t index = 0;
+	size_t countOfNodes = CountNodes(head); //Преброява елементите в списъка
+
+	Node **movies = (Node**)malloc(countOfNodes*sizeof(Node*)); //динамично заделяне на памет за масива
+	Node *current = head;
+
+	while (head != NULL) //записваме елемнтите от списъка в масива
+	{
+		movies[index++] = head;
+		head = head->next; //преминаваме към следващият елемент
+	}
+
+	SortArray(movies, index); //сортираме масива по метод на мехурчето
+
+	for (size_t i = 0; i < index; i++)
+	{
+		for (size_t j = 0; j < 1; j++)
+		{
+			printf("+------------------------+\n");
+			printf("Номен. номер   : %s\n", movies[i][j].data.Id);
+			printf("Име на филма   : %s\n", movies[i][j].data.movieName);
+			printf("Режисьор       : %s\n", movies[i][j].data.producer);
+			printf("Продължителност: %.2f\n", movies[i][j].data.duration);
+			printf("Година         : %d\n", movies[i][j].data.year);
+		}
+	}
+}
+
+void SortArray(Node **arr, size_t count)
+{
+	if (count == 0) //ако масивът е празен се връщаме обратно във функцията
+	{
+		return;
+	}
+
+	int swap = 1;
+	Node *change = NULL;
+
+	while (swap) //сортираме масива по метод на мехурчето
+	{
+		swap = 0;
+		for (size_t i = 0; i < count - 1; i++)
+		{
+			if (arr[i]->data.year < arr[i + 1]->data.year) //Сравнява годините на филмите
+			{
+				change = arr[i];
+				arr[i] = arr[i + 1];
+				arr[i + 1] = change;
+				swap = 1;
+			}
+		}
+	}
+}
+
+void WriteListToBinFile(Node *head)
+{
+	char fileName[128];
+	FILE *destFile = NULL;
+
+	printf("Въведете име на файла: ");
+	scanf("%s", fileName);
+
+	if ((destFile = fopen(fileName, "wb")) == NULL) //проверяваме дали файлът е успешно отворен
+	{
+		printf("\nФайлът <%s> Не може да се отвори\n", fileName);
+		return;
+	}
+	else
+	{
+		printf("\nФайлът <%s> е отворен успешно за обработка !\n\n", fileName);
+		system("pause");
+	}
+
+	Node *current = head;
+	Node *holdNext = NULL; //ще съдържа адреса на следващият елемент от списъка
+
+	while (current != NULL) //докато не стигнем края на списъка
+	{
+		holdNext = current->next;
+		current->next = NULL;
+
+		fwrite(current, sizeof(Node), 1, destFile); //записва съдържанието на елемента в бинарния файл
+
+		current->next = holdNext;
+		holdNext = NULL;
+
+		current = current->next; //преминаваме към следващият елемент
+	}
+
+	if (destFile)
+		fclose(destFile); //затваряме файлът
+}
