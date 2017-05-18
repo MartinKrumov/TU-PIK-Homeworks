@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 #include "funcs.h"
 
 int CheckForOverflow(size_t max, char *arr)
@@ -32,30 +31,11 @@ int CheckForUniqueId(Node *head, char *id) //Проверява дали ном�
 			printf("--Факултетният номер съществува.Моля въведете нов.--\n");
 			return 0;
 		}
-		head = head->next;
+
+		head = head->next; //преминаваме към следващият елемент
 	}
 
 	return 1;
-}
-
-int CheckForValidDay(size_t day)
-{
-	fflush(stdin);
-	if (day < 1 || day > 31)
-	{
-		return 1;
-	}
-	return 0;
-}
-
-int CheckForValidMonth(size_t month)
-{
-	fflush(stdin);
-	if (month < 1 || month > 12)
-	{
-		return 1;
-	}
-	return 0;
 }
 
 Node *AddElement(Node *head)
@@ -219,13 +199,14 @@ void PrintStudentsByGroup(Node *head, int group)
 		printf("The list is empty!\n");
 		return;
 	}
+
 	size_t index = 0; 
 	size_t countOfNodes = CountNodes(head, group); //борят на студентите от търсената група
 
 	Node **students = (Node**)malloc(countOfNodes*sizeof(Node*)); //динамично заделяне на памет за масива
 	Node *current = head;
 
-	while (current != NULL)
+	while (current != NULL) //записваме елемнтите от списъка в масива
 	{
 		if (current->data.group == group) //сравнява групите на елемнтите с желаната група
 		{
@@ -235,7 +216,7 @@ void PrintStudentsByGroup(Node *head, int group)
 		current = current->next; //преминаваме към следващият елемент
 	}
 
-	SortArray(students, index);
+	SortArray(students, index); //сортираме масива по метод на мехурчето
 
 	for (size_t i = 0; i < index; i++)
 	{
@@ -263,7 +244,7 @@ void SortArray(Node **arr, size_t count)
 	int swap = 1;
 	Node *change;
 
-	while (swap)
+	while (swap) //сортираме масива по метод на мехурчето
 	{
 		swap = 0;
 		for (size_t i = 0; i < count - 1; i++)
