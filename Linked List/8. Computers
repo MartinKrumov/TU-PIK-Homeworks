@@ -117,7 +117,7 @@ Node *AddElement(Node *head)
 
 void PrintElement(Node *head, char *Id) //Принтира избран елемент от списъка
 {
-	if (head == NULL)
+	if (head == NULL) //Проверяваме списъка дали е празен
 	{
 		printf("The list is empty!\n");
 		return;
@@ -141,27 +141,27 @@ void PrintElement(Node *head, char *Id) //Принтира избран елем
 float GetAveragePrice(Node *head)
 {
 	float sum = 0;
-	int count = 0;
+	int count = 0; //за броя на елементите в списъка
 	float average;
 
 	Node *current = head;
 
-	while (current != NULL)
+	while (current != NULL) //докато не стигнем края на списъка
 	{
-		sum += current->data.price;
+		sum += current->data.price; 
 		count++;
 
 		current = current->next; //преминаваме към следващия елемент от списъка
 	}
 
-	average = (float)sum / count;
+	average = (float)sum / count; //делим сумата на броя на елементите в списъка
 
-	return average;
+	return average; 
 }
 
 void PrintComputers(Node *head)
 {
-	if (head == NULL)
+	if (head == NULL) //Проверяваме списъка дали е празен
 	{
 		printf("The list is empty!\n");
 		return;
@@ -171,7 +171,7 @@ void PrintComputers(Node *head)
 
 	while (head != NULL)
 	{
-		if (head->data.price > averagePrice)
+		if (head->data.price > averagePrice) //ако цената на сегашният елемент е по-висока от средната го извждаме на екрана
 		{
 			printf("+------------------------+\n");
 			printf("Номер      : %s\n", head->data.Id);
@@ -181,6 +181,90 @@ void PrintComputers(Node *head)
 		}
 
 		head = head->next; //преминаваме към следващия елемент от списъка
+	}
+}
+
+void ChangeQuantity(Node *head, char *Id)
+{
+	if (head == NULL) //Проверяваме списъка дали е празен
+	{
+		printf("The list is empty!\n");
+		return;
+	}
+	Node *current = head; //казваме на current да сочи към 1вия елемент от списъка
+
+	int action;
+	printf("Въведете '1' за добавяне или '2' за изваждане на количесто: ");
+	scanf("%d", &action);
+
+	int amount;
+	printf("Въведете количество: ");
+	scanf("%d", &amount);
+
+	while (current != NULL)
+	{
+		if (strcmp(Id, current->data.Id) == 0)
+		{
+			if (action == 1)
+			{
+				current->data.quantity += amount; //добавяме въведеното количество
+				return;
+			}
+			else if (action == 2)
+			{
+				if (amount > current->data.quantity) //проверяваме дали въведената стойност е по-голяма от сегашната
+				{
+					printf("Операцията не може да бъде извършена!\n");
+					return;
+				}
+				else
+				{
+					current->data.quantity -= amount; //изваждаме въведеното количество
+
+					if (current->data.quantity == 0) //ако количесвтото е 0
+					{
+						DeleteElement(&head); //изтриваме компютъра от списъка
+					}
+					return;
+				}
+			}
+		}
+
+		current = current->next; //преминаваме към следващият елемент
+	}
+}
+
+void DeleteElement(Node **head) //Изтрива избран елемент от списъка
+{
+	if (*head == NULL)
+	{
+		fprintf(stderr, "The list is empty!\n");
+		return;
+	}
+
+	Node *current = *head;
+	Node *previous = NULL; //For 1st node, indicate there is no previous.
+
+	while (current != NULL)
+	{
+		if (current->data.quantity == 0) //Aко количеството е 0
+		{
+			if (previous == NULL)
+			{
+				*head = current->next; //Ако е първи елемент
+			}
+			else
+			{
+				previous->next = current->next; //Предишния възел прескача следващия и сочи към другия елемнт
+			}
+
+			free(current); //Освобождава памета на елемнта
+
+			printf("Елемента е изтрит успешно.\n");
+			return;
+		}
+		previous = current;
+		current = current->next;
 	}
 }
 
