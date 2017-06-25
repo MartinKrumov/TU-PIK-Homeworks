@@ -1,0 +1,224 @@
+import java.util.Random;
+import java.util.Scanner;
+
+public class Helper {
+	static int row = 0;
+	static int col = 0;
+	static int numberOfMines = 0;
+	static boolean[][] visited;
+
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+		// row = sc.nextInt();
+		// col = sc.nextInt();
+		// numberOfMines = sc.nextInt();
+
+		menu(sc);
+
+		int[][] mineField = new int[row][col];
+		char[][] emptyField = new char[row][col];
+		visited = new boolean[row][col];
+
+		placeMines(mineField);
+		placeNumbers(mineField);
+		fillBoard(emptyField);
+
+		getCordinates(sc, mineField, emptyField);
+	}
+
+	public static void getCordinates(Scanner sc, int[][] mineField, char[][] emptyBoard) {
+		while (true) {
+			int x, y;
+
+			do {
+				System.out.print("Enter x: ");
+				x = sc.nextInt();
+			} while (x < 0 || x >= row);
+
+			do {
+				System.out.print("Enter y: ");
+				y = sc.nextInt();
+			} while (y < 0 || y >= col);
+
+			System.out.println();
+
+			if (mineField[x][y] != 9 && mineField[x][y] != 0) {
+				uncoverFields(emptyBoard, x, y, mineField[x][y], mineField);
+				showBoard(emptyBoard);
+			} else if (mineField[x][y] == 0) {
+				uncoverFields(emptyBoard, x, y, mineField[x][y], mineField);
+				showBoard(emptyBoard);
+			} else if (mineField[x][y] == 9) {
+				System.out.println("\t\tG A M E  O V E R!\n");
+				printBoard(mineField);
+				break;
+			}
+		}
+	}
+
+	public static void uncoverFields(char[][] emptyBoard, int x, int y, int value, int[][] mineField) {
+		char temp = Character.forDigit(value, 10);// converts the digit into char
+		emptyBoard[x][y] = temp;
+			
+		if (temp != '0') {
+			return;
+		}
+		
+		if (!visited[x][y]) {
+			visited[x][y] = true;
+		} else {
+			return;
+		}
+
+		for (int i = x - 1; i <= x + 1; i++) {
+			for (int j = y - 1; j <= y + 1; j++) {
+				if ((i >= 0 && i < row) && (j >= 0 && j < col )) {
+					uncoverFields(emptyBoard, i, j, mineField[i][j], mineField);
+				}	
+			}
+		}
+	}
+
+	public static void showBoard(char[][] emptyBoard) {
+		for (int i = 0; i < emptyBoard.length; i++) {
+			for (int j = 0; j < emptyBoard[i].length; j++) {
+				System.out.print(emptyBoard[i][j] + " ");
+			}
+			System.out.println();
+		}
+	}
+
+	public static void info() {
+		System.out.println("\tMINESWEEPER");
+		System.out.println("1) Beginer -> 8x8 and 10 mines.");
+		System.out.println("2) Intermediate -> 16x16 and 49 mines.");
+		System.out.println("3) Expert -> 16x30 and 99 mines.");
+		System.out.println("4) Custom -> 16x30 and the player choose the number of mines.");
+		System.out.println("5) Exit.");
+		System.out.print("\nEnter your choice: ");
+
+	}
+
+	public static void menu(Scanner sc) {
+		info();
+		int choice = sc.nextInt();
+
+		while (choice < 1 || choice > 5) {
+			System.out.print("Please enter again: ");
+			choice = sc.nextInt();
+		}
+
+		switch (choice) {
+		case 1:
+			row = 8;
+			col = 8;
+			numberOfMines = 10;
+			break;
+		case 2:
+			row = 16;
+			col = 16;
+			numberOfMines = 49;
+			break;
+		case 3:
+			row = 16;
+			col = 30;
+			numberOfMines = 99;
+			break;
+		case 4:
+			row = 16;
+			col = 30;
+
+			System.out.print("Enter number of mines between[0,480]: ");
+			numberOfMines = sc.nextInt();
+
+			while (numberOfMines < 0 || numberOfMines > 480) {
+				System.out.print("Please enter mines again: ");
+				numberOfMines = sc.nextInt();
+			}
+			break;
+		case 5:
+			System.exit(0);
+		}
+		System.out.println("\n");
+	}
+
+	public static void placeNumbers(int[][] mineFiled) {
+		// Finds how many mines are around the square
+		for (int i = 0; i < mineFiled.length; i++) {
+			for (int j = 0; j < mineFiled[i].length; j++) {
+				if (mineFiled[i][j] != 9) {
+					mineFiled[i][j] = minesNear(mineFiled, i, j);
+				}
+			}
+		}
+	}
+
+	public static int minesNear(int[][] mineFiled, int x, int y) {
+		int mines = 0;
+		// check mines in all directions
+		mines += mineChecker(mineFiled, x - 1, y - 1); // NW
+		mines += mineChecker(mineFiled, x - 1, y); // N
+		mines += mineChecker(mineFiled, x - 1, y + 1); // NE
+		mines += mineChecker(mineFiled, x, y - 1); // W
+		mines += mineChecker(mineFiled, x, y + 1); // E
+		mines += mineChecker(mineFiled, x + 1, y - 1); // SW
+		mines += mineChecker(mineFiled, x + 1, y); // S
+		mines += mineChecker(mineFiled, x + 1, y + 1); // SE
+		if (mines > 0) {
+			return mines;
+		} else {
+			return 0;
+		}
+	}
+
+	public static int mineChecker(int[][] mineField, int x, int y) {
+		if ((x >= 0 && x < row) && (y >= 0 && y < col) && mineField[x][y] == 9) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+
+	public static void placeMines(int[][] mineField) {
+		Random random = new Random();
+		int minesPlaced = 0;
+
+		while (minesPlaced < numberOfMines) {
+			int x = random.nextInt(row);
+			int y = random.nextInt(col);
+			// make sure we don't place a mine on top of another
+			if (mineField[x][y] != 9) {
+				mineField[x][y] = 9;
+				minesPlaced++;
+			}
+		}
+	}
+	
+	public static void fillBoard(char[][] emptyField) {
+		for (int i = 0; i < emptyField.length; i++) {
+			for (int j = 0; j < emptyField[i].length; j++) {
+				emptyField[i][j] = '+';
+				System.out.print(emptyField[i][j] + " ");
+			}
+			System.out.println();
+		}
+	}
+
+	public static void printBoard(int[][] mineFiled) {
+		int mines = 0;
+		for (int i = 0; i < mineFiled.length; i++) {
+			System.out.print("\t");
+			for (int j = 0; j < mineFiled[i].length; j++) {	
+				if (mineFiled[i][j] == 9) {
+					System.out.print("*" + " ");
+					mines++;
+				} else {
+					System.out.print(mineFiled[i][j] + " ");
+				}
+			}
+			System.out.println();
+		}
+		System.out.println("Number of mines = " + mines);
+	}
+
+}
