@@ -9,10 +9,6 @@ public class Helper {
 
 	public static void main(String[] args) {
 		Scanner sc = new Scanner(System.in);
-		// row = sc.nextInt();
-		// col = sc.nextInt();
-		// numberOfMines = sc.nextInt();
-
 		menu(sc);
 
 		int[][] mineField = new int[row][col];
@@ -27,6 +23,8 @@ public class Helper {
 	}
 
 	public static void getCordinates(Scanner sc, int[][] mineField, char[][] emptyBoard) {
+		
+		
 		while (true) {
 			int x, y;
 
@@ -53,7 +51,30 @@ public class Helper {
 				printBoard(mineField);
 				break;
 			}
+			
+			if (minesLeft(emptyBoard)) {
+				System.out.println("\t\tYOU WON THE GAME :)\n");
+				printBoard(mineField);
+				break;
+			}
 		}
+	}
+
+	private static boolean minesLeft(char[][] emptyBoard) {
+		int visited = 0;
+		for (int i = 0; i < emptyBoard.length; i++) {
+			for (int j = 0; j < emptyBoard[i].length; j++) {
+				if (emptyBoard[i][j] != '+') {
+					visited++;
+				}
+			}
+		}
+		
+		int fields = row * col;
+		if (fields - visited == numberOfMines) {
+			return true;
+		}
+		return false;
 	}
 
 	public static void uncoverFields(char[][] emptyBoard, int x, int y, int value, int[][] mineField) {
@@ -205,20 +226,17 @@ public class Helper {
 	}
 
 	public static void printBoard(int[][] mineFiled) {
-		int mines = 0;
 		for (int i = 0; i < mineFiled.length; i++) {
 			System.out.print("\t");
+			
 			for (int j = 0; j < mineFiled[i].length; j++) {	
 				if (mineFiled[i][j] == 9) {
 					System.out.print("*" + " ");
-					mines++;
 				} else {
 					System.out.print(mineFiled[i][j] + " ");
 				}
 			}
 			System.out.println();
 		}
-		System.out.println("Number of mines = " + mines);
 	}
-
 }
