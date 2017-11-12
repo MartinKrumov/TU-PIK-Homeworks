@@ -1,0 +1,27 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <conio.h>
+
+short menu(char *arr[])
+{
+	int k, i = 1;
+	char ch;
+
+	printf("%s\n", arr[0]); //принтира нулевия ред от матрицата
+	while (arr[i])
+	{
+		printf("\n<%d> - %s", i, arr[i]); //принтира докато не стигне NULL
+		i++;
+	}
+
+	printf("\n\nВашият избор: ");
+	do
+	{
+		ch = _getch();//взима само един символ 
+		k = ch - '0'; //превръща char в int (взима аски кода и му маха кода на 0-та)
+	} while (k <= 0 || k > i);
+
+	printf("%c\n", ch);
+
+	return ch - '0'; // връща цифра
+}

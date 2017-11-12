@@ -1,0 +1,131 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <conio.h>
+#include <stdlib.h>
+#include <Windows.h>
+#include "menu.h"
+#include "automat_f.h"
+
+#define NAMES 256
+
+char *txtMenu[] =
+{
+	"\tГЛАВНО МЕНЮ",
+
+	"Избор на входен файл.",
+	"Преброяване на думите и записване на думите във файл.",
+	"Преброяване на изреченията и записване на изреченията във файл.", 
+	"Разпознаване на С константи.",
+	"Разпознаване на реални константи.",
+	"Проверка за валидна директория.",
+	"Изход.",
+	NULL
+};
+
+int main()
+{
+	int mode;
+	FILE *fp_in = NULL, *fp_out = NULL;
+	char inputFName[NAMES], outputFName[NAMES];
+	char path[NAMES];
+	int flag = 0;
+	int flag2 = 0;
+
+	size_t countOfWords = 0;
+	size_t countOfSentences = 0;
+
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+
+	do
+	{
+		system("cls");
+		mode = menu(txtMenu);
+		switch (mode)
+		{
+		case 1:
+			if ((fp_in = getNameFile(inputFName, "rb", "за четене")) != NULL)
+			{
+				flag = 1;
+			}
+			break;
+
+		case 2:
+			if (flag == 0)
+			{
+				printf("\nНе сте отворили файл за обработка!\n");
+				system("pause");
+				break;
+			}
+
+			if ((fp_out = getNameFile(outputFName, "wt", "за запис")) != NULL)
+			{
+				flag2 = 1;
+				system("cls");
+				countOfWords = GetWords(fp_in, fp_out);
+				if (countOfWords)
+					printf("\n\nПреброените думи във файлът %s са: %d\n\n", inputFName, countOfWords);
+			}
+
+			system("pause");
+			if (flag2 == 1)
+				fclose(fp_out);
+			break;
+
+		case 3:
+			if (flag == 0)
+			{
+				printf("\nНе сте отворили файл за обработка!\n");
+				system("pause");
+				break;
+			}
+
+			if ((fp_out = getNameFile(outputFName, "wt", "за запис")) != NULL)
+			{
+				system("cls");
+				PrintSentences(fp_in, fp_out);
+				countOfSentences = CountOfSentences(fp_in);
+
+				printf("\n\nПреброените изречения във файлът %s са: %d\n\n", inputFName, countOfSentences);
+			}
+			system("pause");
+			if (flag2 == 1)
+				fclose(fp_out);
+			break;
+
+		case 4:
+			if (flag == 0)
+			{
+				printf("\nНе сте отворили файл за обработка!\n");
+				system("pause");
+				break;
+			}
+
+			IntConstant(fp_in);
+			system("pause");
+			break;
+
+		case 5:
+			if (flag == 0)
+			{
+				printf("\nНе сте отворили файл за обработка!\n");
+				system("pause");
+				break;
+			}
+			
+			RealConstant(fp_in);
+			system("pause");
+			break;
+
+		case 6:
+			printf("Въведете директория за проверяване: ");
+			fscanf(stdin, "%s", path);
+			ValidDirectory(path);
+
+			system("pause");
+			break;
+		}
+	} while (mode != 7);
+	_fcloseall(); // затваря всички потоци
+}
+
