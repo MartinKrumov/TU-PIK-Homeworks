@@ -1,11 +1,7 @@
-#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <ctype.h>
 
 #define SIZE 256
 #define NAMES 128
@@ -82,12 +78,12 @@ void getFileName(char* fileName, int mode) /// 1 TO OPEN A FILE TO READ /// 2 TO
 			printf("Enter File Name To Read (.c/.txt): ");
 			scanf("%s", fileName);      ///gets(fileName);
 
-			if (fileName[strlen(fileName) - 4] == '.' && toupper(fileName[strlen(fileName) - 3]) == 'T' && toupper(fileName[strlen(fileName) - 2]) == 'X' && toupper(fileName[strlen(fileName) - 1]) == 'T')
+			if (fileName[strlen(fileName) - 4] == '.' && fileName[strlen(fileName) - 3] == 't' && fileName[strlen(fileName) - 2] == 'x' && fileName[strlen(fileName) - 1] == 't')
 			{
 				return;
 			}
 
-			if (fileName[strlen(fileName) - 2] == '.' && toupper(fileName[strlen(fileName) - 1]) == 'C')// Проверка дали файла завършва на .С
+			if (fileName[strlen(fileName) - 2] == '.' && fileName[strlen(fileName) - 1] == 'c')// Проверка дали файла завършва на .c
 			{
 				return;// Ако завършва се излиза от функцията
 			}
@@ -98,14 +94,14 @@ void getFileName(char* fileName, int mode) /// 1 TO OPEN A FILE TO READ /// 2 TO
 			printf("Enter File Name To Write (.c/.txt): ");
 			scanf("%s", fileName);      ///gets(fileName);
 
-			if (fileName[strlen(fileName) - 4] == '.' && toupper(fileName[strlen(fileName) - 3]) == 'T' && toupper(fileName[strlen(fileName) - 2]) == 'X' && toupper(fileName[strlen(fileName) - 1]) == 'T')
+			if (fileName[strlen(fileName) - 4] == '.' && fileName[strlen(fileName) - 3] == 't' && fileName[strlen(fileName) - 2] == 'x' && fileName[strlen(fileName) - 1] == 't')
 			{
 				return;
 			}
 
-			if (fileName[strlen(fileName) - 2] == '.' && toupper(fileName[strlen(fileName) - 1]) == 'C')
+			if (fileName[strlen(fileName) - 2] == '.' && fileName[strlen(fileName) - 1] == 'c')// Проверка дали файла завършва на .c
 			{
-				return;
+				return;// Ако завършва се излиза от функцията
 			}
 		}
 	}
@@ -123,21 +119,21 @@ void GetNumberOfLoops(FILE *inputFile, FILE *outputFile)
 			if (line[i] == '\"' && !flag) flag = 1; // не търсим в къвичките
 			else if (line[i] == '\"' && line[i - 1] != '\\' && flag == 1) flag = 0;
 
-			if (!flag && line[i] == '/' && line[i + 1] == '/') break; // pri nalicieto na C++ comment krai na tyrseneto v tozi red
+			if (!flag && line[i] == '/' && line[i + 1] == '/') break; // при наличието на коментар спираме да четем реда
 
-			if (!flag && line[i] == '/' && line[i + 1] == '*') flag = 2;// ne tyrsim v C komentarite;
+			if (!flag && line[i] == '/' && line[i + 1] == '*') flag = 2;// не търсим в големите коментари / *
 			else if (flag == 2 && line[i] == '*' && line[i + 1] == '/') flag = 0;
 
-			if (line[i] == '\'' && !flag) flag = 3; // ne tyrsim v kavi4kite;
+			if (line[i] == '\'' && !flag) flag = 3; // не търсим в апострофите;
 			else if (line[i] == '\'' && flag == 3) flag = 0;
 
 			if (!flag){
 				if (line[i] == 'f' && line[i + 1] == 'o' && line[i + 2] == 'r')    countOP++;// Проверка за for
-				else if (line[i] == 'd' && line[i + 1] == 'o')// проверка за думичката do
+				else if (line[i] == 'd' && line[i + 1] == 'o')// проверка за оператор do
 				{
 					flag2++;
 				}
-				else if ((line[i] == 'w' && line[i + 1] == 'h' && line[i + 2] == 'i' && line[i + 3] == 'l' && line[i + 4] == 'e') && flag2)// Проверка за думата while
+				else if ((line[i] == 'w' && line[i + 1] == 'h' && line[i + 2] == 'i' && line[i + 3] == 'l' && line[i + 4] == 'e') && flag2)// Проверка за оператор while
 				{
 					flag2--;
 					countOP++;
@@ -281,8 +277,8 @@ int ScreenToFile()
 	}
 
 
-	GetNumberOfComments(tempBuffer, outputFile);
-	rewind(tempBuffer);
+	GetNumberOfComments(tempBuffer, outputFile); // изивикваме функцията
+	rewind(tempBuffer); // Връща файловия поинтър към началото на файла(за да може пак да се прочете)
 	GetNumberOfLoops(tempBuffer, outputFile);
 
 	printf("Information saved to \"%s\"\n", writeFile);
@@ -296,7 +292,6 @@ int ScreenToFile()
 int ScreenToScreen()// Тук нещата са като по-горе
 {
 	char  manage[SIZE], c = 0;
-	int counter = 0;
 	FILE *tempBuffer;
 
 	tempBuffer = fopen("TempChanges.tmp", "w");
@@ -307,23 +302,23 @@ int ScreenToScreen()// Тук нещата са като по-горе
 
 	while (1)
 	{
-		gets(manage);
-		if (!strcmp(manage, "exit"))
+		gets(manage); // Взима низ от клавиетурата
+		if (!strcmp(manage, "exit")) // Проверка дали се среща 'exit' във въведения от потребителя низ
 		{
-			fclose(tempBuffer);
-			tempBuffer = fopen("TempChanges.tmp", "r");
-			break;
+			fclose(tempBuffer); //ако се среща файла се затваря
+			tempBuffer = fopen("TempChanges.tmp", "r"); // след това се отваря за четене
+			break;//излизане от безкрайният цикъл
 		}
-		fprintf(tempBuffer, "%s\n", manage);
+		fprintf(tempBuffer, "%s\n", manage); // Записване на низа въведен от потребителя
 	}
 
 	system("CLS");
 	printf("Information:\n");
 	GetNumberOfComments(tempBuffer, stdout);
-	rewind(tempBuffer);
+	rewind(tempBuffer); // Връща файловия поинтър към началото на файла(за да може пак да се прочете)
 	GetNumberOfLoops(tempBuffer, stdout);
 
-	fclose(tempBuffer);
+	fclose(tempBuffer); //затваряне на файла
 
 	return 0;
 }
